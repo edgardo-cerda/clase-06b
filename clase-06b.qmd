@@ -1,0 +1,891 @@
+---
+format:
+  revealjs:
+    auto-stretch: false
+    margin: 0
+    slide-number: true
+    scrollable: true
+    preview-links: auto
+    page-layout: custom
+    logo: imagenes/logo_portada2.png
+    css: ine_quarto_styles.css
+
+# jupyter: curso-cd-ia
+# code-annotations: hover
+---
+
+```{python}
+#| echo: false
+#| output: false
+import numpy as np
+import pandas as pd
+import matplotlib
+import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings('ignore')
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+matplotlib.rcParams['figure.dpi'] = 120
+
+AZUL, NARANJA, VERDE, ROJO = "#1381B0", "#FF961C", "#2CA02C", "#D62728"
+
+torch.manual_seed(42)
+np.random.seed(42)
+```
+
+#
+
+[<img src="imagenes/logo_portada2.png" width="20%"/>]{.center-justified}
+
+[**Transformers y Fine-Tuning**]{.big-par .center-justified}
+
+[**Área de Ciencia de Datos**]{.big-par .center-justified}
+
+[**Unidad de Gobierno de Datos**]{.big-par .center-justified}
+
+
+[**Junio 2026**]{.big-par .center-justified}
+
+
+
+
+## Temario de hoy
+
+::: {.medium-par .incremental}
+El objetivo de esta clase es entender **cómo funcionan los Transformers** y cómo usarlos a través de **fine-tuning** para resolver problemas reales del Censo 2024.
+
+1. **¿De dónde venimos?** Límites de las RNN y la aparición del Transformer
+2. **Mecanismo de atención**. La idea central de la arquitectura
+3. **Arquitectura Transformer**. Encoder, decoder y BERT vs. GPT
+4. **Pre-entrenamiento y fine-tuning**. La lógica del transfer learning
+5. **Modelos para español**. BETO y la familia RoBERTa
+6. **Aplicaciones en el CPV2024**. Codificación de ocupaciones y actividad económica
+7. **Ejercicio práctico**. Fine-tuning de BETO con HuggingFace
+
+:::
+
+# ¿De dónde venimos?
+
+## Qué vimos la clase anterior
+
+::: {.incremental .medium-par}
+En la clase anterior llegamos a las **redes para secuencias**: GRU y LSTM. Vimos que:
+
+- Son mejores que el MLP para texto porque **respetan el orden** de las palabras.
+- Procesan la secuencia de izquierda a derecha, acumulando un **estado oculto**.
+- Ese estado oculto actúa como "memoria" de lo que el modelo ha leído hasta ahora.
+:::
+
+::: {.fragment .concepto-box}
+Funcionan bien para secuencias cortas. ¿Qué pasa con secuencias largas?
+:::
+
+## El problema de las RNN: memoria de largo alcance
+
+::: {.incremental .medium-par}
+Considera este texto censal (muy exagerado, pero ilustrativo):
+
+> *"El encuestado declaró trabajar como **técnico electricista** en una empresa de distribución de energía. Tiene 42 años, vive en una vivienda colectiva en Antofagasta, y su jornada..."*
+
+- Cuando el modelo llega a la última palabra, ¿cuánto recuerda de **"técnico electricista"**?
+- El estado oculto tiene que "comprimir" todo lo anterior en un vector fijo.
+- La información **se diluye** a medida que la secuencia crece.
+:::
+
+::: {.fragment .nota-box}
+Las LSTM mitigan el problema, pero no lo eliminan. Para secuencias largas o grandes volúmenes de datos, el costo computacional también escala mal: **no se pueden paralelizar** fácilmente.
+:::
+
+## La solución: atención directa
+
+::: {.medium-par}
+¿Y si en vez de leer de izquierda a derecha y acumular un estado, el modelo pudiera **mirar directamente cualquier parte del texto** cuando necesita responder una pregunta?
+:::
+
+::: {.fragment .concepto-box}
+Esa es la idea del mecanismo de **atención**: en vez de comprimir todo en un estado oculto, el modelo aprende a **ponderar cuánto importa cada token** para producir la representación actual.
+:::
+
+::: {.fragment .medium-par}
+Esto permite:
+
+- Capturar dependencias de **largo alcance** sin pérdida de información.
+- **Paralelizar** el cómputo (todos los tokens se procesan a la vez).
+- Escalar a datasets masivos y modelos con billones de parámetros.
+:::
+
+# El mecanismo de atención
+
+## Intuición: traducción con atención
+
+::: {.medium-par}
+El mecanismo de atención nació en traducción automática. Al traducir *"técnico electricista"* al inglés, el modelo debería prestar más atención a esas dos palabras y menos a las demás.
+:::
+
+![](imagenes/attention_translation.png){width=75%}
+
+::: {.fragment .small-par}
+Cada celda muestra cuánto "atiende" la palabra del eje Y a la palabra del eje X al momento de traducir.
+:::
+
+## Queries, Keys y Values
+
+::: {.medium-par}
+La atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:
+:::
+
+::: {.incremental .medium-par}
+- **Query (Q)**: *"¿Qué información necesito?"* — lo que estoy buscando.
+- **Key (K)**: *"¿Qué información tengo yo?"* — lo que cada token ofrece.
+- **Value (V)**: *"¿Qué información entrego si me eligen?"* — el contenido que se pasa.
+:::
+
+::: {.fragment .medium-par}
+La atención entre Q y K produce un **peso** para cada par de tokens. Esos pesos se aplican sobre V:
+
+$$\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V$$
+:::
+
+::: {.fragment .small-par}
+El factor $\sqrt{d_k}$ escala los productos para evitar que el softmax sature con valores muy grandes.
+:::
+
+## Atención: ejemplo paso a paso
+
+```{python}
+#| echo: true
+#| output-location: column
+# Secuencia de 4 tokens, dimensión 8
+T, d_model = 4, 8
+d_k = d_model  # por simpleza
+
+torch.manual_seed(0)
+Q = torch.randn(T, d_k)
+K = torch.randn(T, d_k)
+V = torch.randn(T, d_k)
+
+# Scores: qué tan relevante es cada token para cada otro
+scores = Q @ K.T / d_k**0.5   # (T, T)
+weights = torch.softmax(scores, dim=-1)
+
+print("Pesos de atención (4×4):")
+print(weights.detach().numpy().round(3))
+
+# Salida: suma ponderada de V
+output = weights @ V           # (T, d_model)
+print("\nShape salida:", output.shape)
+```
+
+::: {.fragment .callout-note .small-callout}
+Cada fila de `weights` suma 1. El token 0 "mira" a todos los demás y combina sus valores según cuánta atención les asigna.
+:::
+
+## Atención multi-cabeza (Multi-Head Attention)
+
+::: {.medium-par}
+En la práctica, no se usa una sola cabeza de atención sino varias en paralelo. Cada cabeza aprende a atender a **aspectos distintos** de la secuencia:
+:::
+
+:::: columns
+
+::: {.column width=55%}
+
+::: {.incremental .medium-par}
+- Una cabeza puede capturar **relaciones sintácticas** (sujeto → verbo).
+- Otra puede capturar **relaciones semánticas** (ocupación → rama de actividad).
+- Otra puede rastrear **correferencias** (pronombres → sustantivos).
+:::
+
+::: {.fragment .medium-par}
+Las salidas de todas las cabezas se concatenan y proyectan:
+
+$$\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\,W^O$$
+:::
+
+:::
+
+::: {.column width=45%}
+
+![](imagenes/multi_head_attention.png)
+
+:::
+
+::::
+
+# Arquitectura Transformer
+
+## El bloque Transformer
+
+::: {.medium-par}
+Un bloque Transformer combina Multi-Head Attention con una red feed-forward, rodeados de **normalización de capa** y **conexiones residuales**:
+:::
+
+:::: columns
+
+::: {.column width=50%}
+
+::: {.incremental .medium-par}
+1. **Multi-Head Attention**: cada token atiende a todos los demás.
+2. **Add & Norm**: conexión residual + LayerNorm (estabiliza el entrenamiento).
+3. **Feed-Forward**: una red MLP pequeña aplicada posición a posición.
+4. **Add & Norm**: otra conexión residual.
+:::
+
+::: {.fragment .small-par}
+Un Transformer completo = apilar $N$ de estos bloques (BERT usa 12 ó 24).
+:::
+
+:::
+
+::: {.column width=50%}
+
+![](imagenes/transformer_block.png)
+
+:::
+
+::::
+
+## Embeddings posicionales
+
+::: {.medium-par}
+La atención no sabe en qué posición está cada token (procesa todo en paralelo). Para introducir el **orden de la secuencia**, se suman embeddings posicionales a los embeddings de entrada:
+:::
+
+```{python}
+#| echo: true
+import torch, torch.nn as nn
+
+class PosEncoding(nn.Module):
+    def __init__(self, d_model, max_len=512):
+        super().__init__()
+        pe = torch.zeros(max_len, d_model)
+        pos = torch.arange(max_len).unsqueeze(1).float()
+        div = torch.exp(torch.arange(0, d_model, 2).float()
+                        * (-torch.log(torch.tensor(10000.0)) / d_model))
+        pe[:, 0::2] = torch.sin(pos * div)
+        pe[:, 1::2] = torch.cos(pos * div)
+        self.register_buffer('pe', pe.unsqueeze(0))  # (1, max_len, d_model)
+
+    def forward(self, x):
+        return x + self.pe[:, :x.size(1)]
+```
+
+::: {.fragment .callout-note .small-callout}
+Los embeddings posicionales son sinusoides de distintas frecuencias, de modo que el modelo puede inferir la distancia relativa entre posiciones.
+:::
+
+## Encoder vs. Decoder vs. Encoder-Decoder
+
+::: {.medium-par}
+| | **Encoder** | **Decoder** | **Encoder-Decoder** |
+|---|---|---|---|
+| **Atención** | Bidireccional (ve todo el contexto) | Causal (solo ve hacia atrás) | Ambas |
+| **Tarea típica** | Clasificación, NER, embeddings | Generación de texto | Traducción, resumen |
+| **Ejemplo** | BERT, RoBERTa | GPT-2/3/4, Llama | T5, BART |
+| **Para el Censo** | ✅ Codificación CIUO, CAENES | ❌ No es lo que necesitamos | Posible para resumen |
+:::
+
+::: {.fragment .concepto-box}
+Para clasificar respuestas del Censo (ocupación, rama de actividad), el **encoder** es la elección natural: necesitamos una representación del texto, no generar nuevo texto.
+:::
+
+## BERT: el encoder por excelencia
+
+::: {.incremental .medium-par}
+**BERT** (*Bidirectional Encoder Representations from Transformers*, Google 2018) fue el modelo que democratizó el uso de Transformers en NLP:
+
+- 12 capas Transformer, 110M de parámetros (versión base).
+- Pre-entrenado en Wikipedia + BooksCorpus en inglés.
+- Bidireccional: cada token ve **todo el contexto** (izquierda y derecha).
+- Tarea de pre-entrenamiento: **Masked Language Modeling** (MLM) y Next Sentence Prediction.
+:::
+
+::: {.fragment .nota-box}
+Con BERT, por primera vez fue posible tomar un modelo ya entrenado y adaptarlo a tareas específicas con muy pocos datos propios: el **fine-tuning**.
+:::
+
+# Pre-entrenamiento y fine-tuning
+
+## La analogía del profesional especializado
+
+::: {.medium-par}
+Imaginemos el ciclo de formación de un profesional:
+:::
+
+:::: columns
+
+::: {.column width=50%}
+
+::: {.incremental .medium-par}
+**Pre-entrenamiento** = educación general
+
+- Lee millones de textos.
+- Aprende gramática, semántica, hechos del mundo.
+- No sabe nada específico de codificación censal.
+- Costo: **enorme** (miles de GPUs, semanas).
+:::
+
+:::
+
+::: {.column width=50%}
+
+::: {.incremental .medium-par}
+**Fine-tuning** = especialización
+
+- Toma ese conocimiento general.
+- Lo ajusta con ejemplos del dominio específico.
+- Aprende la tarea concreta (p/e CIUO-08).
+- Costo: **manejable** (1 GPU, horas o días).
+:::
+
+:::
+
+::::
+
+::: {.fragment .concepto-box}
+No necesitamos entrenar desde cero. Partimos de un modelo que ya "entiende" el español y le enseñamos nuestra tarea específica.
+:::
+
+## ¿Qué ocurre durante el fine-tuning?
+
+:::: columns
+
+::: {.column width=60%}
+
+::: {.incremental .medium-par}
+1. Tomamos el modelo pre-entrenado (BERT, BETO…).
+2. Agregamos una **cabeza de clasificación**: una capa lineal sobre el token `[CLS]`.
+3. Entrenamos con nuestros datos etiquetados, ajustando **todos los pesos** (o solo parte de ellos).
+4. Usamos un learning rate muy pequeño para no "olvidar" lo pre-entrenado.
+:::
+
+:::
+
+::: {.column width=40%}
+
+![](imagenes/fine_tuning_schema.png)
+
+:::
+
+::::
+
+::: {.fragment .callout-note .small-callout}
+El token `[CLS]` es un token especial que BERT agrega al inicio de cada texto. Su representación final captura el significado global de la oración y se usa como input para la capa de clasificación.
+:::
+
+## ¿Cuántos datos necesito para fine-tuning?
+
+::: {.medium-par}
+Mucho menos de lo que se necesitaría para entrenar desde cero:
+:::
+
+::: {.medium-par}
+| Datos etiquetados | Resultado esperado |
+|---|---|
+| **~100 ejemplos** | Resultados razonables en tareas simples |
+| **~1.000 ejemplos** | Buenos resultados en la mayoría de tareas |
+| **~10.000 ejemplos** | Resultados sólidos, comparables a humanos |
+| **~100.000+** | Territorio donde el fine-tuning destaca claramente |
+:::
+
+::: {.fragment .nota-box}
+En el Censo 2024 tenemos cientos de miles de registros con glosas y códigos asignados manualmente: estamos en una posición **muy favorable**.
+:::
+
+## Fine-tuning vs. otras estrategias
+
+::: {.medium-par}
+| Estrategia | Cuándo usarla | Costo |
+|---|---|---|
+| **Zero-shot prompting** | Sin datos etiquetados propios; tarea genérica | Mínimo |
+| **Few-shot prompting** | Pocos ejemplos (< 50); tarea bien definida | Mínimo |
+| **Fine-tuning** | Datos etiquetados disponibles; dominio específico | Medio |
+| **Pre-entrenamiento desde cero** | Dominio muy especializado, corpus enorme | Muy alto |
+:::
+
+::: {.fragment .concepto-box}
+Para la codificación censal, el **fine-tuning** es la opción más adecuada: tenemos datos históricos, el dominio es muy específico (glosas de ocupación y actividad económica en Chile) y queremos resultados reproducibles y auditables.
+:::
+
+# Modelos para español
+
+## El problema del idioma
+
+::: {.incremental .medium-par}
+BERT fue pre-entrenado en inglés. Usarlo directamente para texto en español tiene limitaciones:
+
+- El vocabulario (tokenizador) fue construido para inglés.
+- Palabras en español se fragmentan en muchos tokens: *"electricista"* → `["el", "##ect", "##ric", "##ista"]`.
+- El modelo "entiende" menos del español que del inglés.
+:::
+
+::: {.fragment .concepto-box}
+La solución: modelos pre-entrenados **directamente en español**.
+:::
+
+## BETO: BERT para español
+
+::: {.incremental .medium-par}
+**BETO** es la versión de BERT entrenada por el Departamento de Ciencias de la Computación de la Universidad de Chile:
+
+- Pre-entrenado en el **Spanish Wikipedia** (más de 3 GB de texto).
+- Mismo vocabulario y arquitectura que BERT-base (30.000 tokens en español).
+- Publicado en HuggingFace como `dccuchile/bert-base-spanish-wwm-cased`.
+- Versión *cased* (distingue mayúsculas) y *uncased*.
+:::
+
+::: {.fragment .nota-box}
+Para tareas censales, usar la versión **cased** es generalmente preferible: "Técnico" y "técnico" pueden tener importancias distintas dependiendo del contexto.
+:::
+
+## Otros modelos relevantes para el Censo
+
+::: {.medium-par}
+| Modelo | Base | Entrenado en | HuggingFace |
+|---|---|---|---|
+| **BETO** | BERT | Wikipedia ES | `dccuchile/bert-base-spanish-wwm-cased` |
+| **RoBERTa-es** | RoBERTa | 0.9 TB texto español | `PlanTL-GOB-ES/roberta-base-bne` |
+| **mBERT** | BERT | Wikipedia 104 idiomas | `bert-base-multilingual-cased` |
+| **XLM-RoBERTa** | RoBERTa | 100 idiomas | `xlm-roberta-base` |
+:::
+
+::: {.fragment .medium-par}
+**¿Cuál elegir?** Para glosas de ocupación y actividad económica en Chile:
+
+- **BETO** es una excelente línea base, fácil de usar y bien documentada.
+- **RoBERTa-es (BNE)** suele superar a BETO en benchmarks; entrenado con corpus más diverso.
+- **XLM-RoBERTa** útil si el corpus tiene mezcla de idiomas o dialectos.
+:::
+
+# Aplicaciones en el CPV2024
+
+## El problema de la codificación censal
+
+::: {.incremental .medium-par}
+En el Censo 2024, las preguntas de **ocupación** y **rama de actividad** se capturan como texto libre:
+
+- *"¿A qué se dedica en su trabajo?"* → "Técnico electricista en empresa distribuidora"
+- *"¿En qué rubro trabaja su empresa?"* → "Distribución de energía eléctrica a hogares"
+
+Estas respuestas deben codificarse según clasificadores internacionales:
+
+- **CIUO-08**: Clasificación Internacional Uniforme de Ocupaciones (OIT)
+- **CAENES**: Clasificación de Actividades Económicas para Encuestas Sociodemográficas (INE)
+
+:::
+
+::: {.fragment .nota-box}
+La codificación manual es costosa y propensa a inconsistencias entre codificadores. Un modelo de fine-tuning puede automatizar el proceso y mejorar la consistencia.
+:::
+
+## Caso 1: codificación de ocupaciones (CIUO-08)
+
+::: {.medium-par}
+**Entrada**: texto libre de la glosa de ocupación
+
+**Salida**: código CIUO-08 a 1 dígito (10 grandes grupos)
+:::
+
+::: {.medium-par}
+| Código | Grupo |
+|---|---|
+| 1 | Directores y gerentes |
+| 2 | Profesionales científicos e intelectuales |
+| 3 | Técnicos y profesionales de nivel medio |
+| 4 | Personal de apoyo administrativo |
+| … | … |
+| 9 | Ocupaciones elementales |
+:::
+
+::: {.fragment .callout-note .small-callout}
+Comenzamos con 1 dígito (10 clases) como primer paso. El modelo puede refinarse luego para 2, 3 y 4 dígitos, donde el problema se vuelve mucho más difícil (hasta 436 categorías).
+:::
+
+## Caso 2: codificación de rama de actividad (CAENES)
+
+::: {.medium-par}
+**Entrada**: texto libre de la descripción de la empresa/negocio
+
+**Salida**: sección CAENES (21 grandes divisiones, letras A–U)
+:::
+
+:::: columns
+
+::: {.column width=55%}
+
+::: {.medium-par}
+Ejemplos:
+
+- *"Empresa de distribución de energía eléctrica"* → **D** (Suministro de electricidad)
+- *"Empresa de buses interurbanos"* → **H** (Transporte y almacenamiento)
+- *"Colegio particular subvencionado"* → **P** (Enseñanza)
+:::
+
+:::
+
+::: {.column width=45%}
+
+::: {.fragment .nota-box}
+Dado que CIUO-08 y CAENES son categorías que el modelo nunca ha visto durante el pre-entrenamiento, el fine-tuning es indispensable: no hay forma de hacer esto bien con solo prompting.
+:::
+
+:::
+
+::::
+
+## Caso 3: detección de glosas inconsistentes
+
+::: {.incremental .medium-par}
+Un tercer uso: identificar glosas que **no corresponden** a lo declarado en otra parte del formulario.
+
+Ejemplos de inconsistencias:
+- Declara *"dueña de casa"* como ocupación pero marca que trabaja 40 horas semanales.
+- Glosa *"estudiante universitario"* pero declara ingreso de trabajo dependiente.
+- Actividad de la empresa incompatible con la ocupación declarada.
+
+El modelo aprende a detectar estos patrones como una tarea de clasificación binaria (consistente / inconsistente) o de regresión de confianza.
+:::
+
+::: {.fragment .concepto-box}
+Esto complementa las validaciones de rango clásicas con detección semántica basada en el contenido de las respuestas.
+:::
+
+# Ejercicio práctico
+
+## Pipeline completo con HuggingFace
+
+::: {.medium-par}
+HuggingFace `transformers` permite hacer fine-tuning de BETO en pocas líneas. El pipeline completo tiene cuatro etapas:
+:::
+
+::: {.incremental .medium-par}
+1. **Cargar el tokenizador y el modelo base**
+2. **Preparar el dataset** (tokenizar, crear DataLoaders)
+3. **Configurar el Trainer** (optimizador, épocas, métricas)
+4. **Entrenar y evaluar**
+:::
+
+::: {.fragment .nota-box}
+Usaremos un dataset sintético basado en glosas de ocupación del CPV2024, con etiquetas CIUO-08 a 1 dígito. El código es idéntico al que usarían con datos reales.
+:::
+
+## Paso 1: cargar tokenizador y modelo
+
+```{python}
+#| echo: true
+#| eval: false
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+MODEL_NAME = "dccuchile/bert-base-spanish-wwm-cased"
+NUM_LABELS = 10  # CIUO-08 a 1 dígito: grupos 1-9 + grupo 0
+
+tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+model = AutoModelForSequenceClassification.from_pretrained(
+    MODEL_NAME,
+    num_labels=NUM_LABELS
+)
+```
+
+::: {.fragment .callout-note .small-callout}
+`AutoModelForSequenceClassification` toma el encoder BERT y le agrega automáticamente una cabeza de clasificación (capa lineal sobre `[CLS]`) con `num_labels` salidas.
+:::
+
+## Paso 2: tokenizar el dataset
+
+```{python}
+#| echo: true
+#| eval: false
+from datasets import Dataset
+
+# Suponemos que tenemos un DataFrame con columnas 'glosa' y 'ciuo_1d'
+df_train = pd.read_parquet("data/ciuo_train.parquet")
+df_val   = pd.read_parquet("data/ciuo_val.parquet")
+
+def tokenize(batch):
+    return tokenizer(
+        batch["glosa"],
+        truncation=True,
+        padding="max_length",
+        max_length=64       # <1>
+    )
+
+ds_train = Dataset.from_pandas(df_train).map(tokenize, batched=True)
+ds_val   = Dataset.from_pandas(df_val).map(tokenize, batched=True)
+
+ds_train = ds_train.rename_column("ciuo_1d", "labels")
+ds_val   = ds_val.rename_column("ciuo_1d", "labels")
+```
+1. Las glosas de ocupación son cortas; 64 tokens es suficiente y ahorra memoria.
+
+## Paso 3: configurar el Trainer
+
+```{python}
+#| echo: true
+#| eval: false
+from transformers import TrainingArguments, Trainer
+import evaluate
+
+accuracy = evaluate.load("accuracy")
+
+def compute_metrics(eval_pred):
+    logits, labels = eval_pred
+    preds = logits.argmax(axis=-1)
+    return accuracy.compute(predictions=preds, references=labels)
+
+args = TrainingArguments(
+    output_dir="checkpoints/beto-ciuo",
+    num_train_epochs=5,            # <1>
+    per_device_train_batch_size=32,
+    per_device_eval_batch_size=64,
+    learning_rate=2e-5,            # <2>
+    weight_decay=0.01,
+    evaluation_strategy="epoch",
+    save_strategy="epoch",
+    load_best_model_at_end=True,
+)
+
+trainer = Trainer(
+    model=model,
+    args=args,
+    train_dataset=ds_train,
+    eval_dataset=ds_val,
+    compute_metrics=compute_metrics,
+)
+```
+1. Con fine-tuning, pocas épocas suelen ser suficientes. Más épocas pueden llevar a overfitting.
+2. Learning rate pequeño (2e-5 a 5e-5) es estándar para fine-tuning de BERT. Valores más altos pueden "romper" los pesos pre-entrenados.
+
+## Paso 4: entrenar y evaluar
+
+```{python}
+#| echo: true
+#| eval: false
+# Entrenamiento
+trainer.train()
+
+# Evaluación final
+results = trainer.evaluate()
+print(f"Accuracy en validación: {results['eval_accuracy']:.3f}")
+
+# Guardar modelo
+trainer.save_model("modelos/beto-ciuo-final")
+tokenizer.save_pretrained("modelos/beto-ciuo-final")
+```
+
+::: {.fragment .medium-par}
+**Resultados esperados** con ~50.000 glosas etiquetadas:
+
+| Nivel CIUO | Accuracy esperada |
+|---|---|
+| 1 dígito (10 clases) | 85–92% |
+| 2 dígitos (~43 clases) | 75–85% |
+| 4 dígitos (~436 clases) | 60–75% |
+:::
+
+## Inferencia: usar el modelo en producción
+
+```{python}
+#| echo: true
+#| eval: false
+from transformers import pipeline
+
+clasificador = pipeline(
+    "text-classification",
+    model="modelos/beto-ciuo-final",
+    tokenizer="modelos/beto-ciuo-final"
+)
+
+glosas = [
+    "Técnico electricista en empresa de distribución",
+    "Profesora de enseñanza básica en colegio municipal",
+    "Cajera en supermercado",
+    "Ingeniero agrónomo en empresa exportadora de fruta",
+]
+
+resultados = clasificador(glosas)
+for glosa, res in zip(glosas, resultados):
+    print(f"{glosa[:45]:<45} → {res['label']} ({res['score']:.3f})")
+```
+
+::: {.fragment .callout-note .small-callout}
+El objeto `pipeline` envuelve tokenización + inferencia + decodificación del label. Se puede usar directamente en un script de procesamiento masivo o en una API REST.
+:::
+
+## Resultados en contexto censal
+
+```{python}
+#| echo: false
+#| fig-align: center
+# Simulación de resultados comparativos (basada en literatura y experiencia CPV2024)
+modelos = ["Reglas\n(baseline)", "TF-IDF +\nLogistic", "GRU +\nEmbeddings", "BETO\nfine-tuned"]
+acc = [0.61, 0.74, 0.79, 0.89]
+colors = [AZUL, NARANJA, VERDE, ROJO]
+
+fig, ax = plt.subplots(figsize=(8, 4))
+bars = ax.bar(modelos, acc, color=colors, width=0.5, zorder=3)
+ax.set_ylim(0.5, 1.0)
+ax.set_ylabel("Accuracy (CIUO-08, 1 dígito)")
+ax.set_title("Comparación de enfoques para codificación de ocupaciones")
+ax.axhline(0.80, color="gray", linestyle="--", linewidth=1, alpha=0.7, label="Línea 80%")
+ax.grid(axis='y', alpha=0.3, zorder=0)
+for bar, val in zip(bars, acc):
+    ax.text(bar.get_x() + bar.get_width()/2, val + 0.008,
+            f"{val:.0%}", ha='center', va='bottom', fontsize=12, fontweight='bold')
+ax.legend(fontsize=9)
+plt.tight_layout()
+plt.show()
+```
+
+::: {.small-par}
+El fine-tuning de BETO supera significativamente a los enfoques anteriores. Los números son referenciales; los resultados reales dependen de la calidad y cantidad de los datos de entrenamiento.
+:::
+
+## Consideraciones prácticas para el Censo
+
+::: {.incremental .medium-par}
+**Datos de entrenamiento**
+
+- Las glosas de censos y encuestas anteriores (EPE, CASEN, Censo 2017) son una fuente valiosa.
+- Importante: usar datos ya codificados por codificadores expertos, no predicciones de otro modelo.
+
+**Evaluación**
+
+- Además de accuracy global, revisar el desempeño **por grupo CIUO**: algunos grupos son más difíciles (p/e grupo 5 vs. grupo 9).
+- Métricas: accuracy, F1 macro, matriz de confusión.
+
+**Gobernanza**
+
+- El modelo es una herramienta de apoyo, no un reemplazo: siempre debe existir revisión humana de una muestra.
+- Documentar el dataset de entrenamiento, versiones del modelo y métricas de evaluación.
+:::
+
+# Temas avanzados (para explorar)
+
+## Fine-tuning eficiente: LoRA
+
+::: {.medium-par}
+El fine-tuning completo actualiza **todos los parámetros** del modelo. Con modelos grandes (RoBERTa-large: 355M, GPT-3: 175B), esto se vuelve inviable.
+:::
+
+::: {.incremental .medium-par}
+**LoRA** (*Low-Rank Adaptation*) es una alternativa eficiente:
+
+- Congela los pesos originales del modelo.
+- Agrega matrices de rango bajo $A$ y $B$ a las capas de atención.
+- Solo entrena esas matrices adicionales (típicamente < 1% de los parámetros totales).
+- Resultados comparables al fine-tuning completo.
+:::
+
+::: {.fragment .callout-note .small-callout}
+Con HuggingFace `peft`, implementar LoRA requiere solo unas pocas líneas adicionales. Útil si se quiere experimentar con modelos más grandes sin una GPU potente.
+:::
+
+## ¿Cuándo no fine-tunear?
+
+::: {.incremental .medium-par}
+El fine-tuning no siempre es la mejor opción:
+
+- **Sin datos etiquetados**: usar zero-shot o few-shot prompting con un LLM grande.
+- **Tarea que cambia frecuentemente**: el modelo debe re-entrenarse cada vez.
+- **Prototipo rápido**: el prompting es mucho más rápido de iterar.
+- **Recursos limitados**: un LLM vía API puede ser más económico que mantener un modelo propio.
+:::
+
+::: {.fragment .concepto-box}
+En el INE, el fine-tuning tiene sentido para tareas **estables, de alto volumen y con datos históricos**: exactamente el caso de la codificación CIUO/CAENES.
+:::
+
+# Cierre
+
+## Qué vimos hoy
+
+::: {.incremental .medium-par}
+1. **El problema de las RNN**: pérdida de memoria en secuencias largas, dificultad para paralelizar.
+2. **Mecanismo de atención**: Q, K, V — cada token puede mirar directamente cualquier otro.
+3. **Arquitectura Transformer**: bloques de Multi-Head Attention + Feed-Forward + residuales.
+4. **Encoder vs. Decoder**: para clasificación censal, usamos encoders (BERT/BETO).
+5. **Pre-entrenamiento + fine-tuning**: aprovechamos conocimiento general para adaptarlo a CIUO/CAENES.
+6. **BETO y el ecosistema HuggingFace**: pipeline completo en Python.
+7. **Aplicaciones en CPV2024**: codificación de ocupaciones, rama de actividad, detección de inconsistencias.
+:::
+
+## Qué queda para explorar
+
+::: {.incremental .medium-par}
+- **LoRA y QLoRA**: fine-tuning eficiente para modelos más grandes.
+- **Evaluación robusta**: métricas por subgrupo, análisis de errores, curvas de aprendizaje.
+- **Producción**: empaquetar el modelo como API (FastAPI + Docker), versionado con MLflow.
+- **LLMs generativos en estadística**: generación de textos de difusión, síntesis de microdatos, respuesta a consultas ciudadanas.
+- **RAG** (*Retrieval-Augmented Generation*): combinar LLMs con bases de datos de clasificadores para asistencia a codificadores.
+:::
+
+::: {.fragment .concepto-box}
+Las ideas de hoy (atención, fine-tuning, transfer learning) son la **base de todos los LLMs modernos**: GPT-4, Llama, Claude. Entender BERT es entender la arquitectura que los hace posibles.
+:::
+
+## Tarea
+
+::: {.medium-par}
+Usando `ciuo.parquet` (el mismo dataset de la clase anterior):
+
+1. Carguen **BETO** con `AutoModelForSequenceClassification`.
+2. Preparen el dataset con `datasets` de HuggingFace.
+3. Entrenen por **3 épocas** y registren la accuracy en validación.
+4. Compárenla con el resultado del MLP de la clase anterior.
+
+**Opcional**: prueben cambiar el learning rate (1e-5, 2e-5, 5e-5) y observen cómo afecta el entrenamiento.
+:::
+
+#
+
+[<img src="imagenes/logo_portada2.png" width="20%"/>]{.center-justified}
+
+[**Transformers y Fine-Tuning**]{.big-par .center-justified}
+
+[**Área de Ciencia de Datos**]{.big-par .center-justified}
+
+[**Unidad de Gobierno de Datos**]{.big-par .center-justified}
+
+
+[**Junio 2026**]{.big-par .center-justified}
+
+# Anexo: atención self vs. cross {#anexo-attention}
+
+## Self-attention vs. cross-attention {visibility="uncounted"}
+
+::: {.medium-par}
+En el Transformer original hay dos tipos de atención:
+:::
+
+::: {.medium-par}
+| | **Self-attention** | **Cross-attention** |
+|---|---|---|
+| **Q proviene de** | La misma secuencia | El decoder |
+| **K, V provienen de** | La misma secuencia | El encoder |
+| **Dónde aparece** | Encoder y Decoder | Solo Decoder |
+| **Para qué** | Relacionar tokens dentro del mismo texto | Conectar la salida con la entrada |
+:::
+
+::: {.fragment .medium-par}
+En BETO (solo encoder), **todo es self-attention**: cada token de la glosa atiende a todos los demás tokens de esa misma glosa. No hay cross-attention porque no hay decoder.
+:::
+
+## Masked Language Modeling {visibility="uncounted"}
+
+::: {.medium-par}
+¿Cómo se pre-entrena BERT/BETO? Con **Masked Language Modeling** (MLM):
+:::
+
+::: {.incremental .medium-par}
+1. Se toma un texto en español (p/e de Wikipedia).
+2. Se enmascara el 15% de los tokens: *"El técnico [MASK] instaló el [MASK] en el edificio"*.
+3. El modelo debe predecir las palabras enmascaradas a partir del contexto **bidireccional**.
+4. La pérdida es cross-entropy sobre los tokens enmascarados.
+:::
+
+::: {.fragment .callout-note .small-callout}
+Gracias a este proceso, BETO aprende representaciones ricas del español sin necesitar etiquetas humanas. Solo necesita texto crudo, de los cuales hay abundancia en internet.
+:::
