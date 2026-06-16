@@ -42,22 +42,16 @@ np.random.seed(42)
 
 [**Transformers y Fine-Tuning**]{.big-par .center-justified}
 
-[**Área de Ciencia de Datos**]{.big-par .center-justified}
-
-[**Unidad de Gobierno de Datos**]{.big-par .center-justified}
-
-
 [**Junio 2026**]{.big-par .center-justified}
-
 
 
 
 ## Temario de hoy
 
 ::: {.medium-par .incremental}
-El objetivo de esta clase es entender **cómo funcionan los Transformers** y cómo usarlos a través de **fine-tuning** para resolver problemas reales del Censo 2024.
+El objetivo de esta clase es entender **cómo funcionan los Transformers** y cómo usarlos a través de **fine-tuning** para resolver problemas reales de procesamiento y análisis estadístico, viendo el ejemplo del Censo 2024.
 
-1. **¿De dónde venimos?** Límites de las RNN y la aparición del Transformer
+1. **¿De dónde venimos?** Límites de las Redes neuronales y la aparición del Transformer
 2. **Mecanismo de atención**. La idea central de la arquitectura
 3. **Arquitectura Transformer**. Encoder, decoder y BERT vs. GPT
 4. **Pre-entrenamiento y fine-tuning**. La lógica del transfer learning
@@ -536,22 +530,6 @@ Dado que CIUO-08 y CAENES son categorías que el modelo nunca ha visto durante e
 
 ::::
 
-## Caso 3: detección de glosas inconsistentes
-
-::: {.incremental .medium-par}
-Un tercer uso: identificar glosas que **no corresponden** a lo declarado en otra parte del formulario.
-
-Ejemplos de inconsistencias:
-- Declara *"dueña de casa"* como ocupación pero marca que trabaja 40 horas semanales.
-- Glosa *"estudiante universitario"* pero declara ingreso de trabajo dependiente.
-- Actividad de la empresa incompatible con la ocupación declarada.
-
-El modelo aprende a detectar estos patrones como una tarea de clasificación binaria (consistente / inconsistente) o de regresión de confianza.
-:::
-
-::: {.fragment .concepto-box}
-Esto complementa las validaciones de rango clásicas con detección semántica basada en el contenido de las respuestas.
-:::
 
 # Ejercicio práctico
 
