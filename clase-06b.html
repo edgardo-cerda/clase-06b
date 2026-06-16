@@ -394,56 +394,77 @@
 <h1></h1>
 <p><span class="center-justified"><img src="imagenes/logo_portada2.png" width="20%"></span></p>
 <p><span class="big-par center-justified"><strong>Transformers y Fine-Tuning</strong></span></p>
-<p><span class="big-par center-justified"><strong>Área de Ciencia de Datos</strong></span></p>
-<p><span class="big-par center-justified"><strong>Unidad de Gobierno de Datos</strong></span></p>
 <p><span class="big-par center-justified"><strong>Junio 2026</strong></span></p>
 </section>
 <section id="temario-de-hoy" class="slide level2">
 <h2>Temario de hoy</h2>
 <div class="medium-par">
-<p>El objetivo de esta clase es entender <strong>cómo funcionan los Transformers</strong> y cómo usarlos a través de <strong>fine-tuning</strong> para resolver problemas reales del Censo 2024.</p>
+<p>El objetivo de esta clase es entender <strong>cómo funcionan los Transformers</strong> y cómo usarlos a través de <strong>fine-tuning</strong> para resolver problemas reales de procesamiento y análisis estadístico, viendo el ejemplo del Censo 2024.</p>
 <ol type="1">
-<li class="fragment"><strong>¿De dónde venimos?</strong> Límites de las RNN y la aparición del Transformer</li>
-<li class="fragment"><strong>Mecanismo de atención</strong>. La idea central de la arquitectura</li>
-<li class="fragment"><strong>Arquitectura Transformer</strong>. Encoder, decoder y BERT vs.&nbsp;GPT</li>
-<li class="fragment"><strong>Pre-entrenamiento y fine-tuning</strong>. La lógica del transfer learning</li>
-<li class="fragment"><strong>Modelos para español</strong>. BETO y la familia RoBERTa</li>
-<li class="fragment"><strong>Aplicaciones en el CPV2024</strong>. Codificación de ocupaciones y actividad económica</li>
-<li class="fragment"><strong>Ejercicio práctico</strong>. Fine-tuning de BETO con HuggingFace</li>
+<li class="fragment"><strong>El problema que los transformers vinieron a resolver:</strong> Límites de las RNN y LSTM y la aparición del Transformer</li>
+<li class="fragment"><strong>Mecanismo de atención:</strong> La idea central de la arquitectura</li>
+<li class="fragment"><strong>Arquitectura Transformer:</strong> Bloque transformer, embeddings posicionales</li>
+<li class="fragment"><strong>Pre-entrenamiento y fine-tuning:</strong> La lógica del transfer learning</li>
+<li class="fragment"><strong>Modelos para español:</strong> BETO y la familia RoBERTa</li>
+<li class="fragment"><strong>Aplicaciones en el CPV2024:</strong> Codificación de ocupaciones y actividad económica</li>
+<li class="fragment"><strong>Ejercicio práctico:</strong> Fine-tuning de BETO con HuggingFace</li>
 </ol>
 </div>
 </section></section>
 <section>
-<section id="de-dónde-venimos" class="title-slide slide level1 center">
-<h1>¿De dónde venimos?</h1>
+<section id="el-problema-que-los-transformers-vinieron-a-resolver" class="title-slide slide level1 center">
+<h1>El problema que los transformers vinieron a resolver</h1>
 
 </section>
-<section id="qué-vimos-la-clase-anterior" class="slide level2">
-<h2>Qué vimos la clase anterior</h2>
-<div class="medium-par">
-<p>En la clase anterior llegamos a las <strong>redes para secuencias</strong>: GRU y LSTM. Vimos que:</p>
-<ul>
-<li class="fragment">Son mejores que el MLP para texto porque <strong>respetan el orden</strong> de las palabras.</li>
-<li class="fragment">Procesan la secuencia de izquierda a derecha, acumulando un <strong>estado oculto</strong>.</li>
-<li class="fragment">Ese estado oculto actúa como “memoria” de lo que el modelo ha leído hasta ahora.</li>
-</ul>
+<section id="límites-de-las-rnn-y-lstm" class="slide level2">
+<h2>Límites de las RNN y LSTM</h2>
+<div class="fragment medium-par">
+<p>Las redes que vimos la clase anterior tratan cada entrada como <strong>independiente</strong>: no tienen noción de orden ni de contexto previo.</p>
+</div>
+<div class="fragment medium-par">
+<p>Para texto, eso es un problema: el significado de una palabra depende de su contexto.</p>
+</div>
+<div class="fragment">
+<p>Ejemplo de respuesta en actividad económica:</p>
+<blockquote>
+<p>“Trabajo en una empresa que realiza <strong>minería</strong> de …”</p>
+</blockquote>
+</div>
+<div class="fragment">
+<p>En qué sector económico trabaja? La respuesta depende del contexto:</p>
+<p>Minería de datos -&gt; Actividades profesionales, científicas y técnicas Minería de cobre -&gt; Explotación de minas y canteras</p>
+</div>
+</section>
+<section id="límites-de-las-rnn-y-lstm-1" class="slide level2">
+<h2>Límites de las RNN y LSTM</h2>
+<p>Antes de los transformers (2017), el estado del arte para solucionar este problema eran las <strong>Redes Neuronales Recurrentes (RNN)</strong> y su variante <strong>Long Short-Term Memory (LSTM)</strong>.</p>
+<div class="fragment medium-par">
+<p>Estas resuelven el problema con una idea simple: además de procesar la entrada actual <span class="math inline">\(x_t\)</span>, mantienen un <strong>estado oculto</strong> <span class="math inline">\(h_t\)</span> que “recuerda” lo que se procesó antes:</p>
+<p><span class="math display">\[h_t = f(W_x \, x_t + W_h \, h_{t-1} + b)\]</span></p>
 </div>
 <div class="fragment concepto-box">
-<p>Funcionan bien para secuencias cortas. ¿Qué pasa con secuencias largas?</p>
+<p>El estado oculto <span class="math inline">\(h_t\)</span> es la “memoria” de la red: se actualiza en cada paso y pasa al siguiente. Al final de la secuencia, <span class="math inline">\(h_T\)</span> resume todo lo leído.</p>
 </div>
 </section>
 <section id="el-problema-de-las-rnn-memoria-de-largo-alcance" class="slide level2">
 <h2>El problema de las RNN: memoria de largo alcance</h2>
 <div class="medium-par">
-<p>Considera este texto censal (muy exagerado, pero ilustrativo):</p>
+<p>Otro ejemplo:</p>
 <blockquote>
-<p><em>“El encuestado declaró trabajar como <strong>técnico electricista</strong> en una empresa de distribución de energía. Tiene 42 años, vive en una vivienda colectiva en Antofagasta, y su jornada…”</em></p>
+<p><em>“El encuestado declaró trabajar como <strong>técnico electricista</strong>, realiza tarea tareas de instalación de cableado eléctrico y otras similares. Trabaja en una empresa constructora, pero también de forma independiente los fines de semana”</em></p>
 </blockquote>
 <ul>
 <li class="fragment">Cuando el modelo llega a la última palabra, ¿cuánto recuerda de <strong>“técnico electricista”</strong>?</li>
 <li class="fragment">El estado oculto tiene que “comprimir” todo lo anterior en un vector fijo.</li>
 <li class="fragment">La información <strong>se diluye</strong> a medida que la secuencia crece.</li>
 </ul>
+</div>
+</section>
+<section id="el-problema-de-las-rnn-memoria-de-largo-alcance-1" class="slide level2">
+<h2>El problema de las RNN: memoria de largo alcance</h2>
+<p>La <strong>Long Short-Term Memory (LSTM)</strong> agrega un segundo vector de estado, la <strong>celda</strong> <span class="math inline">\(c_t\)</span>, protegida por tres <strong>compuertas</strong> aprendibles:</p>
+<div class="fragment">
+<p>Las compuertas permiten que la celda mantenga información útil por muchos pasos sin degradarse.</p>
 </div>
 <div class="fragment nota-box">
 <p>Las LSTM mitigan el problema, pero no lo eliminan. Para secuencias largas o grandes volúmenes de datos, el costo computacional también escala mal: <strong>no se pueden paralelizar</strong> fácilmente.</p>
@@ -452,13 +473,13 @@
 <section id="la-solución-atención-directa" class="slide level2">
 <h2>La solución: atención directa</h2>
 <div class="medium-par">
-<p>¿Y si en vez de leer de izquierda a derecha y acumular un estado, el modelo pudiera <strong>mirar directamente cualquier parte del texto</strong> cuando necesita responder una pregunta?</p>
+<p>¿Y si en vez de leer de izquierda a derecha y acumular un estado, el modelo pudiera <strong>mirar directamente cualquier parte del texto</strong>, independiente de la distancia, cuando necesita entender qué dice un texto?</p>
 </div>
 <div class="fragment concepto-box">
 <p>Esa es la idea del mecanismo de <strong>atención</strong>: en vez de comprimir todo en un estado oculto, el modelo aprende a <strong>ponderar cuánto importa cada token</strong> para producir la representación actual.</p>
 </div>
 <div class="fragment medium-par">
-<p>Esto permite:</p>
+<p>La estructura de los transformers permite:</p>
 <ul>
 <li>Capturar dependencias de <strong>largo alcance</strong> sin pérdida de información.</li>
 <li><strong>Paralelizar</strong> el cómputo (todos los tokens se procesan a la vez).</li>
@@ -471,15 +492,17 @@
 <h1>El mecanismo de atención</h1>
 
 </section>
-<section id="intuición-traducción-con-atención" class="slide level2">
-<h2>Intuición: traducción con atención</h2>
+<section id="intuición" class="slide level2">
+<h2>Intuición</h2>
+<!-- El paper original ("Attention Is All You Need", Vaswani et al., 2017) propuso una arquitectura encoder-decoder para traducción automática. Hoy usamos variantes de ella, pero la estructura base es similar. -->
 <div class="medium-par">
-<p>El mecanismo de atención nació en traducción automática. Al traducir <em>“técnico electricista”</em> al inglés, el modelo debería prestar más atención a esas dos palabras y menos a las demás.</p>
+<p>La atención es un mecanismo de búsqueda suave aprendible (entrenable).</p>
 </div>
-<p><img data-src="imagenes/attention_translation.png" style="width:75.0%"></p>
+<!-- ![](imagenes/attention_translation.png){width=75%} -->
 <div class="fragment small-par">
 <p>Cada celda muestra cuánto “atiende” la palabra del eje Y a la palabra del eje X al momento de traducir.</p>
 </div>
+<p>DIAGRAMA</p>
 </section>
 <section id="queries-keys-y-values" class="slide level2">
 <h2>Queries, Keys y Values</h2>
@@ -500,6 +523,11 @@
 <div class="fragment small-par">
 <p>El factor <span class="math inline">\(\sqrt{d_k}\)</span> escala los productos para evitar que el softmax sature con valores muy grandes.</p>
 </div>
+</section>
+<section id="queries-keys-y-values-1" class="slide level2">
+<h2>Queries, Keys y Values</h2>
+<p>La atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:</p>
+<p>::: {fragment .medium-par} - <strong>Query (Q)</strong>: <em>“¿Qué información me haría cambiar la forma en que entiendo un token?”</em> - <strong>Key (K)</strong>: <em>“¿Qué información es relevante para el significado de otros tokens?”</em> - <strong>Value (V)</strong>: <em>“¿Qué información traspaso a otros tokens, si es que me”eligen”?“</em> :::</p>
 </section>
 <section id="atención-ejemplo-paso-a-paso" class="slide level2">
 <h2>Atención: ejemplo paso a paso</h2>
@@ -536,19 +564,9 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </div>
 </div>
 </div>
-<div class="callout callout-note callout-captioned callout-style-default">
-<div class="callout-body">
-<div class="callout-caption">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p>Cada fila de <code>weights</code> suma 1. El token 0 “mira” a todos los demás y combina sus valores según cuánta atención les asigna.</p>
-</div>
-</div>
-</div>
+<!-- ::: {.fragment .callout-note .small-callout} -->
+<!-- Cada fila de `weights` suma 1. El token 0 "mira" a todos los demás y combina sus valores según cuánta atención les asigna. -->
+<!-- ::: -->
 </section>
 <section id="atención-multi-cabeza-multi-head-attention" class="slide level2">
 <h2>Atención multi-cabeza (Multi-Head Attention)</h2>
@@ -569,7 +587,7 @@ Shape salida: torch.Size([4, 8])</code></pre>
 <p><span class="math display">\[\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\,W^O\]</span></p>
 </div>
 </div><div class="column" style="width:45%;">
-<p><img data-src="imagenes/multi_head_attention.png"></p>
+<!-- ![](imagenes/multi_head_attention.png) -->
 </div>
 </div>
 </section></section>
@@ -597,7 +615,7 @@ Shape salida: torch.Size([4, 8])</code></pre>
 <p>Un Transformer completo = apilar <span class="math inline">\(N\)</span> de estos bloques (BERT usa 12 ó 24).</p>
 </div>
 </div><div class="column" style="width:50%;">
-<p><img data-src="imagenes/transformer_block.png"></p>
+<!-- ![](imagenes/transformer_block.png) -->
 </div>
 </div>
 </section>
@@ -605,23 +623,6 @@ Shape salida: torch.Size([4, 8])</code></pre>
 <h2>Embeddings posicionales</h2>
 <div class="medium-par">
 <p>La atención no sabe en qué posición está cada token (procesa todo en paralelo). Para introducir el <strong>orden de la secuencia</strong>, se suman embeddings posicionales a los embeddings de entrada:</p>
-</div>
-<div class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="im">import</span> torch, torch.nn <span class="im">as</span> nn</span>
-<span id="cb3-2"><a href="#cb3-2"></a></span>
-<span id="cb3-3"><a href="#cb3-3"></a><span class="kw">class</span> PosEncoding(nn.Module):</span>
-<span id="cb3-4"><a href="#cb3-4"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model, max_len<span class="op">=</span><span class="dv">512</span>):</span>
-<span id="cb3-5"><a href="#cb3-5"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
-<span id="cb3-6"><a href="#cb3-6"></a>        pe <span class="op">=</span> torch.zeros(max_len, d_model)</span>
-<span id="cb3-7"><a href="#cb3-7"></a>        pos <span class="op">=</span> torch.arange(max_len).unsqueeze(<span class="dv">1</span>).<span class="bu">float</span>()</span>
-<span id="cb3-8"><a href="#cb3-8"></a>        div <span class="op">=</span> torch.exp(torch.arange(<span class="dv">0</span>, d_model, <span class="dv">2</span>).<span class="bu">float</span>()</span>
-<span id="cb3-9"><a href="#cb3-9"></a>                        <span class="op">*</span> (<span class="op">-</span>torch.log(torch.tensor(<span class="fl">10000.0</span>)) <span class="op">/</span> d_model))</span>
-<span id="cb3-10"><a href="#cb3-10"></a>        pe[:, <span class="dv">0</span>::<span class="dv">2</span>] <span class="op">=</span> torch.sin(pos <span class="op">*</span> div)</span>
-<span id="cb3-11"><a href="#cb3-11"></a>        pe[:, <span class="dv">1</span>::<span class="dv">2</span>] <span class="op">=</span> torch.cos(pos <span class="op">*</span> div)</span>
-<span id="cb3-12"><a href="#cb3-12"></a>        <span class="va">self</span>.register_buffer(<span class="st">'pe'</span>, pe.unsqueeze(<span class="dv">0</span>))  <span class="co"># (1, max_len, d_model)</span></span>
-<span id="cb3-13"><a href="#cb3-13"></a></span>
-<span id="cb3-14"><a href="#cb3-14"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
-<span id="cb3-15"><a href="#cb3-15"></a>        <span class="cf">return</span> x <span class="op">+</span> <span class="va">self</span>.pe[:, :x.size(<span class="dv">1</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="callout callout-note callout-captioned callout-style-default">
 <div class="callout-body">
@@ -637,55 +638,36 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </div>
 </div>
 </section>
+<section id="visualizando-un-transformer" class="slide level2">
+<h2>Visualizando un Transformer:</h2>
+<p><a href="https://poloclub.github.io/transformer-explainer/">https://poloclub.github.io/transformer-explainer/</a></p>
+</section>
+<section id="por-qué-son-tan-bacanes-los-transformers" class="slide level2">
+<h2>¿Por qué son tan bacanes los Transformers?</h2>
+<p>3 motivos principales:</p>
+<div class="fragment">
+<p><strong>Paralelización masiva</strong>: Las RNN procesaban tokens en secuencia, una a la vez. Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Esto no es una mejora incremental: es lo que hizo posible entrenar modelos con billones de parámetros.</p>
+</div>
+<div class="fragment">
+<p><strong>Preentrenamiento a escala</strong> GPT-1 (2018) demostró que podías preentrenar un transformer en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. BERT lo hizo en la dirección bidireccional. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.</p>
+</div>
+<div class="fragment">
+<p><strong>Capacidades emergentes</strong> Nadie diseñó explícitamente la capacidad de GPT-3 para razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto (few-shot learning). Estas capacidades emergieron del escalamiento.</p>
+</div>
+</section>
 <section id="encoder-vs.-decoder-vs.-encoder-decoder" class="slide level2">
 <h2>Encoder vs.&nbsp;Decoder vs.&nbsp;Encoder-Decoder</h2>
-<div class="medium-par">
-<table>
-<colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Encoder</strong></th>
-<th><strong>Decoder</strong></th>
-<th><strong>Encoder-Decoder</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Atención</strong></td>
-<td>Bidireccional (ve todo el contexto)</td>
-<td>Causal (solo ve hacia atrás)</td>
-<td>Ambas</td>
-</tr>
-<tr class="even">
-<td><strong>Tarea típica</strong></td>
-<td>Clasificación, NER, embeddings</td>
-<td>Generación de texto</td>
-<td>Traducción, resumen</td>
-</tr>
-<tr class="odd">
-<td><strong>Ejemplo</strong></td>
-<td>BERT, RoBERTa</td>
-<td>GPT-2/3/4, Llama</td>
-<td>T5, BART</td>
-</tr>
-<tr class="even">
-<td><strong>Para el Censo</strong></td>
-<td>✅ Codificación CIUO, CAENES</td>
-<td>❌ No es lo que necesitamos</td>
-<td>Posible para resumen</td>
-</tr>
-</tbody>
-</table>
+<div class="fragment">
+<p>El Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: encoder y decoder. Encoder “codificaba” la información de un idioma en un vector numérico, y el decoder tomaba esto y lo “decodificaba” en otro idioma.</p>
 </div>
-<div class="fragment concepto-box">
-<p>Para clasificar respuestas del Censo (ocupación, rama de actividad), el <strong>encoder</strong> es la elección natural: necesitamos una representación del texto, no generar nuevo texto.</p>
+<div class="fragment">
+<p>Con el tiempo se descubrió que cada mitad es útil por separado.</p>
 </div>
+</section>
+<section id="modelos-actuales-claude-gpt-4-etc." class="slide level2">
+<h2>Modelos actuales (Claude, GPT-4, etc.)</h2>
+<p>Claude, GPT-4, Gemini y todos los grandes modelos de lenguaje actuales son, en su núcleo, transformers decoder-only entrenados con predicción de siguiente token sobre cantidades enormes de texto, seguido de refinamiento con retroalimentación humana (RLHF o variantes).</p>
+<p>La arquitectura del paper de 2017 es reconocible, pero hay décadas de mejoras acumuladas: normalización de capas, embeddings posicionales aprendidos, atención con ventanas, mezcla de expertos (MoE), contextos de millones de tokens, y mucho más.</p>
 </section>
 <section id="bert-el-encoder-por-excelencia" class="slide level2">
 <h2>BERT: el encoder por excelencia</h2>
@@ -752,7 +734,7 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </ol>
 </div>
 </div><div class="column" style="width:40%;">
-<p><img data-src="imagenes/fine_tuning_schema.png"></p>
+<!-- ![](imagenes/fine_tuning_schema.png) -->
 </div>
 </div>
 <div class="callout callout-note callout-captioned callout-style-default">
@@ -768,86 +750,11 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </div>
 </div>
 </div>
-</section>
-<section id="cuántos-datos-necesito-para-fine-tuning" class="slide level2">
-<h2>¿Cuántos datos necesito para fine-tuning?</h2>
 <div class="medium-par">
+<p>¿Cuántos datos necesito para fine-tuning?</p>
+</div>
+<div class="small-par">
 <p>Mucho menos de lo que se necesitaría para entrenar desde cero:</p>
-</div>
-<div class="medium-par">
-<table>
-<thead>
-<tr class="header">
-<th>Datos etiquetados</th>
-<th>Resultado esperado</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>~100 ejemplos</strong></td>
-<td>Resultados razonables en tareas simples</td>
-</tr>
-<tr class="even">
-<td><strong>~1.000 ejemplos</strong></td>
-<td>Buenos resultados en la mayoría de tareas</td>
-</tr>
-<tr class="odd">
-<td><strong>~10.000 ejemplos</strong></td>
-<td>Resultados sólidos, comparables a humanos</td>
-</tr>
-<tr class="even">
-<td><strong>~100.000+</strong></td>
-<td>Territorio donde el fine-tuning destaca claramente</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="fragment nota-box">
-<p>En el Censo 2024 tenemos cientos de miles de registros con glosas y códigos asignados manualmente: estamos en una posición <strong>muy favorable</strong>.</p>
-</div>
-</section>
-<section id="fine-tuning-vs.-otras-estrategias" class="slide level2">
-<h2>Fine-tuning vs.&nbsp;otras estrategias</h2>
-<div class="medium-par">
-<table>
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Estrategia</th>
-<th>Cuándo usarla</th>
-<th>Costo</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Zero-shot prompting</strong></td>
-<td>Sin datos etiquetados propios; tarea genérica</td>
-<td>Mínimo</td>
-</tr>
-<tr class="even">
-<td><strong>Few-shot prompting</strong></td>
-<td>Pocos ejemplos (&lt; 50); tarea bien definida</td>
-<td>Mínimo</td>
-</tr>
-<tr class="odd">
-<td><strong>Fine-tuning</strong></td>
-<td>Datos etiquetados disponibles; dominio específico</td>
-<td>Medio</td>
-</tr>
-<tr class="even">
-<td><strong>Pre-entrenamiento desde cero</strong></td>
-<td>Dominio muy especializado, corpus enorme</td>
-<td>Muy alto</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="fragment concepto-box">
-<p>Para la codificación censal, el <strong>fine-tuning</strong> es la opción más adecuada: tenemos datos históricos, el dominio es muy específico (glosas de ocupación y actividad económica en Chile) y queremos resultados reproducibles y auditables.</p>
 </div>
 </section></section>
 <section>
@@ -879,9 +786,6 @@ Shape salida: torch.Size([4, 8])</code></pre>
 <li class="fragment">Publicado en HuggingFace como <code>dccuchile/bert-base-spanish-wwm-cased</code>.</li>
 <li class="fragment">Versión <em>cased</em> (distingue mayúsculas) y <em>uncased</em>.</li>
 </ul>
-</div>
-<div class="fragment nota-box">
-<p>Para tareas censales, usar la versión <strong>cased</strong> es generalmente preferible: “Técnico” y “técnico” pueden tener importancias distintas dependiendo del contexto.</p>
 </div>
 </section>
 <section id="otros-modelos-relevantes-para-el-censo" class="slide level2">
@@ -949,8 +853,9 @@ Shape salida: torch.Size([4, 8])</code></pre>
 <div class="medium-par">
 <p>En el Censo 2024, las preguntas de <strong>ocupación</strong> y <strong>rama de actividad</strong> se capturan como texto libre:</p>
 <ul>
-<li class="fragment"><em>“¿A qué se dedica en su trabajo?”</em> → “Técnico electricista en empresa distribuidora”</li>
-<li class="fragment"><em>“¿En qué rubro trabaja su empresa?”</em> → “Distribución de energía eléctrica a hogares”</li>
+<li class="fragment"><em>“¿Cuál es su ocupación principal?”</em> → “Técnico electricista”</li>
+<li class="fragment"><em>“¿Qué tareas y deberes cumple en su trabajo?”</em> → “Instalar sistemas eléctricos”</li>
+<li class="fragment"><em>“¿A qué se dedica la empresa en la cual trabaja?”</em> → “Construcción de edificios”</li>
 </ul>
 <p>Estas respuestas deben codificarse según clasificadores internacionales:</p>
 <ul>
@@ -961,9 +866,14 @@ Shape salida: torch.Size([4, 8])</code></pre>
 <div class="fragment nota-box">
 <p>La codificación manual es costosa y propensa a inconsistencias entre codificadores. Un modelo de fine-tuning puede automatizar el proceso y mejorar la consistencia.</p>
 </div>
+</section></section>
+<section>
+<section id="ejercicio-práctico" class="title-slide slide level1 center">
+<h1>Ejercicio práctico</h1>
+
 </section>
-<section id="caso-1-codificación-de-ocupaciones-ciuo-08" class="slide level2">
-<h2>Caso 1: codificación de ocupaciones (CIUO-08)</h2>
+<section id="codificación-de-ocupaciones-ciuo-08" class="slide level2">
+<h2>Codificación de ocupaciones (CIUO-08)</h2>
 <div class="medium-par">
 <p><strong>Entrada</strong>: texto libre de la glosa de ocupación</p>
 <p><strong>Salida</strong>: código CIUO-08 a 1 dígito (10 grandes grupos)</p>
@@ -1013,49 +923,10 @@ Shape salida: torch.Size([4, 8])</code></pre>
 <p><strong>Note</strong></p>
 </div>
 <div class="callout-content">
-<p>Comenzamos con 1 dígito (10 clases) como primer paso. El modelo puede refinarse luego para 2, 3 y 4 dígitos, donde el problema se vuelve mucho más difícil (hasta 436 categorías).</p>
+<p>Comenzamos con 1 dígito (10 clases) como primer paso. El modelo puede refinarse luego para 2, 3 y 4 dígitos, donde el problema se vuelve mucho más difícil.</p>
 </div>
 </div>
 </div>
-</section>
-<section id="caso-2-codificación-de-rama-de-actividad-caenes" class="slide level2">
-<h2>Caso 2: codificación de rama de actividad (CAENES)</h2>
-<div class="medium-par">
-<p><strong>Entrada</strong>: texto libre de la descripción de la empresa/negocio</p>
-<p><strong>Salida</strong>: sección CAENES (21 grandes divisiones, letras A–U)</p>
-</div>
-<div class="columns">
-<div class="column" style="width:55%;">
-<div class="medium-par">
-<p>Ejemplos:</p>
-<ul>
-<li><em>“Empresa de distribución de energía eléctrica”</em> → <strong>D</strong> (Suministro de electricidad)</li>
-<li><em>“Empresa de buses interurbanos”</em> → <strong>H</strong> (Transporte y almacenamiento)</li>
-<li><em>“Colegio particular subvencionado”</em> → <strong>P</strong> (Enseñanza)</li>
-</ul>
-</div>
-</div><div class="column" style="width:45%;">
-<div class="fragment nota-box">
-<p>Dado que CIUO-08 y CAENES son categorías que el modelo nunca ha visto durante el pre-entrenamiento, el fine-tuning es indispensable: no hay forma de hacer esto bien con solo prompting.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="caso-3-detección-de-glosas-inconsistentes" class="slide level2">
-<h2>Caso 3: detección de glosas inconsistentes</h2>
-<div class="medium-par">
-<p>Un tercer uso: identificar glosas que <strong>no corresponden</strong> a lo declarado en otra parte del formulario.</p>
-<p>Ejemplos de inconsistencias: - Declara <em>“dueña de casa”</em> como ocupación pero marca que trabaja 40 horas semanales. - Glosa <em>“estudiante universitario”</em> pero declara ingreso de trabajo dependiente. - Actividad de la empresa incompatible con la ocupación declarada.</p>
-<p>El modelo aprende a detectar estos patrones como una tarea de clasificación binaria (consistente / inconsistente) o de regresión de confianza.</p>
-</div>
-<div class="fragment concepto-box">
-<p>Esto complementa las validaciones de rango clásicas con detección semántica basada en el contenido de las respuestas.</p>
-</div>
-</section></section>
-<section>
-<section id="ejercicio-práctico" class="title-slide slide level1 center">
-<h1>Ejercicio práctico</h1>
-
 </section>
 <section id="pipeline-completo-con-huggingface" class="slide level2">
 <h2>Pipeline completo con HuggingFace</h2>
@@ -1071,22 +942,22 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </ol>
 </div>
 <div class="fragment nota-box">
-<p>Usaremos un dataset sintético basado en glosas de ocupación del CPV2024, con etiquetas CIUO-08 a 1 dígito. El código es idéntico al que usarían con datos reales.</p>
+<p>Usaremos un dataset de glosas auditadas por el equipo de Nomenclaturas, proveniente de distintas encuestas o Censos realizados por el INE, con etiquetas CIUO-08 a 1 dígito. El código es idéntico al que usarían con datos reales.</p>
 </div>
 </section>
 <section id="paso-1-cargar-tokenizador-y-modelo" class="slide level2">
 <h2>Paso 1: cargar tokenizador y modelo</h2>
-<div class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer, AutoModelForSequenceClassification</span>
-<span id="cb4-2"><a href="#cb4-2"></a></span>
-<span id="cb4-3"><a href="#cb4-3"></a>MODEL_NAME <span class="op">=</span> <span class="st">"dccuchile/bert-base-spanish-wwm-cased"</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a>NUM_LABELS <span class="op">=</span> <span class="dv">10</span>  <span class="co"># CIUO-08 a 1 dígito: grupos 1-9 + grupo 0</span></span>
-<span id="cb4-5"><a href="#cb4-5"></a></span>
-<span id="cb4-6"><a href="#cb4-6"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(MODEL_NAME)</span>
-<span id="cb4-7"><a href="#cb4-7"></a>model <span class="op">=</span> AutoModelForSequenceClassification.from_pretrained(</span>
-<span id="cb4-8"><a href="#cb4-8"></a>    MODEL_NAME,</span>
-<span id="cb4-9"><a href="#cb4-9"></a>    num_labels<span class="op">=</span>NUM_LABELS</span>
-<span id="cb4-10"><a href="#cb4-10"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer, AutoModelForSequenceClassification</span>
+<span id="cb3-2"><a href="#cb3-2"></a></span>
+<span id="cb3-3"><a href="#cb3-3"></a>MODEL_NAME <span class="op">=</span> <span class="st">"dccuchile/bert-base-spanish-wwm-cased"</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a>NUM_LABELS <span class="op">=</span> <span class="dv">10</span>  <span class="co"># CIUO-08 a 1 dígito: grupos 1-9 + grupo 0</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a></span>
+<span id="cb3-6"><a href="#cb3-6"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(MODEL_NAME)</span>
+<span id="cb3-7"><a href="#cb3-7"></a>model <span class="op">=</span> AutoModelForSequenceClassification.from_pretrained(</span>
+<span id="cb3-8"><a href="#cb3-8"></a>    MODEL_NAME,</span>
+<span id="cb3-9"><a href="#cb3-9"></a>    num_labels<span class="op">=</span>NUM_LABELS</span>
+<span id="cb3-10"><a href="#cb3-10"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="callout callout-note callout-captioned callout-style-default">
 <div class="callout-body">
@@ -1104,26 +975,26 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </section>
 <section id="paso-2-tokenizar-el-dataset" class="slide level2">
 <h2>Paso 2: tokenizar el dataset</h2>
-<div class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="im">from</span> datasets <span class="im">import</span> Dataset</span>
-<span id="cb5-2"><a href="#cb5-2"></a></span>
-<span id="cb5-3"><a href="#cb5-3"></a><span class="co"># Suponemos que tenemos un DataFrame con columnas 'glosa' y 'ciuo_1d'</span></span>
-<span id="cb5-4"><a href="#cb5-4"></a>df_train <span class="op">=</span> pd.read_parquet(<span class="st">"data/ciuo_train.parquet"</span>)</span>
-<span id="cb5-5"><a href="#cb5-5"></a>df_val   <span class="op">=</span> pd.read_parquet(<span class="st">"data/ciuo_val.parquet"</span>)</span>
-<span id="cb5-6"><a href="#cb5-6"></a></span>
-<span id="cb5-7"><a href="#cb5-7"></a><span class="kw">def</span> tokenize(batch):</span>
-<span id="cb5-8"><a href="#cb5-8"></a>    <span class="cf">return</span> tokenizer(</span>
-<span id="cb5-9"><a href="#cb5-9"></a>        batch[<span class="st">"glosa"</span>],</span>
-<span id="cb5-10"><a href="#cb5-10"></a>        truncation<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb5-11"><a href="#cb5-11"></a>        padding<span class="op">=</span><span class="st">"max_length"</span>,</span>
-<span id="cb5-12"><a href="#cb5-12"></a>        max_length<span class="op">=</span><span class="dv">64</span>       <span class="co"># &lt;1&gt;</span></span>
-<span id="cb5-13"><a href="#cb5-13"></a>    )</span>
-<span id="cb5-14"><a href="#cb5-14"></a></span>
-<span id="cb5-15"><a href="#cb5-15"></a>ds_train <span class="op">=</span> Dataset.from_pandas(df_train).<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb5-16"><a href="#cb5-16"></a>ds_val   <span class="op">=</span> Dataset.from_pandas(df_val).<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb5-17"><a href="#cb5-17"></a></span>
-<span id="cb5-18"><a href="#cb5-18"></a>ds_train <span class="op">=</span> ds_train.rename_column(<span class="st">"ciuo_1d"</span>, <span class="st">"labels"</span>)</span>
-<span id="cb5-19"><a href="#cb5-19"></a>ds_val   <span class="op">=</span> ds_val.rename_column(<span class="st">"ciuo_1d"</span>, <span class="st">"labels"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="im">from</span> datasets <span class="im">import</span> Dataset</span>
+<span id="cb4-2"><a href="#cb4-2"></a></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="co"># Suponemos que tenemos un DataFrame con columnas 'glosa' y 'ciuo_1d'</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a>df_train <span class="op">=</span> pd.read_parquet(<span class="st">"data/ciuo_train.parquet"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5"></a>df_val   <span class="op">=</span> pd.read_parquet(<span class="st">"data/ciuo_val.parquet"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6"></a></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="kw">def</span> tokenize(batch):</span>
+<span id="cb4-8"><a href="#cb4-8"></a>    <span class="cf">return</span> tokenizer(</span>
+<span id="cb4-9"><a href="#cb4-9"></a>        batch[<span class="st">"glosa"</span>],</span>
+<span id="cb4-10"><a href="#cb4-10"></a>        truncation<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-11"><a href="#cb4-11"></a>        padding<span class="op">=</span><span class="st">"max_length"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12"></a>        max_length<span class="op">=</span><span class="dv">64</span>       <span class="co"># &lt;1&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a>    )</span>
+<span id="cb4-14"><a href="#cb4-14"></a></span>
+<span id="cb4-15"><a href="#cb4-15"></a>ds_train <span class="op">=</span> Dataset.from_pandas(df_train).<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-16"><a href="#cb4-16"></a>ds_val   <span class="op">=</span> Dataset.from_pandas(df_val).<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-17"><a href="#cb4-17"></a></span>
+<span id="cb4-18"><a href="#cb4-18"></a>ds_train <span class="op">=</span> ds_train.rename_column(<span class="st">"ciuo_1d"</span>, <span class="st">"labels"</span>)</span>
+<span id="cb4-19"><a href="#cb4-19"></a>ds_val   <span class="op">=</span> ds_val.rename_column(<span class="st">"ciuo_1d"</span>, <span class="st">"labels"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol type="1">
 <li>Las glosas de ocupación son cortas; 64 tokens es suficiente y ahorra memoria.</li>
@@ -1131,36 +1002,36 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </section>
 <section id="paso-3-configurar-el-trainer" class="slide level2">
 <h2>Paso 3: configurar el Trainer</h2>
-<div class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a><span class="im">from</span> transformers <span class="im">import</span> TrainingArguments, Trainer</span>
-<span id="cb6-2"><a href="#cb6-2"></a><span class="im">import</span> evaluate</span>
-<span id="cb6-3"><a href="#cb6-3"></a></span>
-<span id="cb6-4"><a href="#cb6-4"></a>accuracy <span class="op">=</span> evaluate.load(<span class="st">"accuracy"</span>)</span>
-<span id="cb6-5"><a href="#cb6-5"></a></span>
-<span id="cb6-6"><a href="#cb6-6"></a><span class="kw">def</span> compute_metrics(eval_pred):</span>
-<span id="cb6-7"><a href="#cb6-7"></a>    logits, labels <span class="op">=</span> eval_pred</span>
-<span id="cb6-8"><a href="#cb6-8"></a>    preds <span class="op">=</span> logits.argmax(axis<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb6-9"><a href="#cb6-9"></a>    <span class="cf">return</span> accuracy.compute(predictions<span class="op">=</span>preds, references<span class="op">=</span>labels)</span>
-<span id="cb6-10"><a href="#cb6-10"></a></span>
-<span id="cb6-11"><a href="#cb6-11"></a>args <span class="op">=</span> TrainingArguments(</span>
-<span id="cb6-12"><a href="#cb6-12"></a>    output_dir<span class="op">=</span><span class="st">"checkpoints/beto-ciuo"</span>,</span>
-<span id="cb6-13"><a href="#cb6-13"></a>    num_train_epochs<span class="op">=</span><span class="dv">5</span>,            <span class="co"># &lt;1&gt;</span></span>
-<span id="cb6-14"><a href="#cb6-14"></a>    per_device_train_batch_size<span class="op">=</span><span class="dv">32</span>,</span>
-<span id="cb6-15"><a href="#cb6-15"></a>    per_device_eval_batch_size<span class="op">=</span><span class="dv">64</span>,</span>
-<span id="cb6-16"><a href="#cb6-16"></a>    learning_rate<span class="op">=</span><span class="fl">2e-5</span>,            <span class="co"># &lt;2&gt;</span></span>
-<span id="cb6-17"><a href="#cb6-17"></a>    weight_decay<span class="op">=</span><span class="fl">0.01</span>,</span>
-<span id="cb6-18"><a href="#cb6-18"></a>    evaluation_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
-<span id="cb6-19"><a href="#cb6-19"></a>    save_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
-<span id="cb6-20"><a href="#cb6-20"></a>    load_best_model_at_end<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb6-21"><a href="#cb6-21"></a>)</span>
-<span id="cb6-22"><a href="#cb6-22"></a></span>
-<span id="cb6-23"><a href="#cb6-23"></a>trainer <span class="op">=</span> Trainer(</span>
-<span id="cb6-24"><a href="#cb6-24"></a>    model<span class="op">=</span>model,</span>
-<span id="cb6-25"><a href="#cb6-25"></a>    args<span class="op">=</span>args,</span>
-<span id="cb6-26"><a href="#cb6-26"></a>    train_dataset<span class="op">=</span>ds_train,</span>
-<span id="cb6-27"><a href="#cb6-27"></a>    eval_dataset<span class="op">=</span>ds_val,</span>
-<span id="cb6-28"><a href="#cb6-28"></a>    compute_metrics<span class="op">=</span>compute_metrics,</span>
-<span id="cb6-29"><a href="#cb6-29"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="im">from</span> transformers <span class="im">import</span> TrainingArguments, Trainer</span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="im">import</span> evaluate</span>
+<span id="cb5-3"><a href="#cb5-3"></a></span>
+<span id="cb5-4"><a href="#cb5-4"></a>accuracy <span class="op">=</span> evaluate.load(<span class="st">"accuracy"</span>)</span>
+<span id="cb5-5"><a href="#cb5-5"></a></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="kw">def</span> compute_metrics(eval_pred):</span>
+<span id="cb5-7"><a href="#cb5-7"></a>    logits, labels <span class="op">=</span> eval_pred</span>
+<span id="cb5-8"><a href="#cb5-8"></a>    preds <span class="op">=</span> logits.argmax(axis<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb5-9"><a href="#cb5-9"></a>    <span class="cf">return</span> accuracy.compute(predictions<span class="op">=</span>preds, references<span class="op">=</span>labels)</span>
+<span id="cb5-10"><a href="#cb5-10"></a></span>
+<span id="cb5-11"><a href="#cb5-11"></a>args <span class="op">=</span> TrainingArguments(</span>
+<span id="cb5-12"><a href="#cb5-12"></a>    output_dir<span class="op">=</span><span class="st">"checkpoints/beto-ciuo"</span>,</span>
+<span id="cb5-13"><a href="#cb5-13"></a>    num_train_epochs<span class="op">=</span><span class="dv">5</span>,            <span class="co"># &lt;1&gt;</span></span>
+<span id="cb5-14"><a href="#cb5-14"></a>    per_device_train_batch_size<span class="op">=</span><span class="dv">32</span>,</span>
+<span id="cb5-15"><a href="#cb5-15"></a>    per_device_eval_batch_size<span class="op">=</span><span class="dv">64</span>,</span>
+<span id="cb5-16"><a href="#cb5-16"></a>    learning_rate<span class="op">=</span><span class="fl">2e-5</span>,            <span class="co"># &lt;2&gt;</span></span>
+<span id="cb5-17"><a href="#cb5-17"></a>    weight_decay<span class="op">=</span><span class="fl">0.01</span>,</span>
+<span id="cb5-18"><a href="#cb5-18"></a>    evaluation_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
+<span id="cb5-19"><a href="#cb5-19"></a>    save_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
+<span id="cb5-20"><a href="#cb5-20"></a>    load_best_model_at_end<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb5-21"><a href="#cb5-21"></a>)</span>
+<span id="cb5-22"><a href="#cb5-22"></a></span>
+<span id="cb5-23"><a href="#cb5-23"></a>trainer <span class="op">=</span> Trainer(</span>
+<span id="cb5-24"><a href="#cb5-24"></a>    model<span class="op">=</span>model,</span>
+<span id="cb5-25"><a href="#cb5-25"></a>    args<span class="op">=</span>args,</span>
+<span id="cb5-26"><a href="#cb5-26"></a>    train_dataset<span class="op">=</span>ds_train,</span>
+<span id="cb5-27"><a href="#cb5-27"></a>    eval_dataset<span class="op">=</span>ds_val,</span>
+<span id="cb5-28"><a href="#cb5-28"></a>    compute_metrics<span class="op">=</span>compute_metrics,</span>
+<span id="cb5-29"><a href="#cb5-29"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol type="1">
 <li>Con fine-tuning, pocas épocas suelen ser suficientes. Más épocas pueden llevar a overfitting.</li>
@@ -1169,87 +1040,56 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </section>
 <section id="paso-4-entrenar-y-evaluar" class="slide level2">
 <h2>Paso 4: entrenar y evaluar</h2>
-<div class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># Entrenamiento</span></span>
-<span id="cb7-2"><a href="#cb7-2"></a>trainer.train()</span>
-<span id="cb7-3"><a href="#cb7-3"></a></span>
-<span id="cb7-4"><a href="#cb7-4"></a><span class="co"># Evaluación final</span></span>
-<span id="cb7-5"><a href="#cb7-5"></a>results <span class="op">=</span> trainer.evaluate()</span>
-<span id="cb7-6"><a href="#cb7-6"></a><span class="bu">print</span>(<span class="ss">f"Accuracy en validación: </span><span class="sc">{</span>results[<span class="st">'eval_accuracy'</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb7-7"><a href="#cb7-7"></a></span>
-<span id="cb7-8"><a href="#cb7-8"></a><span class="co"># Guardar modelo</span></span>
-<span id="cb7-9"><a href="#cb7-9"></a>trainer.save_model(<span class="st">"modelos/beto-ciuo-final"</span>)</span>
-<span id="cb7-10"><a href="#cb7-10"></a>tokenizer.save_pretrained(<span class="st">"modelos/beto-ciuo-final"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># Entrenamiento</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>trainer.train()</span>
+<span id="cb6-3"><a href="#cb6-3"></a></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="co"># Evaluación final</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a>results <span class="op">=</span> trainer.evaluate()</span>
+<span id="cb6-6"><a href="#cb6-6"></a><span class="bu">print</span>(<span class="ss">f"Accuracy en validación: </span><span class="sc">{</span>results[<span class="st">'eval_accuracy'</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb6-7"><a href="#cb6-7"></a></span>
+<span id="cb6-8"><a href="#cb6-8"></a><span class="co"># Guardar modelo</span></span>
+<span id="cb6-9"><a href="#cb6-9"></a>trainer.save_model(<span class="st">"modelos/beto-ciuo-final"</span>)</span>
+<span id="cb6-10"><a href="#cb6-10"></a>tokenizer.save_pretrained(<span class="st">"modelos/beto-ciuo-final"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="fragment medium-par">
 <p><strong>Resultados esperados</strong> con ~50.000 glosas etiquetadas:</p>
-<table>
-<thead>
-<tr class="header">
-<th>Nivel CIUO</th>
-<th>Accuracy esperada</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1 dígito (10 clases)</td>
-<td>85–92%</td>
-</tr>
-<tr class="even">
-<td>2 dígitos (~43 clases)</td>
-<td>75–85%</td>
-</tr>
-<tr class="odd">
-<td>4 dígitos (~436 clases)</td>
-<td>60–75%</td>
-</tr>
-</tbody>
-</table>
+<p>Tabla con resultados</p>
 </div>
 </section>
 <section id="inferencia-usar-el-modelo-en-producción" class="slide level2">
 <h2>Inferencia: usar el modelo en producción</h2>
-<div class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
-<span id="cb8-2"><a href="#cb8-2"></a></span>
-<span id="cb8-3"><a href="#cb8-3"></a>clasificador <span class="op">=</span> pipeline(</span>
-<span id="cb8-4"><a href="#cb8-4"></a>    <span class="st">"text-classification"</span>,</span>
-<span id="cb8-5"><a href="#cb8-5"></a>    model<span class="op">=</span><span class="st">"modelos/beto-ciuo-final"</span>,</span>
-<span id="cb8-6"><a href="#cb8-6"></a>    tokenizer<span class="op">=</span><span class="st">"modelos/beto-ciuo-final"</span></span>
-<span id="cb8-7"><a href="#cb8-7"></a>)</span>
-<span id="cb8-8"><a href="#cb8-8"></a></span>
-<span id="cb8-9"><a href="#cb8-9"></a>glosas <span class="op">=</span> [</span>
-<span id="cb8-10"><a href="#cb8-10"></a>    <span class="st">"Técnico electricista en empresa de distribución"</span>,</span>
-<span id="cb8-11"><a href="#cb8-11"></a>    <span class="st">"Profesora de enseñanza básica en colegio municipal"</span>,</span>
-<span id="cb8-12"><a href="#cb8-12"></a>    <span class="st">"Cajera en supermercado"</span>,</span>
-<span id="cb8-13"><a href="#cb8-13"></a>    <span class="st">"Ingeniero agrónomo en empresa exportadora de fruta"</span>,</span>
-<span id="cb8-14"><a href="#cb8-14"></a>]</span>
-<span id="cb8-15"><a href="#cb8-15"></a></span>
-<span id="cb8-16"><a href="#cb8-16"></a>resultados <span class="op">=</span> clasificador(glosas)</span>
-<span id="cb8-17"><a href="#cb8-17"></a><span class="cf">for</span> glosa, res <span class="kw">in</span> <span class="bu">zip</span>(glosas, resultados):</span>
-<span id="cb8-18"><a href="#cb8-18"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>glosa[:<span class="dv">45</span>]<span class="sc">:&lt;45}</span><span class="ss"> → </span><span class="sc">{</span>res[<span class="st">'label'</span>]<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>res[<span class="st">'score'</span>]<span class="sc">:.3f}</span><span class="ss">)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a>clasificador <span class="op">=</span> pipeline(</span>
+<span id="cb7-4"><a href="#cb7-4"></a>    <span class="st">"text-classification"</span>,</span>
+<span id="cb7-5"><a href="#cb7-5"></a>    model<span class="op">=</span><span class="st">"modelos/beto-ciuo-final"</span>,</span>
+<span id="cb7-6"><a href="#cb7-6"></a>    tokenizer<span class="op">=</span><span class="st">"modelos/beto-ciuo-final"</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a>)</span>
+<span id="cb7-8"><a href="#cb7-8"></a></span>
+<span id="cb7-9"><a href="#cb7-9"></a>glosas <span class="op">=</span> [</span>
+<span id="cb7-10"><a href="#cb7-10"></a>    <span class="st">"Técnico electricista en empresa de distribución"</span>,</span>
+<span id="cb7-11"><a href="#cb7-11"></a>    <span class="st">"Profesora de enseñanza básica en colegio municipal"</span>,</span>
+<span id="cb7-12"><a href="#cb7-12"></a>    <span class="st">"Cajera en supermercado"</span>,</span>
+<span id="cb7-13"><a href="#cb7-13"></a>    <span class="st">"Ingeniero agrónomo en empresa exportadora de fruta"</span>,</span>
+<span id="cb7-14"><a href="#cb7-14"></a>]</span>
+<span id="cb7-15"><a href="#cb7-15"></a></span>
+<span id="cb7-16"><a href="#cb7-16"></a>resultados <span class="op">=</span> clasificador(glosas)</span>
+<span id="cb7-17"><a href="#cb7-17"></a><span class="cf">for</span> glosa, res <span class="kw">in</span> <span class="bu">zip</span>(glosas, resultados):</span>
+<span id="cb7-18"><a href="#cb7-18"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>glosa[:<span class="dv">45</span>]<span class="sc">:&lt;45}</span><span class="ss"> → </span><span class="sc">{</span>res[<span class="st">'label'</span>]<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>res[<span class="st">'score'</span>]<span class="sc">:.3f}</span><span class="ss">)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="callout callout-note callout-captioned callout-style-default">
-<div class="callout-body">
-<div class="callout-caption">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p>El objeto <code>pipeline</code> envuelve tokenización + inferencia + decodificación del label. Se puede usar directamente en un script de procesamiento masivo o en una API REST.</p>
-</div>
-</div>
-</div>
+<!-- ::: {.fragment .callout-note .small-callout} -->
+<!-- El objeto `pipeline` envuelve tokenización + inferencia + decodificación del label. Se puede usar directamente en un script de procesamiento masivo o en una API REST. -->
+<!-- ::: -->
 </section>
 <section id="resultados-en-contexto-censal" class="slide level2">
 <h2>Resultados en contexto censal</h2>
-<div class="cell" data-execution_count="9">
+<div class="cell" data-execution_count="8">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="clase-06b_files/figure-revealjs/cell-10-output-1.png"></p>
+<p><img data-src="clase-06b_files/figure-revealjs/cell-9-output-1.png"></p>
 </figure>
 </div>
 </div>
@@ -1279,54 +1119,6 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </div>
 </section></section>
 <section>
-<section id="temas-avanzados-para-explorar" class="title-slide slide level1 center">
-<h1>Temas avanzados (para explorar)</h1>
-
-</section>
-<section id="fine-tuning-eficiente-lora" class="slide level2">
-<h2>Fine-tuning eficiente: LoRA</h2>
-<div class="medium-par">
-<p>El fine-tuning completo actualiza <strong>todos los parámetros</strong> del modelo. Con modelos grandes (RoBERTa-large: 355M, GPT-3: 175B), esto se vuelve inviable.</p>
-</div>
-<div class="medium-par">
-<p><strong>LoRA</strong> (<em>Low-Rank Adaptation</em>) es una alternativa eficiente:</p>
-<ul>
-<li class="fragment">Congela los pesos originales del modelo.</li>
-<li class="fragment">Agrega matrices de rango bajo <span class="math inline">\(A\)</span> y <span class="math inline">\(B\)</span> a las capas de atención.</li>
-<li class="fragment">Solo entrena esas matrices adicionales (típicamente &lt; 1% de los parámetros totales).</li>
-<li class="fragment">Resultados comparables al fine-tuning completo.</li>
-</ul>
-</div>
-<div class="callout callout-note callout-captioned callout-style-default">
-<div class="callout-body">
-<div class="callout-caption">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p>Con HuggingFace <code>peft</code>, implementar LoRA requiere solo unas pocas líneas adicionales. Útil si se quiere experimentar con modelos más grandes sin una GPU potente.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="cuándo-no-fine-tunear" class="slide level2">
-<h2>¿Cuándo no fine-tunear?</h2>
-<div class="medium-par">
-<p>El fine-tuning no siempre es la mejor opción:</p>
-<ul>
-<li class="fragment"><strong>Sin datos etiquetados</strong>: usar zero-shot o few-shot prompting con un LLM grande.</li>
-<li class="fragment"><strong>Tarea que cambia frecuentemente</strong>: el modelo debe re-entrenarse cada vez.</li>
-<li class="fragment"><strong>Prototipo rápido</strong>: el prompting es mucho más rápido de iterar.</li>
-<li class="fragment"><strong>Recursos limitados</strong>: un LLM vía API puede ser más económico que mantener un modelo propio.</li>
-</ul>
-</div>
-<div class="fragment concepto-box">
-<p>En el INE, el fine-tuning tiene sentido para tareas <strong>estables, de alto volumen y con datos históricos</strong>: exactamente el caso de la codificación CIUO/CAENES.</p>
-</div>
-</section></section>
-<section>
 <section id="cierre" class="title-slide slide level1 center">
 <h1>Cierre</h1>
 
@@ -1343,95 +1135,6 @@ Shape salida: torch.Size([4, 8])</code></pre>
 <li class="fragment"><strong>BETO y el ecosistema HuggingFace</strong>: pipeline completo en Python.</li>
 <li class="fragment"><strong>Aplicaciones en CPV2024</strong>: codificación de ocupaciones, rama de actividad, detección de inconsistencias.</li>
 </ol>
-</div>
-</section>
-<section id="qué-queda-para-explorar" class="slide level2">
-<h2>Qué queda para explorar</h2>
-<div class="medium-par">
-<ul>
-<li class="fragment"><strong>LoRA y QLoRA</strong>: fine-tuning eficiente para modelos más grandes.</li>
-<li class="fragment"><strong>Evaluación robusta</strong>: métricas por subgrupo, análisis de errores, curvas de aprendizaje.</li>
-<li class="fragment"><strong>Producción</strong>: empaquetar el modelo como API (FastAPI + Docker), versionado con MLflow.</li>
-<li class="fragment"><strong>LLMs generativos en estadística</strong>: generación de textos de difusión, síntesis de microdatos, respuesta a consultas ciudadanas.</li>
-<li class="fragment"><strong>RAG</strong> (<em>Retrieval-Augmented Generation</em>): combinar LLMs con bases de datos de clasificadores para asistencia a codificadores.</li>
-</ul>
-</div>
-<div class="fragment concepto-box">
-<p>Las ideas de hoy (atención, fine-tuning, transfer learning) son la <strong>base de todos los LLMs modernos</strong>: GPT-4, Llama, Claude. Entender BERT es entender la arquitectura que los hace posibles.</p>
-</div>
-</section>
-<section id="tarea" class="slide level2">
-<h2>Tarea</h2>
-<div class="medium-par">
-<p>Usando <code>ciuo.parquet</code> (el mismo dataset de la clase anterior):</p>
-<ol type="1">
-<li>Carguen <strong>BETO</strong> con <code>AutoModelForSequenceClassification</code>.</li>
-<li>Preparen el dataset con <code>datasets</code> de HuggingFace.</li>
-<li>Entrenen por <strong>3 épocas</strong> y registren la accuracy en validación.</li>
-<li>Compárenla con el resultado del MLP de la clase anterior.</li>
-</ol>
-<p><strong>Opcional</strong>: prueben cambiar el learning rate (1e-5, 2e-5, 5e-5) y observen cómo afecta el entrenamiento.</p>
-</div>
-</section></section>
-<section id="section-1" class="title-slide slide level1 center">
-<h1></h1>
-<p><span class="center-justified"><img src="imagenes/logo_portada2.png" width="20%"></span></p>
-<p><span class="big-par center-justified"><strong>Transformers y Fine-Tuning</strong></span></p>
-<p><span class="big-par center-justified"><strong>Área de Ciencia de Datos</strong></span></p>
-<p><span class="big-par center-justified"><strong>Unidad de Gobierno de Datos</strong></span></p>
-<p><span class="big-par center-justified"><strong>Junio 2026</strong></span></p>
-</section>
-
-<section>
-<section id="anexo-attention" class="title-slide slide level1 center">
-<h1>Anexo: atención self vs.&nbsp;cross</h1>
-
-</section>
-<section id="self-attention-vs.-cross-attention" class="slide level2" data-visibility="uncounted">
-<h2>Self-attention vs.&nbsp;cross-attention</h2>
-<div class="medium-par">
-<p>En el Transformer original hay dos tipos de atención:</p>
-</div>
-<div class="medium-par">
-<table>
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th><strong>Self-attention</strong></th>
-<th><strong>Cross-attention</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>Q proviene de</strong></td>
-<td>La misma secuencia</td>
-<td>El decoder</td>
-</tr>
-<tr class="even">
-<td><strong>K, V provienen de</strong></td>
-<td>La misma secuencia</td>
-<td>El encoder</td>
-</tr>
-<tr class="odd">
-<td><strong>Dónde aparece</strong></td>
-<td>Encoder y Decoder</td>
-<td>Solo Decoder</td>
-</tr>
-<tr class="even">
-<td><strong>Para qué</strong></td>
-<td>Relacionar tokens dentro del mismo texto</td>
-<td>Conectar la salida con la entrada</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="fragment medium-par">
-<p>En BETO (solo encoder), <strong>todo es self-attention</strong>: cada token de la glosa atiende a todos los demás tokens de esa misma glosa. No hay cross-attention porque no hay decoder.</p>
 </div>
 </section>
 <section id="masked-language-modeling" class="slide level2" data-visibility="uncounted">

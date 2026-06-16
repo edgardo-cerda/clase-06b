@@ -44,49 +44,80 @@ np.random.seed(42)
 
 [**Junio 2026**]{.big-par .center-justified}
 
-
-
 ## Temario de hoy
 
 ::: {.medium-par .incremental}
 El objetivo de esta clase es entender **cómo funcionan los Transformers** y cómo usarlos a través de **fine-tuning** para resolver problemas reales de procesamiento y análisis estadístico, viendo el ejemplo del Censo 2024.
 
-1. **¿De dónde venimos?** Límites de las Redes neuronales y la aparición del Transformer
-2. **Mecanismo de atención**. La idea central de la arquitectura
-3. **Arquitectura Transformer**. Encoder, decoder y BERT vs. GPT
-4. **Pre-entrenamiento y fine-tuning**. La lógica del transfer learning
-5. **Modelos para español**. BETO y la familia RoBERTa
-6. **Aplicaciones en el CPV2024**. Codificación de ocupaciones y actividad económica
-7. **Ejercicio práctico**. Fine-tuning de BETO con HuggingFace
+1. **El problema que los transformers vinieron a resolver:** Límites de las RNN y LSTM y la aparición del Transformer
+2. **Mecanismo de atención:** La idea central de la arquitectura
+3. **Arquitectura Transformer:** Bloque transformer, embeddings posicionales
+4. **Pre-entrenamiento y fine-tuning:** La lógica del transfer learning
+5. **Modelos para español:** BETO y la familia RoBERTa
+6. **Aplicaciones en el CPV2024:** Codificación de ocupaciones y actividad económica
+7. **Ejercicio práctico:** Fine-tuning de BETO con HuggingFace
 
 :::
 
-# ¿De dónde venimos?
+# El problema que los transformers vinieron a resolver
 
-## Qué vimos la clase anterior
+## Límites de las RNN y LSTM
 
-::: {.incremental .medium-par}
-En la clase anterior llegamos a las **redes para secuencias**: GRU y LSTM. Vimos que:
+::: {.fragment .medium-par}
+Las redes que vimos la clase anterior tratan cada entrada como **independiente**: no tienen noción de orden ni de contexto previo.
+:::
 
-- Son mejores que el MLP para texto porque **respetan el orden** de las palabras.
-- Procesan la secuencia de izquierda a derecha, acumulando un **estado oculto**.
-- Ese estado oculto actúa como "memoria" de lo que el modelo ha leído hasta ahora.
+::: {.fragment .medium-par}
+Para texto, eso es un problema: el significado de una palabra depende de su contexto.
+:::
+
+::: {.fragment}
+Ejemplo de respuesta en actividad económica:
+
+> "Trabajo en una empresa que realiza **minería** de ..."
+
+:::
+
+::: {.fragment}
+En qué sector económico trabaja? La respuesta depende del contexto:
+
+Minería de datos -> Actividades profesionales, científicas y técnicas
+Minería de cobre -> Explotación de minas y canteras
+:::
+
+
+## Límites de las RNN y LSTM
+
+Antes de los transformers (2017), el estado del arte para solucionar este problema eran las  **Redes Neuronales Recurrentes (RNN)** y su variante **Long Short-Term Memory (LSTM)**.
+
+::: {.fragment .medium-par}
+Estas resuelven el problema con una idea simple: además de procesar la entrada actual $x_t$, mantienen un **estado oculto** $h_t$ que "recuerda" lo que se procesó antes:
+
+$$h_t = f(W_x \, x_t + W_h \, h_{t-1} + b)$$
 :::
 
 ::: {.fragment .concepto-box}
-Funcionan bien para secuencias cortas. ¿Qué pasa con secuencias largas?
+El estado oculto $h_t$ es la "memoria" de la red: se actualiza en cada paso y pasa al siguiente. Al final de la secuencia, $h_T$ resume todo lo leído.
 :::
 
 ## El problema de las RNN: memoria de largo alcance
 
 ::: {.incremental .medium-par}
-Considera este texto censal (muy exagerado, pero ilustrativo):
+Otro ejemplo:
 
-> *"El encuestado declaró trabajar como **técnico electricista** en una empresa de distribución de energía. Tiene 42 años, vive en una vivienda colectiva en Antofagasta, y su jornada..."*
+> *"El encuestado declaró trabajar como **técnico electricista**, realiza tarea tareas de instalación de cableado eléctrico y otras similares. Trabaja en una empresa constructora, pero también de forma independiente los fines de semana"*
 
 - Cuando el modelo llega a la última palabra, ¿cuánto recuerda de **"técnico electricista"**?
 - El estado oculto tiene que "comprimir" todo lo anterior en un vector fijo.
 - La información **se diluye** a medida que la secuencia crece.
+:::
+
+## El problema de las RNN: memoria de largo alcance
+
+La **Long Short-Term Memory (LSTM)** agrega un segundo vector de estado, la **celda** $c_t$, protegida por tres **compuertas** aprendibles:
+
+::: {.fragment}
+Las compuertas permiten que la celda mantenga información útil por muchos pasos sin degradarse.
 :::
 
 ::: {.fragment .nota-box}
@@ -96,15 +127,15 @@ Las LSTM mitigan el problema, pero no lo eliminan. Para secuencias largas o gran
 ## La solución: atención directa
 
 ::: {.medium-par}
-¿Y si en vez de leer de izquierda a derecha y acumular un estado, el modelo pudiera **mirar directamente cualquier parte del texto** cuando necesita responder una pregunta?
+¿Y si en vez de leer de izquierda a derecha y acumular un estado, el modelo pudiera **mirar directamente cualquier parte del texto**, independiente de la distancia, cuando necesita entender qué dice un texto?
 :::
 
-::: {.fragment .concepto-box}
+::: {.fragment    .concepto-box}
 Esa es la idea del mecanismo de **atención**: en vez de comprimir todo en un estado oculto, el modelo aprende a **ponderar cuánto importa cada token** para producir la representación actual.
 :::
 
 ::: {.fragment .medium-par}
-Esto permite:
+La estructura de los transformers permite:
 
 - Capturar dependencias de **largo alcance** sin pérdida de información.
 - **Paralelizar** el cómputo (todos los tokens se procesan a la vez).
@@ -113,17 +144,21 @@ Esto permite:
 
 # El mecanismo de atención
 
-## Intuición: traducción con atención
+## Intuición
+
+<!-- El paper original ("Attention Is All You Need", Vaswani et al., 2017) propuso una arquitectura encoder-decoder para traducción automática. Hoy usamos variantes de ella, pero la estructura base es similar. -->
 
 ::: {.medium-par}
-El mecanismo de atención nació en traducción automática. Al traducir *"técnico electricista"* al inglés, el modelo debería prestar más atención a esas dos palabras y menos a las demás.
+La atención es un mecanismo de búsqueda suave aprendible (entrenable).
 :::
 
-![](imagenes/attention_translation.png){width=75%}
+<!-- ![](imagenes/attention_translation.png){width=75%} -->
 
 ::: {.fragment .small-par}
 Cada celda muestra cuánto "atiende" la palabra del eje Y a la palabra del eje X al momento de traducir.
 :::
+
+DIAGRAMA
 
 ## Queries, Keys y Values
 
@@ -145,6 +180,16 @@ $$\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\r
 
 ::: {.fragment .small-par}
 El factor $\sqrt{d_k}$ escala los productos para evitar que el softmax sature con valores muy grandes.
+:::
+
+## Queries, Keys y Values
+
+La atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:
+
+::: {fragment .medium-par}
+- **Query (Q)**: *"¿Qué información me haría cambiar la forma en que entiendo un token?"*
+- **Key (K)**: *"¿Qué información es relevante para el significado de otros tokens?"*
+- **Value (V)**: *"¿Qué información traspaso a otros tokens, si es que me "eligen"?"*
 :::
 
 ## Atención: ejemplo paso a paso
@@ -173,9 +218,9 @@ output = weights @ V           # (T, d_model)
 print("\nShape salida:", output.shape)
 ```
 
-::: {.fragment .callout-note .small-callout}
-Cada fila de `weights` suma 1. El token 0 "mira" a todos los demás y combina sus valores según cuánta atención les asigna.
-:::
+<!-- ::: {.fragment .callout-note .small-callout} -->
+<!-- Cada fila de `weights` suma 1. El token 0 "mira" a todos los demás y combina sus valores según cuánta atención les asigna. -->
+<!-- ::: -->
 
 ## Atención multi-cabeza (Multi-Head Attention)
 
@@ -203,7 +248,7 @@ $$\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\
 
 ::: {.column width=45%}
 
-![](imagenes/multi_head_attention.png)
+<!-- ![](imagenes/multi_head_attention.png) -->
 
 :::
 
@@ -236,7 +281,7 @@ Un Transformer completo = apilar $N$ de estos bloques (BERT usa 12 ó 24).
 
 ::: {.column width=50%}
 
-![](imagenes/transformer_block.png)
+<!-- ![](imagenes/transformer_block.png) -->
 
 :::
 
@@ -247,44 +292,50 @@ Un Transformer completo = apilar $N$ de estos bloques (BERT usa 12 ó 24).
 ::: {.medium-par}
 La atención no sabe en qué posición está cada token (procesa todo en paralelo). Para introducir el **orden de la secuencia**, se suman embeddings posicionales a los embeddings de entrada:
 :::
-
-```{python}
-#| echo: true
-import torch, torch.nn as nn
-
-class PosEncoding(nn.Module):
-    def __init__(self, d_model, max_len=512):
-        super().__init__()
-        pe = torch.zeros(max_len, d_model)
-        pos = torch.arange(max_len).unsqueeze(1).float()
-        div = torch.exp(torch.arange(0, d_model, 2).float()
-                        * (-torch.log(torch.tensor(10000.0)) / d_model))
-        pe[:, 0::2] = torch.sin(pos * div)
-        pe[:, 1::2] = torch.cos(pos * div)
-        self.register_buffer('pe', pe.unsqueeze(0))  # (1, max_len, d_model)
-
-    def forward(self, x):
-        return x + self.pe[:, :x.size(1)]
-```
+  
 
 ::: {.fragment .callout-note .small-callout}
 Los embeddings posicionales son sinusoides de distintas frecuencias, de modo que el modelo puede inferir la distancia relativa entre posiciones.
 :::
 
+## Visualizando un Transformer:
+
+
+[https://poloclub.github.io/transformer-explainer/](https://poloclub.github.io/transformer-explainer/)
+
+
+## ¿Por qué son tan bacanes los Transformers?
+
+3 motivos principales:
+
+::: {.fragment}
+**Paralelización masiva**: Las RNN procesaban tokens en secuencia, una a la vez. Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Esto no es una mejora incremental: es lo que hizo posible entrenar modelos con billones de parámetros.
+:::
+
+::: {.fragment}
+**Preentrenamiento a escala** GPT-1 (2018) demostró que podías preentrenar un transformer en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. BERT lo hizo en la dirección bidireccional. Esta idea de "preentrenar una vez, usar muchas veces" escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.
+:::
+
+::: {.fragment}
+**Capacidades emergentes** Nadie diseñó explícitamente la capacidad de GPT-3 para razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto (few-shot learning). Estas capacidades emergieron del escalamiento.
+:::
+
 ## Encoder vs. Decoder vs. Encoder-Decoder
 
-::: {.medium-par}
-| | **Encoder** | **Decoder** | **Encoder-Decoder** |
-|---|---|---|---|
-| **Atención** | Bidireccional (ve todo el contexto) | Causal (solo ve hacia atrás) | Ambas |
-| **Tarea típica** | Clasificación, NER, embeddings | Generación de texto | Traducción, resumen |
-| **Ejemplo** | BERT, RoBERTa | GPT-2/3/4, Llama | T5, BART |
-| **Para el Censo** | ✅ Codificación CIUO, CAENES | ❌ No es lo que necesitamos | Posible para resumen |
+::: {.fragment}
+El Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: encoder y decoder. Encoder "codificaba" la información de un idioma en un vector numérico, y el decoder tomaba esto y lo "decodificaba" en otro idioma.
 :::
 
-::: {.fragment .concepto-box}
-Para clasificar respuestas del Censo (ocupación, rama de actividad), el **encoder** es la elección natural: necesitamos una representación del texto, no generar nuevo texto.
+::: {.fragment}
+Con el tiempo se descubrió que cada mitad es útil por separado.
 :::
+
+
+## Modelos actuales (Claude, GPT-4, etc.)
+
+Claude, GPT-4, Gemini y todos los grandes modelos de lenguaje actuales son, en su núcleo, transformers decoder-only entrenados con predicción de siguiente token sobre cantidades enormes de texto, seguido de refinamiento con retroalimentación humana (RLHF o variantes).
+
+La arquitectura del paper de 2017 es reconocible, pero hay décadas de mejoras acumuladas: normalización de capas, embeddings posicionales aprendidos, atención con ventanas, mezcla de expertos (MoE), contextos de millones de tokens, y mucho más.
 
 ## BERT: el encoder por excelencia
 
@@ -360,7 +411,7 @@ No necesitamos entrenar desde cero. Partimos de un modelo que ya "entiende" el e
 
 ::: {.column width=40%}
 
-![](imagenes/fine_tuning_schema.png)
+<!-- ![](imagenes/fine_tuning_schema.png) -->
 
 :::
 
@@ -370,38 +421,13 @@ No necesitamos entrenar desde cero. Partimos de un modelo que ya "entiende" el e
 El token `[CLS]` es un token especial que BERT agrega al inicio de cada texto. Su representación final captura el significado global de la oración y se usa como input para la capa de clasificación.
 :::
 
-## ¿Cuántos datos necesito para fine-tuning?
 
 ::: {.medium-par}
+¿Cuántos datos necesito para fine-tuning?
+:::
+
+::: {.small-par}
 Mucho menos de lo que se necesitaría para entrenar desde cero:
-:::
-
-::: {.medium-par}
-| Datos etiquetados | Resultado esperado |
-|---|---|
-| **~100 ejemplos** | Resultados razonables en tareas simples |
-| **~1.000 ejemplos** | Buenos resultados en la mayoría de tareas |
-| **~10.000 ejemplos** | Resultados sólidos, comparables a humanos |
-| **~100.000+** | Territorio donde el fine-tuning destaca claramente |
-:::
-
-::: {.fragment .nota-box}
-En el Censo 2024 tenemos cientos de miles de registros con glosas y códigos asignados manualmente: estamos en una posición **muy favorable**.
-:::
-
-## Fine-tuning vs. otras estrategias
-
-::: {.medium-par}
-| Estrategia | Cuándo usarla | Costo |
-|---|---|---|
-| **Zero-shot prompting** | Sin datos etiquetados propios; tarea genérica | Mínimo |
-| **Few-shot prompting** | Pocos ejemplos (< 50); tarea bien definida | Mínimo |
-| **Fine-tuning** | Datos etiquetados disponibles; dominio específico | Medio |
-| **Pre-entrenamiento desde cero** | Dominio muy especializado, corpus enorme | Muy alto |
-:::
-
-::: {.fragment .concepto-box}
-Para la codificación censal, el **fine-tuning** es la opción más adecuada: tenemos datos históricos, el dominio es muy específico (glosas de ocupación y actividad económica en Chile) y queremos resultados reproducibles y auditables.
 :::
 
 # Modelos para español
@@ -431,10 +457,6 @@ La solución: modelos pre-entrenados **directamente en español**.
 - Versión *cased* (distingue mayúsculas) y *uncased*.
 :::
 
-::: {.fragment .nota-box}
-Para tareas censales, usar la versión **cased** es generalmente preferible: "Técnico" y "técnico" pueden tener importancias distintas dependiendo del contexto.
-:::
-
 ## Otros modelos relevantes para el Censo
 
 ::: {.medium-par}
@@ -461,8 +483,9 @@ Para tareas censales, usar la versión **cased** es generalmente preferible: "T�
 ::: {.incremental .medium-par}
 En el Censo 2024, las preguntas de **ocupación** y **rama de actividad** se capturan como texto libre:
 
-- *"¿A qué se dedica en su trabajo?"* → "Técnico electricista en empresa distribuidora"
-- *"¿En qué rubro trabaja su empresa?"* → "Distribución de energía eléctrica a hogares"
+- *"¿Cuál es su ocupación principal?"* → "Técnico electricista"
+- *"¿Qué tareas y deberes cumple en su trabajo?"* → "Instalar sistemas eléctricos"
+- *"¿A qué se dedica la empresa en la cual trabaja?"* → "Construcción de edificios"
 
 Estas respuestas deben codificarse según clasificadores internacionales:
 
@@ -475,7 +498,10 @@ Estas respuestas deben codificarse según clasificadores internacionales:
 La codificación manual es costosa y propensa a inconsistencias entre codificadores. Un modelo de fine-tuning puede automatizar el proceso y mejorar la consistencia.
 :::
 
-## Caso 1: codificación de ocupaciones (CIUO-08)
+
+# Ejercicio práctico
+
+## Codificación de ocupaciones (CIUO-08)
 
 ::: {.medium-par}
 **Entrada**: texto libre de la glosa de ocupación
@@ -495,43 +521,8 @@ La codificación manual es costosa y propensa a inconsistencias entre codificado
 :::
 
 ::: {.fragment .callout-note .small-callout}
-Comenzamos con 1 dígito (10 clases) como primer paso. El modelo puede refinarse luego para 2, 3 y 4 dígitos, donde el problema se vuelve mucho más difícil (hasta 436 categorías).
+Comenzamos con 1 dígito (10 clases) como primer paso. El modelo puede refinarse luego para 2, 3 y 4 dígitos, donde el problema se vuelve mucho más difícil.
 :::
-
-## Caso 2: codificación de rama de actividad (CAENES)
-
-::: {.medium-par}
-**Entrada**: texto libre de la descripción de la empresa/negocio
-
-**Salida**: sección CAENES (21 grandes divisiones, letras A–U)
-:::
-
-:::: columns
-
-::: {.column width=55%}
-
-::: {.medium-par}
-Ejemplos:
-
-- *"Empresa de distribución de energía eléctrica"* → **D** (Suministro de electricidad)
-- *"Empresa de buses interurbanos"* → **H** (Transporte y almacenamiento)
-- *"Colegio particular subvencionado"* → **P** (Enseñanza)
-:::
-
-:::
-
-::: {.column width=45%}
-
-::: {.fragment .nota-box}
-Dado que CIUO-08 y CAENES son categorías que el modelo nunca ha visto durante el pre-entrenamiento, el fine-tuning es indispensable: no hay forma de hacer esto bien con solo prompting.
-:::
-
-:::
-
-::::
-
-
-# Ejercicio práctico
 
 ## Pipeline completo con HuggingFace
 
@@ -547,7 +538,7 @@ HuggingFace `transformers` permite hacer fine-tuning de BETO en pocas líneas. E
 :::
 
 ::: {.fragment .nota-box}
-Usaremos un dataset sintético basado en glosas de ocupación del CPV2024, con etiquetas CIUO-08 a 1 dígito. El código es idéntico al que usarían con datos reales.
+Usaremos un dataset de glosas auditadas por el equipo de Nomenclaturas, proveniente de distintas encuestas o Censos realizados por el INE, con etiquetas CIUO-08 a 1 dígito. El código es idéntico al que usarían con datos reales.
 :::
 
 ## Paso 1: cargar tokenizador y modelo
@@ -656,11 +647,8 @@ tokenizer.save_pretrained("modelos/beto-ciuo-final")
 ::: {.fragment .medium-par}
 **Resultados esperados** con ~50.000 glosas etiquetadas:
 
-| Nivel CIUO | Accuracy esperada |
-|---|---|
-| 1 dígito (10 clases) | 85–92% |
-| 2 dígitos (~43 clases) | 75–85% |
-| 4 dígitos (~436 clases) | 60–75% |
+Tabla con resultados
+
 :::
 
 ## Inferencia: usar el modelo en producción
@@ -688,9 +676,9 @@ for glosa, res in zip(glosas, resultados):
     print(f"{glosa[:45]:<45} → {res['label']} ({res['score']:.3f})")
 ```
 
-::: {.fragment .callout-note .small-callout}
-El objeto `pipeline` envuelve tokenización + inferencia + decodificación del label. Se puede usar directamente en un script de procesamiento masivo o en una API REST.
-:::
+<!-- ::: {.fragment .callout-note .small-callout} -->
+<!-- El objeto `pipeline` envuelve tokenización + inferencia + decodificación del label. Se puede usar directamente en un script de procesamiento masivo o en una API REST. -->
+<!-- ::: -->
 
 ## Resultados en contexto censal
 
@@ -740,42 +728,6 @@ El fine-tuning de BETO supera significativamente a los enfoques anteriores. Los 
 - Documentar el dataset de entrenamiento, versiones del modelo y métricas de evaluación.
 :::
 
-# Temas avanzados (para explorar)
-
-## Fine-tuning eficiente: LoRA
-
-::: {.medium-par}
-El fine-tuning completo actualiza **todos los parámetros** del modelo. Con modelos grandes (RoBERTa-large: 355M, GPT-3: 175B), esto se vuelve inviable.
-:::
-
-::: {.incremental .medium-par}
-**LoRA** (*Low-Rank Adaptation*) es una alternativa eficiente:
-
-- Congela los pesos originales del modelo.
-- Agrega matrices de rango bajo $A$ y $B$ a las capas de atención.
-- Solo entrena esas matrices adicionales (típicamente < 1% de los parámetros totales).
-- Resultados comparables al fine-tuning completo.
-:::
-
-::: {.fragment .callout-note .small-callout}
-Con HuggingFace `peft`, implementar LoRA requiere solo unas pocas líneas adicionales. Útil si se quiere experimentar con modelos más grandes sin una GPU potente.
-:::
-
-## ¿Cuándo no fine-tunear?
-
-::: {.incremental .medium-par}
-El fine-tuning no siempre es la mejor opción:
-
-- **Sin datos etiquetados**: usar zero-shot o few-shot prompting con un LLM grande.
-- **Tarea que cambia frecuentemente**: el modelo debe re-entrenarse cada vez.
-- **Prototipo rápido**: el prompting es mucho más rápido de iterar.
-- **Recursos limitados**: un LLM vía API puede ser más económico que mantener un modelo propio.
-:::
-
-::: {.fragment .concepto-box}
-En el INE, el fine-tuning tiene sentido para tareas **estables, de alto volumen y con datos históricos**: exactamente el caso de la codificación CIUO/CAENES.
-:::
-
 # Cierre
 
 ## Qué vimos hoy
@@ -790,66 +742,6 @@ En el INE, el fine-tuning tiene sentido para tareas **estables, de alto volumen 
 7. **Aplicaciones en CPV2024**: codificación de ocupaciones, rama de actividad, detección de inconsistencias.
 :::
 
-## Qué queda para explorar
-
-::: {.incremental .medium-par}
-- **LoRA y QLoRA**: fine-tuning eficiente para modelos más grandes.
-- **Evaluación robusta**: métricas por subgrupo, análisis de errores, curvas de aprendizaje.
-- **Producción**: empaquetar el modelo como API (FastAPI + Docker), versionado con MLflow.
-- **LLMs generativos en estadística**: generación de textos de difusión, síntesis de microdatos, respuesta a consultas ciudadanas.
-- **RAG** (*Retrieval-Augmented Generation*): combinar LLMs con bases de datos de clasificadores para asistencia a codificadores.
-:::
-
-::: {.fragment .concepto-box}
-Las ideas de hoy (atención, fine-tuning, transfer learning) son la **base de todos los LLMs modernos**: GPT-4, Llama, Claude. Entender BERT es entender la arquitectura que los hace posibles.
-:::
-
-## Tarea
-
-::: {.medium-par}
-Usando `ciuo.parquet` (el mismo dataset de la clase anterior):
-
-1. Carguen **BETO** con `AutoModelForSequenceClassification`.
-2. Preparen el dataset con `datasets` de HuggingFace.
-3. Entrenen por **3 épocas** y registren la accuracy en validación.
-4. Compárenla con el resultado del MLP de la clase anterior.
-
-**Opcional**: prueben cambiar el learning rate (1e-5, 2e-5, 5e-5) y observen cómo afecta el entrenamiento.
-:::
-
-#
-
-[<img src="imagenes/logo_portada2.png" width="20%"/>]{.center-justified}
-
-[**Transformers y Fine-Tuning**]{.big-par .center-justified}
-
-[**Área de Ciencia de Datos**]{.big-par .center-justified}
-
-[**Unidad de Gobierno de Datos**]{.big-par .center-justified}
-
-
-[**Junio 2026**]{.big-par .center-justified}
-
-# Anexo: atención self vs. cross {#anexo-attention}
-
-## Self-attention vs. cross-attention {visibility="uncounted"}
-
-::: {.medium-par}
-En el Transformer original hay dos tipos de atención:
-:::
-
-::: {.medium-par}
-| | **Self-attention** | **Cross-attention** |
-|---|---|---|
-| **Q proviene de** | La misma secuencia | El decoder |
-| **K, V provienen de** | La misma secuencia | El encoder |
-| **Dónde aparece** | Encoder y Decoder | Solo Decoder |
-| **Para qué** | Relacionar tokens dentro del mismo texto | Conectar la salida con la entrada |
-:::
-
-::: {.fragment .medium-par}
-En BETO (solo encoder), **todo es self-attention**: cada token de la glosa atiende a todos los demás tokens de esa misma glosa. No hay cross-attention porque no hay decoder.
-:::
 
 ## Masked Language Modeling {visibility="uncounted"}
 
