@@ -398,16 +398,17 @@
 </section>
 <section id="temario-de-hoy" class="slide level2">
 <h2>Temario de hoy</h2>
-<p>::: {.medium-par .incremental} El objetivo de esta clase es entender <strong>cómo funcionan los Transformers</strong> y cómo usarlos a través de <strong>fine-tuning</strong> para resolver problemas reales de procesamiento y análisis estadístico.</p>
+<div class="medium-par">
+<p>El objetivo de esta clase es entender <strong>cómo funcionan los Transformers</strong> y cómo usarlos a través de <strong>fine-tuning</strong> para resolver problemas reales de procesamiento y análisis estadístico.</p>
 <ol type="1">
-<li><strong>El problema que los transformers vinieron a resolver:</strong> Límites de las RNN y LSTM, y la aparición del Transformer.</li>
-<li><strong>Mecanismo de atención:</strong> La idea central de la arquitectura</li>
-<li><strong>Arquitectura Transformer:</strong> Attention Head, Bloque transformer, Embeddings posicionales</li>
-<li><strong>Pre-entrenamiento y fine-tuning:</strong> La lógica del transfer learning</li>
-<li><strong>Modelos para español:</strong> BETO y la familia RoBERTa</li>
-<li><strong>Ejercicio práctico:</strong> Fine-tuning de BETO con HuggingFace</li>
+<li class="fragment"><strong>El problema que los transformers vinieron a resolver:</strong> Límites de las RNN y LSTM, y la aparición del Transformer.</li>
+<li class="fragment"><strong>Mecanismo de atención:</strong> La idea central de la arquitectura</li>
+<li class="fragment"><strong>Arquitectura Transformer:</strong> Attention Head, Bloque transformer, Embeddings posicionales</li>
+<li class="fragment"><strong>Pre-entrenamiento y fine-tuning:</strong> La lógica del transfer learning</li>
+<li class="fragment"><strong>Modelos para español:</strong> BETO y la familia RoBERTa</li>
+<li class="fragment"><strong>Ejercicio práctico:</strong> Fine-tuning de BETO con HuggingFace</li>
 </ol>
-<p>:::Y</p>
+</div>
 </section></section>
 <section>
 <section id="el-problema-que-los-transformers-vinieron-a-resolver" class="title-slide slide level1 center">
@@ -884,33 +885,238 @@
 <section id="pipeline-completo-con-huggingface" class="slide level2">
 <h2>Pipeline completo con HuggingFace</h2>
 <div class="medium-par">
-<p>HuggingFace <code>transformers</code> permite hacer fine-tuning de BETO en pocas líneas. El pipeline completo tiene cuatro etapas:</p>
+<p>HuggingFace <code>transformers</code> permite hacer fine-tuning de BETO en pocas líneas. El pipeline completo tiene cinco etapas:</p>
 </div>
 <div class="medium-par">
 <ol type="1">
-<li class="fragment"><strong>Cargar el tokenizador y el modelo base</strong></li>
-<li class="fragment"><strong>Preparar el dataset</strong> (tokenizar, crear DataLoaders)</li>
-<li class="fragment"><strong>Configurar el Trainer</strong> (optimizador, épocas, métricas)</li>
-<li class="fragment"><strong>Entrenar y evaluar</strong></li>
+<li class="fragment"><strong>Carga y preparación de datos</strong></li>
+<li class="fragment"><strong>Codificación de etiquetas y split train/test</strong></li>
+<li class="fragment"><strong>Tokenización</strong></li>
+<li class="fragment"><strong>Configurar el Trainer y entrenar</strong></li>
+<li class="fragment"><strong>Evaluación e inferencia</strong></li>
 </ol>
 </div>
 <div class="fragment nota-box">
-<p>Usaremos un dataset de glosas auditadas por el equipo de Nomenclaturas, proveniente de distintas encuestas o Censos realizados por el INE, con etiquetas CIUO-08 a 1 dígito. El código es idéntico al que usarían con datos reales.</p>
+<p>Usaremos un dataset de glosas auditadas por el equipo de Nomenclaturas, proveniente de distintas encuestas o Censos realizados por el INE, con etiquetas CIUO-08 a 1 dígito.</p>
 </div>
 </section>
-<section id="paso-1-cargar-tokenizador-y-modelo" class="slide level2">
-<h2>Paso 1: cargar tokenizador y modelo</h2>
+<section id="paso-1-carga-de-datos" class="slide level2">
+<h2>Paso 1: carga de datos</h2>
 <div class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer, AutoModelForSequenceClassification</span>
-<span id="cb1-2"><a href="#cb1-2"></a></span>
-<span id="cb1-3"><a href="#cb1-3"></a>MODEL_NAME <span class="op">=</span> <span class="st">"dccuchile/bert-base-spanish-wwm-cased"</span></span>
-<span id="cb1-4"><a href="#cb1-4"></a>NUM_LABELS <span class="op">=</span> <span class="dv">10</span>  <span class="co"># CIUO-08 a 1 dígito: grupos 1-9 + grupo 0</span></span>
-<span id="cb1-5"><a href="#cb1-5"></a></span>
-<span id="cb1-6"><a href="#cb1-6"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(MODEL_NAME)</span>
-<span id="cb1-7"><a href="#cb1-7"></a>model <span class="op">=</span> AutoModelForSequenceClassification.from_pretrained(</span>
-<span id="cb1-8"><a href="#cb1-8"></a>    MODEL_NAME,</span>
-<span id="cb1-9"><a href="#cb1-9"></a>    num_labels<span class="op">=</span>NUM_LABELS</span>
-<span id="cb1-10"><a href="#cb1-10"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> LabelEncoder</span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report, accuracy_score, f1_score</span>
+<span id="cb1-6"><a href="#cb1-6"></a></span>
+<span id="cb1-7"><a href="#cb1-7"></a>df <span class="op">=</span> pd.read_csv(<span class="st">"codigos_ciuo_auditorias_nomenclaturas.csv"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8"></a>df <span class="op">=</span> df[[<span class="st">"texto"</span>, <span class="st">"codigo_ciuo_1d"</span>]].dropna().reset_index(drop<span class="op">=</span><span class="va">True</span>) <span class="co"># &lt;1&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9"></a></span>
+<span id="cb1-10"><a href="#cb1-10"></a><span class="bu">print</span>(<span class="ss">f"Total de registros: </span><span class="sc">{</span><span class="bu">len</span>(df)<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11"></a><span class="bu">print</span>(df[<span class="st">"codigo_ciuo_1d"</span>].value_counts().sort_index())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li><code>texto</code> es la concatenación de ocupación y tareas. Usar ambos campos mejora la clasificación porque el modelo dispone de más contexto que solo el nombre del cargo.</li>
+</ol>
+</section>
+<section id="paso-2-codificación-de-etiquetas-y-split" class="slide level2">
+<h2>Paso 2: codificación de etiquetas y split</h2>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a>le <span class="op">=</span> LabelEncoder()                                    <span class="co"># &lt;1&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>df[<span class="st">"label"</span>] <span class="op">=</span> le.fit_transform(df[<span class="st">"codigo_ciuo_1d"</span>])</span>
+<span id="cb2-3"><a href="#cb2-3"></a></span>
+<span id="cb2-4"><a href="#cb2-4"></a>train_df, test_df <span class="op">=</span> train_test_split(</span>
+<span id="cb2-5"><a href="#cb2-5"></a>    df,</span>
+<span id="cb2-6"><a href="#cb2-6"></a>    test_size<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span id="cb2-7"><a href="#cb2-7"></a>    random_state<span class="op">=</span><span class="dv">42</span>,</span>
+<span id="cb2-8"><a href="#cb2-8"></a>    stratify<span class="op">=</span>df[<span class="st">"label"</span>]                               <span class="co"># &lt;2&gt;</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a>)</span>
+<span id="cb2-10"><a href="#cb2-10"></a><span class="bu">print</span>(<span class="ss">f"Entrenamiento: </span><span class="sc">{</span><span class="bu">len</span>(train_df)<span class="sc">:,}</span><span class="ss">  |  Test: </span><span class="sc">{</span><span class="bu">len</span>(test_df)<span class="sc">:,}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li>PyTorch necesita enteros contiguos desde 0. <code>LabelEncoder</code> hace ese mapeo automáticamente: si en los datos solo aparecen los grupos 1, 2, 3 y 5, los convierte a 0, 1, 2, 3. El objeto <code>le</code> guarda el mapeo inverso para recuperar los códigos CIUO originales al final.</li>
+<li><code>stratify</code> garantiza que la proporción de cada grupo CIUO sea la misma en train y test, lo que es importante cuando hay clases con pocos ejemplos.</li>
+</ol>
+</section>
+<section id="paso-3-tokenización" class="slide level2">
+<h2>Paso 3: tokenización</h2>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer</span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="im">from</span> datasets <span class="im">import</span> Dataset</span>
+<span id="cb3-3"><a href="#cb3-3"></a></span>
+<span id="cb3-4"><a href="#cb3-4"></a>MODEL <span class="op">=</span> <span class="st">"dccuchile/bert-base-spanish-wwm-cased"</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(MODEL)</span>
+<span id="cb3-6"><a href="#cb3-6"></a></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="kw">def</span> tokenize(batch):</span>
+<span id="cb3-8"><a href="#cb3-8"></a>    <span class="cf">return</span> tokenizer(</span>
+<span id="cb3-9"><a href="#cb3-9"></a>        batch[<span class="st">"texto"</span>],</span>
+<span id="cb3-10"><a href="#cb3-10"></a>        truncation<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb3-11"><a href="#cb3-11"></a>        padding<span class="op">=</span><span class="st">"max_length"</span>,</span>
+<span id="cb3-12"><a href="#cb3-12"></a>        max_length<span class="op">=</span><span class="dv">64</span>           <span class="co"># &lt;1&gt;</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a>    )</span>
+<span id="cb3-14"><a href="#cb3-14"></a></span>
+<span id="cb3-15"><a href="#cb3-15"></a>ds_train <span class="op">=</span> Dataset.from_pandas(train_df[[<span class="st">"texto"</span>, <span class="st">"label"</span>]].reset_index(drop<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb3-16"><a href="#cb3-16"></a>ds_test  <span class="op">=</span> Dataset.from_pandas(test_df[[<span class="st">"texto"</span>, <span class="st">"label"</span>]].reset_index(drop<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb3-17"><a href="#cb3-17"></a></span>
+<span id="cb3-18"><a href="#cb3-18"></a>ds_train <span class="op">=</span> ds_train.<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-19"><a href="#cb3-19"></a>ds_test  <span class="op">=</span> ds_test.<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-20"><a href="#cb3-20"></a></span>
+<span id="cb3-21"><a href="#cb3-21"></a>ds_train.set_format(<span class="bu">type</span><span class="op">=</span><span class="st">"torch"</span>, columns<span class="op">=</span>[<span class="st">"input_ids"</span>, <span class="st">"attention_mask"</span>, <span class="st">"label"</span>]) <span class="co"># &lt;2&gt;</span></span>
+<span id="cb3-22"><a href="#cb3-22"></a>ds_test.set_format(<span class="bu">type</span><span class="op">=</span><span class="st">"torch"</span>,  columns<span class="op">=</span>[<span class="st">"input_ids"</span>, <span class="st">"attention_mask"</span>, <span class="st">"label"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li>64 tokens es suficiente para glosas cortas de ocupación y ahorra memoria en GPU.</li>
+<li>Sin <code>set_format</code>, el <code>Trainer</code> puede fallar al intentar armar los batches: los tensores de PyTorch deben ser explícitamente del tipo correcto.</li>
+</ol>
+</section>
+<section id="paso-4-modelo-métricas-y-entrenamiento" class="slide level2">
+<h2>Paso 4: modelo, métricas y entrenamiento</h2>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForSequenceClassification, Trainer, TrainingArguments</span>
+<span id="cb4-2"><a href="#cb4-2"></a></span>
+<span id="cb4-3"><a href="#cb4-3"></a>model <span class="op">=</span> AutoModelForSequenceClassification.from_pretrained(  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a>    MODEL, num_labels<span class="op">=</span>df[<span class="st">"label"</span>].nunique()</span>
+<span id="cb4-5"><a href="#cb4-5"></a>)</span>
+<span id="cb4-6"><a href="#cb4-6"></a></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="kw">def</span> compute_metrics(eval_pred):</span>
+<span id="cb4-8"><a href="#cb4-8"></a>    logits, labels <span class="op">=</span> eval_pred</span>
+<span id="cb4-9"><a href="#cb4-9"></a>    preds <span class="op">=</span> np.argmax(logits, axis<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb4-10"><a href="#cb4-10"></a>    <span class="cf">return</span> {</span>
+<span id="cb4-11"><a href="#cb4-11"></a>        <span class="st">"accuracy"</span>:    <span class="bu">round</span>(accuracy_score(labels, preds), <span class="dv">4</span>),</span>
+<span id="cb4-12"><a href="#cb4-12"></a>        <span class="st">"f1_macro"</span>:    <span class="bu">round</span>(f1_score(labels, preds, average<span class="op">=</span><span class="st">"macro"</span>,    zero_division<span class="op">=</span><span class="dv">0</span>), <span class="dv">4</span>), <span class="co"># &lt;2&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a>        <span class="st">"f1_weighted"</span>: <span class="bu">round</span>(f1_score(labels, preds, average<span class="op">=</span><span class="st">"weighted"</span>, zero_division<span class="op">=</span><span class="dv">0</span>), <span class="dv">4</span>),</span>
+<span id="cb4-14"><a href="#cb4-14"></a>    }</span>
+<span id="cb4-15"><a href="#cb4-15"></a></span>
+<span id="cb4-16"><a href="#cb4-16"></a>trainer <span class="op">=</span> Trainer(</span>
+<span id="cb4-17"><a href="#cb4-17"></a>    model<span class="op">=</span>model,</span>
+<span id="cb4-18"><a href="#cb4-18"></a>    args<span class="op">=</span>TrainingArguments(</span>
+<span id="cb4-19"><a href="#cb4-19"></a>        output_dir<span class="op">=</span><span class="st">"./modelo_ciuo08"</span>,</span>
+<span id="cb4-20"><a href="#cb4-20"></a>        num_train_epochs<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb4-21"><a href="#cb4-21"></a>        per_device_train_batch_size<span class="op">=</span><span class="dv">32</span>,</span>
+<span id="cb4-22"><a href="#cb4-22"></a>        learning_rate<span class="op">=</span><span class="fl">2e-5</span>,             <span class="co"># &lt;3&gt;</span></span>
+<span id="cb4-23"><a href="#cb4-23"></a>        eval_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
+<span id="cb4-24"><a href="#cb4-24"></a>        logging_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
+<span id="cb4-25"><a href="#cb4-25"></a>        report_to<span class="op">=</span><span class="st">"none"</span>,               <span class="co"># &lt;4&gt;</span></span>
+<span id="cb4-26"><a href="#cb4-26"></a>        save_strategy<span class="op">=</span><span class="st">"no"</span>,</span>
+<span id="cb4-27"><a href="#cb4-27"></a>    ),</span>
+<span id="cb4-28"><a href="#cb4-28"></a>    train_dataset<span class="op">=</span>ds_train,</span>
+<span id="cb4-29"><a href="#cb4-29"></a>    eval_dataset<span class="op">=</span>ds_test,</span>
+<span id="cb4-30"><a href="#cb4-30"></a>    compute_metrics<span class="op">=</span>compute_metrics,</span>
+<span id="cb4-31"><a href="#cb4-31"></a>)</span>
+<span id="cb4-32"><a href="#cb4-32"></a>trainer.train()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li>Al cargar el modelo verán avisos sobre pesos no utilizados (los de MLM) y pesos faltantes (la cabeza de clasificación). Ambos son normales.</li>
+<li>F1 macro pondera cada clase por igual, independiente de su tamaño. Es más informativo que la accuracy cuando las clases están desbalanceadas.</li>
+<li>Learning rate entre 2e-5 y 5e-5 es estándar para fine-tuning de BERT. Valores más altos pueden degradar los pesos pre-entrenados.</li>
+<li>Evita que el Trainer intente conectarse a Weights &amp; Biases. Si no se incluye, puede generar errores en entornos sin esa librería configurada.</li>
+</ol>
+</section>
+<section id="paso-5-evaluación-detallada" class="slide level2">
+<h2>Paso 5: evaluación detallada</h2>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report</span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a>salida <span class="op">=</span> trainer.predict(ds_test)</span>
+<span id="cb5-4"><a href="#cb5-4"></a>preds  <span class="op">=</span> np.argmax(salida.predictions, axis<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb5-5"><a href="#cb5-5"></a>etiquetas_reales <span class="op">=</span> np.array(ds_test[<span class="st">"label"</span>])</span>
+<span id="cb5-6"><a href="#cb5-6"></a></span>
+<span id="cb5-7"><a href="#cb5-7"></a>nombres_clases <span class="op">=</span> [<span class="ss">f"GG </span><span class="sc">{</span>c<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> c <span class="kw">in</span> le.classes_]  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a></span>
+<span id="cb5-9"><a href="#cb5-9"></a>reporte <span class="op">=</span> classification_report(</span>
+<span id="cb5-10"><a href="#cb5-10"></a>    etiquetas_reales, preds,</span>
+<span id="cb5-11"><a href="#cb5-11"></a>    target_names<span class="op">=</span>nombres_clases,</span>
+<span id="cb5-12"><a href="#cb5-12"></a>    zero_division<span class="op">=</span><span class="dv">0</span></span>
+<span id="cb5-13"><a href="#cb5-13"></a>)</span>
+<span id="cb5-14"><a href="#cb5-14"></a><span class="bu">print</span>(reporte)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li><code>le.classes_</code> contiene los códigos CIUO originales en el orden en que <code>LabelEncoder</code> los asignó. Así cada fila del reporte muestra el gran grupo CIUO real, no un índice interno.</li>
+</ol>
+<div class="callout callout-note callout-captioned callout-style-default">
+<div class="callout-body">
+<div class="callout-caption">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Note</strong></p>
+</div>
+<div class="callout-content">
+<p>El reporte muestra precisión, recall y F1 <strong>por cada gran grupo CIUO</strong>. Es la métrica más útil para detectar qué grupos son difíciles de clasificar (p/e Grupo 5 Servicios vs.&nbsp;Grupo 9 Ocupaciones elementales suelen confundirse).</p>
+</div>
+</div>
+</div>
+</section>
+<section id="paso-6-inferencia-con-decodificación-real" class="slide level2">
+<h2>Paso 6: inferencia con decodificación real</h2>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
+<span id="cb6-2"><a href="#cb6-2"></a></span>
+<span id="cb6-3"><a href="#cb6-3"></a>DIRECTORIO_FINAL <span class="op">=</span> <span class="st">"./modelo_ciuo08/final"</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a>trainer.save_model(DIRECTORIO_FINAL)</span>
+<span id="cb6-5"><a href="#cb6-5"></a>tokenizer.save_pretrained(DIRECTORIO_FINAL)</span>
+<span id="cb6-6"><a href="#cb6-6"></a></span>
+<span id="cb6-7"><a href="#cb6-7"></a>clasificador <span class="op">=</span> pipeline(<span class="st">"text-classification"</span>, model<span class="op">=</span>DIRECTORIO_FINAL,</span>
+<span id="cb6-8"><a href="#cb6-8"></a>                        tokenizer<span class="op">=</span>DIRECTORIO_FINAL, device<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb6-9"><a href="#cb6-9"></a></span>
+<span id="cb6-10"><a href="#cb6-10"></a><span class="kw">def</span> predecir_ciuo(texto):</span>
+<span id="cb6-11"><a href="#cb6-11"></a>    resultado <span class="op">=</span> clasificador(texto, truncation<span class="op">=</span><span class="va">True</span>, max_length<span class="op">=</span><span class="dv">64</span>)[<span class="dv">0</span>]</span>
+<span id="cb6-12"><a href="#cb6-12"></a>    idx     <span class="op">=</span> <span class="bu">int</span>(resultado[<span class="st">"label"</span>].split(<span class="st">"_"</span>)[<span class="dv">1</span>])  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb6-13"><a href="#cb6-13"></a>    codigo  <span class="op">=</span> le.classes_[idx]</span>
+<span id="cb6-14"><a href="#cb6-14"></a>    <span class="cf">return</span> {<span class="st">"codigo_ciuo_1d"</span>: <span class="bu">int</span>(codigo), <span class="st">"confianza"</span>: <span class="bu">round</span>(resultado[<span class="st">"score"</span>], <span class="dv">4</span>)}</span>
+<span id="cb6-15"><a href="#cb6-15"></a></span>
+<span id="cb6-16"><a href="#cb6-16"></a>glosas <span class="op">=</span> [</span>
+<span id="cb6-17"><a href="#cb6-17"></a>    <span class="st">"OCUPACIÓN: ENFERMERA; TAREA: ADMINISTRAR MEDICAMENTOS Y CONTROLAR SIGNOS VITALES"</span>,</span>
+<span id="cb6-18"><a href="#cb6-18"></a>    <span class="st">"OCUPACIÓN: CONDUCTOR DE CAMIÓN; TAREA: TRANSPORTAR CARGA ENTRE REGIONES"</span>,</span>
+<span id="cb6-19"><a href="#cb6-19"></a>    <span class="st">"OCUPACIÓN: TEMPORERO AGRÍCOLA; TAREA: COSECHAR UVA EN TEMPORADA"</span>,</span>
+<span id="cb6-20"><a href="#cb6-20"></a>]</span>
+<span id="cb6-21"><a href="#cb6-21"></a><span class="cf">for</span> glosa <span class="kw">in</span> glosas:</span>
+<span id="cb6-22"><a href="#cb6-22"></a>    r <span class="op">=</span> predecir_ciuo(glosa)</span>
+<span id="cb6-23"><a href="#cb6-23"></a>    <span class="bu">print</span>(<span class="ss">f"GG </span><span class="sc">{</span>r[<span class="st">'codigo_ciuo_1d'</span>]<span class="sc">}</span><span class="ss">  (</span><span class="sc">{</span>r[<span class="st">'confianza'</span>]<span class="sc">:.1%}</span><span class="ss">)  →  </span><span class="sc">{</span>glosa[:<span class="dv">65</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ol type="1">
+<li><code>pipeline</code> devuelve <code>"LABEL_0"</code>, <code>"LABEL_1"</code>, etc. — índices internos, no códigos CIUO. <code>le.classes_[idx]</code> recupera el código CIUO original a partir de ese índice.</li>
+</ol>
+</section>
+<section id="resultados-esperados" class="slide level2">
+<h2>Resultados esperados</h2>
+<div class="medium-par">
+<p>Con el dataset de auditorías de Nomenclaturas (~50.000 glosas), resultados orientativos:</p>
+</div>
+<div class="medium-par">
+<table>
+<thead>
+<tr class="header">
+<th>Nivel CIUO</th>
+<th>Clases</th>
+<th>Accuracy</th>
+<th>F1 macro</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1 dígito</strong></td>
+<td>10</td>
+<td>85–92%</td>
+<td>80–88%</td>
+</tr>
+<tr class="even">
+<td><strong>2 dígitos</strong></td>
+<td>~43</td>
+<td>75–85%</td>
+<td>68–78%</td>
+</tr>
+<tr class="odd">
+<td><strong>4 dígitos</strong></td>
+<td>~436</td>
+<td>60–75%</td>
+<td>45–65%</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="fragment nota-box">
+<p>El F1 macro es el indicador más relevante: pondera cada gran grupo por igual. La accuracy puede ser alta aunque el modelo falle en grupos minoritarios.</p>
 </div>
 <div class="callout callout-note callout-captioned callout-style-default">
 <div class="callout-body">
@@ -921,123 +1127,10 @@
 <p><strong>Note</strong></p>
 </div>
 <div class="callout-content">
-<p><code>AutoModelForSequenceClassification</code> toma el encoder BERT y le agrega automáticamente una cabeza de clasificación (capa lineal sobre <code>[CLS]</code>) con <code>num_labels</code> salidas.</p>
+<p>Estos números son referenciales, basados en la literatura y experiencia con datos similares. Los resultados reales dependen de la calidad y distribución del dataset de entrenamiento.</p>
 </div>
 </div>
 </div>
-</section>
-<section id="paso-2-tokenizar-el-dataset" class="slide level2">
-<h2>Paso 2: tokenizar el dataset</h2>
-<div class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a><span class="im">from</span> datasets <span class="im">import</span> Dataset</span>
-<span id="cb2-2"><a href="#cb2-2"></a></span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="co"># Suponemos que tenemos un DataFrame con columnas 'glosa' y 'ciuo_1d'</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a>df_train <span class="op">=</span> pd.read_parquet(<span class="st">"data/ciuo_train.parquet"</span>)</span>
-<span id="cb2-5"><a href="#cb2-5"></a>df_val   <span class="op">=</span> pd.read_parquet(<span class="st">"data/ciuo_val.parquet"</span>)</span>
-<span id="cb2-6"><a href="#cb2-6"></a></span>
-<span id="cb2-7"><a href="#cb2-7"></a><span class="kw">def</span> tokenize(batch):</span>
-<span id="cb2-8"><a href="#cb2-8"></a>    <span class="cf">return</span> tokenizer(</span>
-<span id="cb2-9"><a href="#cb2-9"></a>        batch[<span class="st">"glosa"</span>],</span>
-<span id="cb2-10"><a href="#cb2-10"></a>        truncation<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb2-11"><a href="#cb2-11"></a>        padding<span class="op">=</span><span class="st">"max_length"</span>,</span>
-<span id="cb2-12"><a href="#cb2-12"></a>        max_length<span class="op">=</span><span class="dv">64</span>       <span class="co"># &lt;1&gt;</span></span>
-<span id="cb2-13"><a href="#cb2-13"></a>    )</span>
-<span id="cb2-14"><a href="#cb2-14"></a></span>
-<span id="cb2-15"><a href="#cb2-15"></a>ds_train <span class="op">=</span> Dataset.from_pandas(df_train).<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-16"><a href="#cb2-16"></a>ds_val   <span class="op">=</span> Dataset.from_pandas(df_val).<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb2-17"><a href="#cb2-17"></a></span>
-<span id="cb2-18"><a href="#cb2-18"></a>ds_train <span class="op">=</span> ds_train.rename_column(<span class="st">"ciuo_1d"</span>, <span class="st">"labels"</span>)</span>
-<span id="cb2-19"><a href="#cb2-19"></a>ds_val   <span class="op">=</span> ds_val.rename_column(<span class="st">"ciuo_1d"</span>, <span class="st">"labels"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<ol type="1">
-<li>Las glosas de ocupación son cortas; 64 tokens es suficiente y ahorra memoria.</li>
-</ol>
-</section>
-<section id="paso-3-configurar-el-trainer" class="slide level2">
-<h2>Paso 3: configurar el Trainer</h2>
-<div class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="im">from</span> transformers <span class="im">import</span> TrainingArguments, Trainer</span>
-<span id="cb3-2"><a href="#cb3-2"></a><span class="im">import</span> evaluate</span>
-<span id="cb3-3"><a href="#cb3-3"></a></span>
-<span id="cb3-4"><a href="#cb3-4"></a>accuracy <span class="op">=</span> evaluate.load(<span class="st">"accuracy"</span>)</span>
-<span id="cb3-5"><a href="#cb3-5"></a></span>
-<span id="cb3-6"><a href="#cb3-6"></a><span class="kw">def</span> compute_metrics(eval_pred):</span>
-<span id="cb3-7"><a href="#cb3-7"></a>    logits, labels <span class="op">=</span> eval_pred</span>
-<span id="cb3-8"><a href="#cb3-8"></a>    preds <span class="op">=</span> logits.argmax(axis<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb3-9"><a href="#cb3-9"></a>    <span class="cf">return</span> accuracy.compute(predictions<span class="op">=</span>preds, references<span class="op">=</span>labels)</span>
-<span id="cb3-10"><a href="#cb3-10"></a></span>
-<span id="cb3-11"><a href="#cb3-11"></a>args <span class="op">=</span> TrainingArguments(</span>
-<span id="cb3-12"><a href="#cb3-12"></a>    output_dir<span class="op">=</span><span class="st">"checkpoints/beto-ciuo"</span>,</span>
-<span id="cb3-13"><a href="#cb3-13"></a>    num_train_epochs<span class="op">=</span><span class="dv">5</span>,            <span class="co"># &lt;1&gt;</span></span>
-<span id="cb3-14"><a href="#cb3-14"></a>    per_device_train_batch_size<span class="op">=</span><span class="dv">32</span>,</span>
-<span id="cb3-15"><a href="#cb3-15"></a>    per_device_eval_batch_size<span class="op">=</span><span class="dv">64</span>,</span>
-<span id="cb3-16"><a href="#cb3-16"></a>    learning_rate<span class="op">=</span><span class="fl">2e-5</span>,            <span class="co"># &lt;2&gt;</span></span>
-<span id="cb3-17"><a href="#cb3-17"></a>    weight_decay<span class="op">=</span><span class="fl">0.01</span>,</span>
-<span id="cb3-18"><a href="#cb3-18"></a>    evaluation_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
-<span id="cb3-19"><a href="#cb3-19"></a>    save_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
-<span id="cb3-20"><a href="#cb3-20"></a>    load_best_model_at_end<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb3-21"><a href="#cb3-21"></a>)</span>
-<span id="cb3-22"><a href="#cb3-22"></a></span>
-<span id="cb3-23"><a href="#cb3-23"></a>trainer <span class="op">=</span> Trainer(</span>
-<span id="cb3-24"><a href="#cb3-24"></a>    model<span class="op">=</span>model,</span>
-<span id="cb3-25"><a href="#cb3-25"></a>    args<span class="op">=</span>args,</span>
-<span id="cb3-26"><a href="#cb3-26"></a>    train_dataset<span class="op">=</span>ds_train,</span>
-<span id="cb3-27"><a href="#cb3-27"></a>    eval_dataset<span class="op">=</span>ds_val,</span>
-<span id="cb3-28"><a href="#cb3-28"></a>    compute_metrics<span class="op">=</span>compute_metrics,</span>
-<span id="cb3-29"><a href="#cb3-29"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<ol type="1">
-<li>Con fine-tuning, pocas épocas suelen ser suficientes. Más épocas pueden llevar a overfitting.</li>
-<li>Learning rate pequeño (2e-5 a 5e-5) es estándar para fine-tuning de BERT. Valores más altos pueden “romper” los pesos pre-entrenados.</li>
-</ol>
-</section>
-<section id="paso-4-entrenar-y-evaluar" class="slide level2">
-<h2>Paso 4: entrenar y evaluar</h2>
-<div class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Entrenamiento</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a>trainer.train()</span>
-<span id="cb4-3"><a href="#cb4-3"></a></span>
-<span id="cb4-4"><a href="#cb4-4"></a><span class="co"># Evaluación final</span></span>
-<span id="cb4-5"><a href="#cb4-5"></a>results <span class="op">=</span> trainer.evaluate()</span>
-<span id="cb4-6"><a href="#cb4-6"></a><span class="bu">print</span>(<span class="ss">f"Accuracy en validación: </span><span class="sc">{</span>results[<span class="st">'eval_accuracy'</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb4-7"><a href="#cb4-7"></a></span>
-<span id="cb4-8"><a href="#cb4-8"></a><span class="co"># Guardar modelo</span></span>
-<span id="cb4-9"><a href="#cb4-9"></a>trainer.save_model(<span class="st">"modelos/beto-ciuo-final"</span>)</span>
-<span id="cb4-10"><a href="#cb4-10"></a>tokenizer.save_pretrained(<span class="st">"modelos/beto-ciuo-final"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="fragment medium-par">
-<p><strong>Resultados esperados</strong> con ~50.000 glosas etiquetadas:</p>
-<p>Tabla con resultados</p>
-</div>
-</section>
-<section id="inferencia-usar-el-modelo-en-producción" class="slide level2">
-<h2>Inferencia: usar el modelo en producción</h2>
-<div class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
-<span id="cb5-2"><a href="#cb5-2"></a></span>
-<span id="cb5-3"><a href="#cb5-3"></a>clasificador <span class="op">=</span> pipeline(</span>
-<span id="cb5-4"><a href="#cb5-4"></a>    <span class="st">"text-classification"</span>,</span>
-<span id="cb5-5"><a href="#cb5-5"></a>    model<span class="op">=</span><span class="st">"modelos/beto-ciuo-final"</span>,</span>
-<span id="cb5-6"><a href="#cb5-6"></a>    tokenizer<span class="op">=</span><span class="st">"modelos/beto-ciuo-final"</span></span>
-<span id="cb5-7"><a href="#cb5-7"></a>)</span>
-<span id="cb5-8"><a href="#cb5-8"></a></span>
-<span id="cb5-9"><a href="#cb5-9"></a>glosas <span class="op">=</span> [</span>
-<span id="cb5-10"><a href="#cb5-10"></a>    <span class="st">"Técnico electricista en empresa de distribución"</span>,</span>
-<span id="cb5-11"><a href="#cb5-11"></a>    <span class="st">"Profesora de enseñanza básica en colegio municipal"</span>,</span>
-<span id="cb5-12"><a href="#cb5-12"></a>    <span class="st">"Cajera en supermercado"</span>,</span>
-<span id="cb5-13"><a href="#cb5-13"></a>    <span class="st">"Ingeniero agrónomo en empresa exportadora de fruta"</span>,</span>
-<span id="cb5-14"><a href="#cb5-14"></a>]</span>
-<span id="cb5-15"><a href="#cb5-15"></a></span>
-<span id="cb5-16"><a href="#cb5-16"></a>resultados <span class="op">=</span> clasificador(glosas)</span>
-<span id="cb5-17"><a href="#cb5-17"></a><span class="cf">for</span> glosa, res <span class="kw">in</span> <span class="bu">zip</span>(glosas, resultados):</span>
-<span id="cb5-18"><a href="#cb5-18"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>glosa[:<span class="dv">45</span>]<span class="sc">:&lt;45}</span><span class="ss"> → </span><span class="sc">{</span>res[<span class="st">'label'</span>]<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>res[<span class="st">'score'</span>]<span class="sc">:.3f}</span><span class="ss">)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<!-- ::: {.fragment .callout-note .small-callout} -->
-<!-- El objeto `pipeline` envuelve tokenización + inferencia + decodificación del label. Se puede usar directamente en un script de procesamiento masivo o en una API REST. -->
-<!-- ::: -->
-</section>
-<section id="resultados" class="slide level2">
-<h2>Resultados</h2>
 </section></section>
 <section>
 <section id="cierre" class="title-slide slide level1 center">
@@ -1054,7 +1147,7 @@
 <li class="fragment"><strong>Encoder vs.&nbsp;Decoder</strong>: para clasificación censal, usamos encoders (BERT/BETO).</li>
 <li class="fragment"><strong>Pre-entrenamiento + fine-tuning</strong>: aprovechamos conocimiento general para adaptarlo a CIUO/CAENES.</li>
 <li class="fragment"><strong>BETO y el ecosistema HuggingFace</strong>: pipeline completo en Python.</li>
-<li class="fragment"><strong>Aplicaciones en CPV2024</strong>: codificación de ocupaciones, rama de actividad, detección de inconsistencias.</li>
+<li class="fragment"><strong>Aplicaciones en CPV2024</strong>: codificación automática de ocupaciones (CIUO-08) y rama de actividad (CAENES).</li>
 </ol>
 </div>
 </section></section>
