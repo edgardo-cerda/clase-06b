@@ -447,17 +447,16 @@
 </ul>
 </div>
 </section>
-<section id="la-solución-transformers-y-su-foco-en-la-atención" class="slide level2">
-<h2>La solución: Transformers y su foco en la Atención</h2>
-<p>El paper original (“Attention Is All You Need”, Vaswani et al., 2017) propuso una arquitectura encoder-decoder para traducción automática. Hoy usamos variantes de ella, pero la estructura base es similar.</p>
-<div class="medium-par">
-<p>En vez de leer de izquierda a derecha y acumular un estado latente, proponen una arquitectura que puede <strong>mirar directamente cualquier parte del texto</strong> cuando necesita entender qué dice un texto.</p>
+<section id="la-solución-transformers-y-la-autoatención" class="slide level2">
+<h2>La solución: Transformers y la Autoatención</h2>
+<div class="fragment medium-par">
+<p>En vez de leer de izquierda a derecha y acumular un estado latente, los Transformers contienen son una arquitectura que puede <strong>mirar directamente cualquier parte del texto</strong> cuando necesita entender qué dice un texto.</p>
 </div>
 <div class="fragment concepto-box">
-<p>Esa es la idea del mecanismo de <strong>atención</strong>: en vez de comprimir todo en un estado oculto, el modelo aprende a <strong>ponderar cuánto importa cada token</strong> para producir la representación actual.</p>
+<p>Esa es la idea del mecanismo de <strong>atención (o Autoatención)</strong>: en vez de comprimir todo en un estado oculto, el modelo aprende a <strong>ponderar cuánto importa cada token</strong> para producir la representación actual.</p>
 </div>
 <div class="fragment medium-par">
-<p>La estructura de los transformers permite:</p>
+<p>Esto permite:</p>
 <ul>
 <li>Capturar dependencias de <strong>largo alcance</strong> sin pérdida de información.</li>
 <li><strong>Paralelizar</strong> el cómputo (todos los tokens se procesan a la vez).</li>
@@ -485,14 +484,16 @@
 </section>
 <section id="intuición" class="slide level2">
 <h2>Intuición</h2>
-<div class="medium-par">
-<p>La atención es un mecanismo de búsqueda suave aprendible (entrenable).</p>
+<div class="fragment medium-par">
+<p>La atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).</p>
 </div>
-<!-- ![](imagenes/attention_translation.png){width=75%} -->
-<div class="fragment small-par">
-<p>Cada celda muestra cuánto “atiende” la palabra del eje Y a la palabra del eje X al momento de traducir.</p>
+<div class="fragment medium-par">
+<p>Los transformers aprenden a qué y cómo poner atención para “entender” los tokens de un texto.</p>
 </div>
-<p>DIAGRAMA</p>
+<div class="fragment medium-par">
+<p>Esto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto.</p>
+</div>
+<p>FALTA UN DIAGRAMA</p>
 </section>
 <section id="queries-keys-y-values" class="slide level2">
 <h2>Queries, Keys y Values</h2>
@@ -516,56 +517,34 @@
 </section>
 <section id="queries-keys-y-values-1" class="slide level2">
 <h2>Queries, Keys y Values</h2>
+<div class="medium-par">
 <p>La atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:</p>
-<div class="fragment medium-par">
+</div>
+<div class="medium-par">
 <ul>
 <li><strong>Query (Q)</strong>: <em>“¿Qué información me haría cambiar la forma en que entiendo un token?”</em></li>
 <li><strong>Key (K)</strong>: <em>“¿Qué información es relevante para el significado de otros tokens?”</em></li>
 <li><strong>Value (V)</strong>: <em>“¿Qué información traspaso a otros tokens, si es que me”eligen”?“</em></li>
 </ul>
 </div>
-</section>
-<section id="atención-ejemplo-paso-a-paso" class="slide level2">
-<h2>Atención: ejemplo paso a paso</h2>
-<div class="cell columns column-output-location" data-execution_count="2">
-<div class="column">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># Secuencia de 4 tokens, dimensión 8</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a>T, d_model <span class="op">=</span> <span class="dv">4</span>, <span class="dv">8</span></span>
-<span id="cb1-3"><a href="#cb1-3"></a>d_k <span class="op">=</span> d_model  <span class="co"># por simpleza</span></span>
-<span id="cb1-4"><a href="#cb1-4"></a></span>
-<span id="cb1-5"><a href="#cb1-5"></a>torch.manual_seed(<span class="dv">0</span>)</span>
-<span id="cb1-6"><a href="#cb1-6"></a>Q <span class="op">=</span> torch.randn(T, d_k)</span>
-<span id="cb1-7"><a href="#cb1-7"></a>K <span class="op">=</span> torch.randn(T, d_k)</span>
-<span id="cb1-8"><a href="#cb1-8"></a>V <span class="op">=</span> torch.randn(T, d_k)</span>
-<span id="cb1-9"><a href="#cb1-9"></a></span>
-<span id="cb1-10"><a href="#cb1-10"></a><span class="co"># Scores: qué tan relevante es cada token para cada otro</span></span>
-<span id="cb1-11"><a href="#cb1-11"></a>scores <span class="op">=</span> Q <span class="op">@</span> K.T <span class="op">/</span> d_k<span class="op">**</span><span class="fl">0.5</span>   <span class="co"># (T, T)</span></span>
-<span id="cb1-12"><a href="#cb1-12"></a>weights <span class="op">=</span> torch.softmax(scores, dim<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb1-13"><a href="#cb1-13"></a></span>
-<span id="cb1-14"><a href="#cb1-14"></a><span class="bu">print</span>(<span class="st">"Pesos de atención (4×4):"</span>)</span>
-<span id="cb1-15"><a href="#cb1-15"></a><span class="bu">print</span>(weights.detach().numpy().<span class="bu">round</span>(<span class="dv">3</span>))</span>
-<span id="cb1-16"><a href="#cb1-16"></a></span>
-<span id="cb1-17"><a href="#cb1-17"></a><span class="co"># Salida: suma ponderada de V</span></span>
-<span id="cb1-18"><a href="#cb1-18"></a>output <span class="op">=</span> weights <span class="op">@</span> V           <span class="co"># (T, d_model)</span></span>
-<span id="cb1-19"><a href="#cb1-19"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Shape salida:"</span>, output.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div><div class="column">
-<div class="cell-output cell-output-stdout">
-<pre><code>Pesos de atención (4×4):
-[[0.121 0.741 0.106 0.032]
- [0.258 0.265 0.171 0.307]
- [0.336 0.017 0.187 0.46 ]
- [0.203 0.623 0.102 0.071]]
+<div class="medium-par">
+<p>La atención entre Q y K produce un <strong>peso</strong> para cada par de tokens. Esos pesos se aplican sobre V:</p>
+<p><span class="math display">\[\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V\]</span></p>
+</div>
+<div class="small-par">
+<p>El factor <span class="math inline">\(\sqrt{d_k}\)</span> escala los productos para evitar que el softmax sature con valores muy grandes.</p>
+</div>
+</section></section>
+<section>
+<section id="arquitectura-transformer" class="title-slide slide level1 center">
+<h1>Arquitectura Transformer</h1>
 
-Shape salida: torch.Size([4, 8])</code></pre>
-</div>
-</div>
-</div>
-<!-- ::: {.fragment .callout-note .small-callout} -->
-<!-- Cada fila de `weights` suma 1. El token 0 "mira" a todos los demás y combina sus valores según cuánta atención les asigna. -->
-<!-- ::: -->
 </section>
 <section id="atención-multi-cabeza-multi-head-attention" class="slide level2">
 <h2>Atención multi-cabeza (Multi-Head Attention)</h2>
+<div class="medium-par">
+<p>El mecanismo de atención corresponde a una “cabeza de atención” (tiene otros componentes)</p>
+</div>
 <div class="medium-par">
 <p>En la práctica, no se usa una sola cabeza de atención sino varias en paralelo. Cada cabeza aprende a atender a <strong>aspectos distintos</strong> de la secuencia:</p>
 </div>
@@ -586,11 +565,6 @@ Shape salida: torch.Size([4, 8])</code></pre>
 <!-- ![](imagenes/multi_head_attention.png) -->
 </div>
 </div>
-</section></section>
-<section>
-<section id="arquitectura-transformer" class="title-slide slide level1 center">
-<h1>Arquitectura Transformer</h1>
-
 </section>
 <section id="el-bloque-transformer" class="slide level2">
 <h2>El bloque Transformer</h2>
@@ -947,17 +921,17 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </section>
 <section id="paso-1-cargar-tokenizador-y-modelo" class="slide level2">
 <h2>Paso 1: cargar tokenizador y modelo</h2>
-<div class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer, AutoModelForSequenceClassification</span>
-<span id="cb3-2"><a href="#cb3-2"></a></span>
-<span id="cb3-3"><a href="#cb3-3"></a>MODEL_NAME <span class="op">=</span> <span class="st">"dccuchile/bert-base-spanish-wwm-cased"</span></span>
-<span id="cb3-4"><a href="#cb3-4"></a>NUM_LABELS <span class="op">=</span> <span class="dv">10</span>  <span class="co"># CIUO-08 a 1 dígito: grupos 1-9 + grupo 0</span></span>
-<span id="cb3-5"><a href="#cb3-5"></a></span>
-<span id="cb3-6"><a href="#cb3-6"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(MODEL_NAME)</span>
-<span id="cb3-7"><a href="#cb3-7"></a>model <span class="op">=</span> AutoModelForSequenceClassification.from_pretrained(</span>
-<span id="cb3-8"><a href="#cb3-8"></a>    MODEL_NAME,</span>
-<span id="cb3-9"><a href="#cb3-9"></a>    num_labels<span class="op">=</span>NUM_LABELS</span>
-<span id="cb3-10"><a href="#cb3-10"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer, AutoModelForSequenceClassification</span>
+<span id="cb1-2"><a href="#cb1-2"></a></span>
+<span id="cb1-3"><a href="#cb1-3"></a>MODEL_NAME <span class="op">=</span> <span class="st">"dccuchile/bert-base-spanish-wwm-cased"</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a>NUM_LABELS <span class="op">=</span> <span class="dv">10</span>  <span class="co"># CIUO-08 a 1 dígito: grupos 1-9 + grupo 0</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a></span>
+<span id="cb1-6"><a href="#cb1-6"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(MODEL_NAME)</span>
+<span id="cb1-7"><a href="#cb1-7"></a>model <span class="op">=</span> AutoModelForSequenceClassification.from_pretrained(</span>
+<span id="cb1-8"><a href="#cb1-8"></a>    MODEL_NAME,</span>
+<span id="cb1-9"><a href="#cb1-9"></a>    num_labels<span class="op">=</span>NUM_LABELS</span>
+<span id="cb1-10"><a href="#cb1-10"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="callout callout-note callout-captioned callout-style-default">
 <div class="callout-body">
@@ -975,26 +949,26 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </section>
 <section id="paso-2-tokenizar-el-dataset" class="slide level2">
 <h2>Paso 2: tokenizar el dataset</h2>
-<div class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="im">from</span> datasets <span class="im">import</span> Dataset</span>
-<span id="cb4-2"><a href="#cb4-2"></a></span>
-<span id="cb4-3"><a href="#cb4-3"></a><span class="co"># Suponemos que tenemos un DataFrame con columnas 'glosa' y 'ciuo_1d'</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a>df_train <span class="op">=</span> pd.read_parquet(<span class="st">"data/ciuo_train.parquet"</span>)</span>
-<span id="cb4-5"><a href="#cb4-5"></a>df_val   <span class="op">=</span> pd.read_parquet(<span class="st">"data/ciuo_val.parquet"</span>)</span>
-<span id="cb4-6"><a href="#cb4-6"></a></span>
-<span id="cb4-7"><a href="#cb4-7"></a><span class="kw">def</span> tokenize(batch):</span>
-<span id="cb4-8"><a href="#cb4-8"></a>    <span class="cf">return</span> tokenizer(</span>
-<span id="cb4-9"><a href="#cb4-9"></a>        batch[<span class="st">"glosa"</span>],</span>
-<span id="cb4-10"><a href="#cb4-10"></a>        truncation<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb4-11"><a href="#cb4-11"></a>        padding<span class="op">=</span><span class="st">"max_length"</span>,</span>
-<span id="cb4-12"><a href="#cb4-12"></a>        max_length<span class="op">=</span><span class="dv">64</span>       <span class="co"># &lt;1&gt;</span></span>
-<span id="cb4-13"><a href="#cb4-13"></a>    )</span>
-<span id="cb4-14"><a href="#cb4-14"></a></span>
-<span id="cb4-15"><a href="#cb4-15"></a>ds_train <span class="op">=</span> Dataset.from_pandas(df_train).<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb4-16"><a href="#cb4-16"></a>ds_val   <span class="op">=</span> Dataset.from_pandas(df_val).<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb4-17"><a href="#cb4-17"></a></span>
-<span id="cb4-18"><a href="#cb4-18"></a>ds_train <span class="op">=</span> ds_train.rename_column(<span class="st">"ciuo_1d"</span>, <span class="st">"labels"</span>)</span>
-<span id="cb4-19"><a href="#cb4-19"></a>ds_val   <span class="op">=</span> ds_val.rename_column(<span class="st">"ciuo_1d"</span>, <span class="st">"labels"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a><span class="im">from</span> datasets <span class="im">import</span> Dataset</span>
+<span id="cb2-2"><a href="#cb2-2"></a></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="co"># Suponemos que tenemos un DataFrame con columnas 'glosa' y 'ciuo_1d'</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>df_train <span class="op">=</span> pd.read_parquet(<span class="st">"data/ciuo_train.parquet"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5"></a>df_val   <span class="op">=</span> pd.read_parquet(<span class="st">"data/ciuo_val.parquet"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6"></a></span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="kw">def</span> tokenize(batch):</span>
+<span id="cb2-8"><a href="#cb2-8"></a>    <span class="cf">return</span> tokenizer(</span>
+<span id="cb2-9"><a href="#cb2-9"></a>        batch[<span class="st">"glosa"</span>],</span>
+<span id="cb2-10"><a href="#cb2-10"></a>        truncation<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb2-11"><a href="#cb2-11"></a>        padding<span class="op">=</span><span class="st">"max_length"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12"></a>        max_length<span class="op">=</span><span class="dv">64</span>       <span class="co"># &lt;1&gt;</span></span>
+<span id="cb2-13"><a href="#cb2-13"></a>    )</span>
+<span id="cb2-14"><a href="#cb2-14"></a></span>
+<span id="cb2-15"><a href="#cb2-15"></a>ds_train <span class="op">=</span> Dataset.from_pandas(df_train).<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-16"><a href="#cb2-16"></a>ds_val   <span class="op">=</span> Dataset.from_pandas(df_val).<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-17"><a href="#cb2-17"></a></span>
+<span id="cb2-18"><a href="#cb2-18"></a>ds_train <span class="op">=</span> ds_train.rename_column(<span class="st">"ciuo_1d"</span>, <span class="st">"labels"</span>)</span>
+<span id="cb2-19"><a href="#cb2-19"></a>ds_val   <span class="op">=</span> ds_val.rename_column(<span class="st">"ciuo_1d"</span>, <span class="st">"labels"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol type="1">
 <li>Las glosas de ocupación son cortas; 64 tokens es suficiente y ahorra memoria.</li>
@@ -1002,36 +976,36 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </section>
 <section id="paso-3-configurar-el-trainer" class="slide level2">
 <h2>Paso 3: configurar el Trainer</h2>
-<div class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="im">from</span> transformers <span class="im">import</span> TrainingArguments, Trainer</span>
-<span id="cb5-2"><a href="#cb5-2"></a><span class="im">import</span> evaluate</span>
-<span id="cb5-3"><a href="#cb5-3"></a></span>
-<span id="cb5-4"><a href="#cb5-4"></a>accuracy <span class="op">=</span> evaluate.load(<span class="st">"accuracy"</span>)</span>
-<span id="cb5-5"><a href="#cb5-5"></a></span>
-<span id="cb5-6"><a href="#cb5-6"></a><span class="kw">def</span> compute_metrics(eval_pred):</span>
-<span id="cb5-7"><a href="#cb5-7"></a>    logits, labels <span class="op">=</span> eval_pred</span>
-<span id="cb5-8"><a href="#cb5-8"></a>    preds <span class="op">=</span> logits.argmax(axis<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb5-9"><a href="#cb5-9"></a>    <span class="cf">return</span> accuracy.compute(predictions<span class="op">=</span>preds, references<span class="op">=</span>labels)</span>
-<span id="cb5-10"><a href="#cb5-10"></a></span>
-<span id="cb5-11"><a href="#cb5-11"></a>args <span class="op">=</span> TrainingArguments(</span>
-<span id="cb5-12"><a href="#cb5-12"></a>    output_dir<span class="op">=</span><span class="st">"checkpoints/beto-ciuo"</span>,</span>
-<span id="cb5-13"><a href="#cb5-13"></a>    num_train_epochs<span class="op">=</span><span class="dv">5</span>,            <span class="co"># &lt;1&gt;</span></span>
-<span id="cb5-14"><a href="#cb5-14"></a>    per_device_train_batch_size<span class="op">=</span><span class="dv">32</span>,</span>
-<span id="cb5-15"><a href="#cb5-15"></a>    per_device_eval_batch_size<span class="op">=</span><span class="dv">64</span>,</span>
-<span id="cb5-16"><a href="#cb5-16"></a>    learning_rate<span class="op">=</span><span class="fl">2e-5</span>,            <span class="co"># &lt;2&gt;</span></span>
-<span id="cb5-17"><a href="#cb5-17"></a>    weight_decay<span class="op">=</span><span class="fl">0.01</span>,</span>
-<span id="cb5-18"><a href="#cb5-18"></a>    evaluation_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
-<span id="cb5-19"><a href="#cb5-19"></a>    save_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
-<span id="cb5-20"><a href="#cb5-20"></a>    load_best_model_at_end<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb5-21"><a href="#cb5-21"></a>)</span>
-<span id="cb5-22"><a href="#cb5-22"></a></span>
-<span id="cb5-23"><a href="#cb5-23"></a>trainer <span class="op">=</span> Trainer(</span>
-<span id="cb5-24"><a href="#cb5-24"></a>    model<span class="op">=</span>model,</span>
-<span id="cb5-25"><a href="#cb5-25"></a>    args<span class="op">=</span>args,</span>
-<span id="cb5-26"><a href="#cb5-26"></a>    train_dataset<span class="op">=</span>ds_train,</span>
-<span id="cb5-27"><a href="#cb5-27"></a>    eval_dataset<span class="op">=</span>ds_val,</span>
-<span id="cb5-28"><a href="#cb5-28"></a>    compute_metrics<span class="op">=</span>compute_metrics,</span>
-<span id="cb5-29"><a href="#cb5-29"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="im">from</span> transformers <span class="im">import</span> TrainingArguments, Trainer</span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="im">import</span> evaluate</span>
+<span id="cb3-3"><a href="#cb3-3"></a></span>
+<span id="cb3-4"><a href="#cb3-4"></a>accuracy <span class="op">=</span> evaluate.load(<span class="st">"accuracy"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5"></a></span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="kw">def</span> compute_metrics(eval_pred):</span>
+<span id="cb3-7"><a href="#cb3-7"></a>    logits, labels <span class="op">=</span> eval_pred</span>
+<span id="cb3-8"><a href="#cb3-8"></a>    preds <span class="op">=</span> logits.argmax(axis<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb3-9"><a href="#cb3-9"></a>    <span class="cf">return</span> accuracy.compute(predictions<span class="op">=</span>preds, references<span class="op">=</span>labels)</span>
+<span id="cb3-10"><a href="#cb3-10"></a></span>
+<span id="cb3-11"><a href="#cb3-11"></a>args <span class="op">=</span> TrainingArguments(</span>
+<span id="cb3-12"><a href="#cb3-12"></a>    output_dir<span class="op">=</span><span class="st">"checkpoints/beto-ciuo"</span>,</span>
+<span id="cb3-13"><a href="#cb3-13"></a>    num_train_epochs<span class="op">=</span><span class="dv">5</span>,            <span class="co"># &lt;1&gt;</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a>    per_device_train_batch_size<span class="op">=</span><span class="dv">32</span>,</span>
+<span id="cb3-15"><a href="#cb3-15"></a>    per_device_eval_batch_size<span class="op">=</span><span class="dv">64</span>,</span>
+<span id="cb3-16"><a href="#cb3-16"></a>    learning_rate<span class="op">=</span><span class="fl">2e-5</span>,            <span class="co"># &lt;2&gt;</span></span>
+<span id="cb3-17"><a href="#cb3-17"></a>    weight_decay<span class="op">=</span><span class="fl">0.01</span>,</span>
+<span id="cb3-18"><a href="#cb3-18"></a>    evaluation_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
+<span id="cb3-19"><a href="#cb3-19"></a>    save_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
+<span id="cb3-20"><a href="#cb3-20"></a>    load_best_model_at_end<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb3-21"><a href="#cb3-21"></a>)</span>
+<span id="cb3-22"><a href="#cb3-22"></a></span>
+<span id="cb3-23"><a href="#cb3-23"></a>trainer <span class="op">=</span> Trainer(</span>
+<span id="cb3-24"><a href="#cb3-24"></a>    model<span class="op">=</span>model,</span>
+<span id="cb3-25"><a href="#cb3-25"></a>    args<span class="op">=</span>args,</span>
+<span id="cb3-26"><a href="#cb3-26"></a>    train_dataset<span class="op">=</span>ds_train,</span>
+<span id="cb3-27"><a href="#cb3-27"></a>    eval_dataset<span class="op">=</span>ds_val,</span>
+<span id="cb3-28"><a href="#cb3-28"></a>    compute_metrics<span class="op">=</span>compute_metrics,</span>
+<span id="cb3-29"><a href="#cb3-29"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol type="1">
 <li>Con fine-tuning, pocas épocas suelen ser suficientes. Más épocas pueden llevar a overfitting.</li>
@@ -1040,17 +1014,17 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </section>
 <section id="paso-4-entrenar-y-evaluar" class="slide level2">
 <h2>Paso 4: entrenar y evaluar</h2>
-<div class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># Entrenamiento</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a>trainer.train()</span>
-<span id="cb6-3"><a href="#cb6-3"></a></span>
-<span id="cb6-4"><a href="#cb6-4"></a><span class="co"># Evaluación final</span></span>
-<span id="cb6-5"><a href="#cb6-5"></a>results <span class="op">=</span> trainer.evaluate()</span>
-<span id="cb6-6"><a href="#cb6-6"></a><span class="bu">print</span>(<span class="ss">f"Accuracy en validación: </span><span class="sc">{</span>results[<span class="st">'eval_accuracy'</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
-<span id="cb6-7"><a href="#cb6-7"></a></span>
-<span id="cb6-8"><a href="#cb6-8"></a><span class="co"># Guardar modelo</span></span>
-<span id="cb6-9"><a href="#cb6-9"></a>trainer.save_model(<span class="st">"modelos/beto-ciuo-final"</span>)</span>
-<span id="cb6-10"><a href="#cb6-10"></a>tokenizer.save_pretrained(<span class="st">"modelos/beto-ciuo-final"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># Entrenamiento</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>trainer.train()</span>
+<span id="cb4-3"><a href="#cb4-3"></a></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="co"># Evaluación final</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a>results <span class="op">=</span> trainer.evaluate()</span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="bu">print</span>(<span class="ss">f"Accuracy en validación: </span><span class="sc">{</span>results[<span class="st">'eval_accuracy'</span>]<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="cb4-7"><a href="#cb4-7"></a></span>
+<span id="cb4-8"><a href="#cb4-8"></a><span class="co"># Guardar modelo</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a>trainer.save_model(<span class="st">"modelos/beto-ciuo-final"</span>)</span>
+<span id="cb4-10"><a href="#cb4-10"></a>tokenizer.save_pretrained(<span class="st">"modelos/beto-ciuo-final"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="fragment medium-par">
 <p><strong>Resultados esperados</strong> con ~50.000 glosas etiquetadas:</p>
@@ -1059,25 +1033,25 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </section>
 <section id="inferencia-usar-el-modelo-en-producción" class="slide level2">
 <h2>Inferencia: usar el modelo en producción</h2>
-<div class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
-<span id="cb7-2"><a href="#cb7-2"></a></span>
-<span id="cb7-3"><a href="#cb7-3"></a>clasificador <span class="op">=</span> pipeline(</span>
-<span id="cb7-4"><a href="#cb7-4"></a>    <span class="st">"text-classification"</span>,</span>
-<span id="cb7-5"><a href="#cb7-5"></a>    model<span class="op">=</span><span class="st">"modelos/beto-ciuo-final"</span>,</span>
-<span id="cb7-6"><a href="#cb7-6"></a>    tokenizer<span class="op">=</span><span class="st">"modelos/beto-ciuo-final"</span></span>
-<span id="cb7-7"><a href="#cb7-7"></a>)</span>
-<span id="cb7-8"><a href="#cb7-8"></a></span>
-<span id="cb7-9"><a href="#cb7-9"></a>glosas <span class="op">=</span> [</span>
-<span id="cb7-10"><a href="#cb7-10"></a>    <span class="st">"Técnico electricista en empresa de distribución"</span>,</span>
-<span id="cb7-11"><a href="#cb7-11"></a>    <span class="st">"Profesora de enseñanza básica en colegio municipal"</span>,</span>
-<span id="cb7-12"><a href="#cb7-12"></a>    <span class="st">"Cajera en supermercado"</span>,</span>
-<span id="cb7-13"><a href="#cb7-13"></a>    <span class="st">"Ingeniero agrónomo en empresa exportadora de fruta"</span>,</span>
-<span id="cb7-14"><a href="#cb7-14"></a>]</span>
-<span id="cb7-15"><a href="#cb7-15"></a></span>
-<span id="cb7-16"><a href="#cb7-16"></a>resultados <span class="op">=</span> clasificador(glosas)</span>
-<span id="cb7-17"><a href="#cb7-17"></a><span class="cf">for</span> glosa, res <span class="kw">in</span> <span class="bu">zip</span>(glosas, resultados):</span>
-<span id="cb7-18"><a href="#cb7-18"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>glosa[:<span class="dv">45</span>]<span class="sc">:&lt;45}</span><span class="ss"> → </span><span class="sc">{</span>res[<span class="st">'label'</span>]<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>res[<span class="st">'score'</span>]<span class="sc">:.3f}</span><span class="ss">)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a>clasificador <span class="op">=</span> pipeline(</span>
+<span id="cb5-4"><a href="#cb5-4"></a>    <span class="st">"text-classification"</span>,</span>
+<span id="cb5-5"><a href="#cb5-5"></a>    model<span class="op">=</span><span class="st">"modelos/beto-ciuo-final"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6"></a>    tokenizer<span class="op">=</span><span class="st">"modelos/beto-ciuo-final"</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a>)</span>
+<span id="cb5-8"><a href="#cb5-8"></a></span>
+<span id="cb5-9"><a href="#cb5-9"></a>glosas <span class="op">=</span> [</span>
+<span id="cb5-10"><a href="#cb5-10"></a>    <span class="st">"Técnico electricista en empresa de distribución"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11"></a>    <span class="st">"Profesora de enseñanza básica en colegio municipal"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12"></a>    <span class="st">"Cajera en supermercado"</span>,</span>
+<span id="cb5-13"><a href="#cb5-13"></a>    <span class="st">"Ingeniero agrónomo en empresa exportadora de fruta"</span>,</span>
+<span id="cb5-14"><a href="#cb5-14"></a>]</span>
+<span id="cb5-15"><a href="#cb5-15"></a></span>
+<span id="cb5-16"><a href="#cb5-16"></a>resultados <span class="op">=</span> clasificador(glosas)</span>
+<span id="cb5-17"><a href="#cb5-17"></a><span class="cf">for</span> glosa, res <span class="kw">in</span> <span class="bu">zip</span>(glosas, resultados):</span>
+<span id="cb5-18"><a href="#cb5-18"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>glosa[:<span class="dv">45</span>]<span class="sc">:&lt;45}</span><span class="ss"> → </span><span class="sc">{</span>res[<span class="st">'label'</span>]<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span>res[<span class="st">'score'</span>]<span class="sc">:.3f}</span><span class="ss">)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <!-- ::: {.fragment .callout-note .small-callout} -->
 <!-- El objeto `pipeline` envuelve tokenización + inferencia + decodificación del label. Se puede usar directamente en un script de procesamiento masivo o en una API REST. -->
@@ -1085,11 +1059,11 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </section>
 <section id="resultados-en-contexto-censal" class="slide level2">
 <h2>Resultados en contexto censal</h2>
-<div class="cell" data-execution_count="8">
+<div class="cell" data-execution_count="7">
 <div class="cell-output cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="clase-06b_files/figure-revealjs/cell-9-output-1.png"></p>
+<p><img data-src="clase-06b_files/figure-revealjs/cell-8-output-1.png"></p>
 </figure>
 </div>
 </div>

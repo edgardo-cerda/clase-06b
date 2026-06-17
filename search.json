@@ -21,11 +21,11 @@
     "text": "RNN y LSTM\nPara solucionar este problema surgieron las Redes Neuronales Recurrentes (RNN), Long Short-Term Memory (LSTM), entre otras, que permiten aprender del contexto.\n\nPero tienen otros problemas:\n\nLa información se diluye a medida que la secuencia crece (Las LSTM mitigan el problema, pero no lo eliminan)\nRecurrencia hace difícil la paralelización, por lo que el costo computacional escala mal."
   },
   {
-    "objectID": "clase-06b.html#la-solución-transformers-y-su-foco-en-la-atención",
-    "href": "clase-06b.html#la-solución-transformers-y-su-foco-en-la-atención",
+    "objectID": "clase-06b.html#la-solución-transformers-y-la-autoatención",
+    "href": "clase-06b.html#la-solución-transformers-y-la-autoatención",
     "title": "",
-    "section": "La solución: Transformers y su foco en la Atención",
-    "text": "La solución: Transformers y su foco en la Atención\nEl paper original (“Attention Is All You Need”, Vaswani et al., 2017) propuso una arquitectura encoder-decoder para traducción automática. Hoy usamos variantes de ella, pero la estructura base es similar.\n\nEn vez de leer de izquierda a derecha y acumular un estado latente, proponen una arquitectura que puede mirar directamente cualquier parte del texto cuando necesita entender qué dice un texto.\n\n\nEsa es la idea del mecanismo de atención: en vez de comprimir todo en un estado oculto, el modelo aprende a ponderar cuánto importa cada token para producir la representación actual.\n\n\nLa estructura de los transformers permite:\n\nCapturar dependencias de largo alcance sin pérdida de información.\nParalelizar el cómputo (todos los tokens se procesan a la vez).\nEscalar a datasets masivos y modelos con billones de parámetros."
+    "section": "La solución: Transformers y la Autoatención",
+    "text": "La solución: Transformers y la Autoatención\n\nEn vez de leer de izquierda a derecha y acumular un estado latente, los Transformers contienen son una arquitectura que puede mirar directamente cualquier parte del texto cuando necesita entender qué dice un texto.\n\n\nEsa es la idea del mecanismo de atención (o Autoatención): en vez de comprimir todo en un estado oculto, el modelo aprende a ponderar cuánto importa cada token para producir la representación actual.\n\n\nEsto permite:\n\nCapturar dependencias de largo alcance sin pérdida de información.\nParalelizar el cómputo (todos los tokens se procesan a la vez).\nEscalar a datasets masivos y modelos con billones de parámetros."
   },
   {
     "objectID": "clase-06b.html#por-qué-son-tan-bacanes-los-transformers",
@@ -39,7 +39,7 @@
     "href": "clase-06b.html#intuición",
     "title": "",
     "section": "Intuición",
-    "text": "Intuición\n\nLa atención es un mecanismo de búsqueda suave aprendible (entrenable).\n\n\n\nCada celda muestra cuánto “atiende” la palabra del eje Y a la palabra del eje X al momento de traducir.\n\nDIAGRAMA"
+    "text": "Intuición\n\nLa atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).\n\n\nLos transformers aprenden a qué y cómo poner atención para “entender” los tokens de un texto.\n\n\nEsto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto.\n\nFALTA UN DIAGRAMA"
   },
   {
     "objectID": "clase-06b.html#queries-keys-y-values",
@@ -53,21 +53,14 @@
     "href": "clase-06b.html#queries-keys-y-values-1",
     "title": "",
     "section": "Queries, Keys y Values",
-    "text": "Queries, Keys y Values\nLa atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:\n\n\nQuery (Q): “¿Qué información me haría cambiar la forma en que entiendo un token?”\nKey (K): “¿Qué información es relevante para el significado de otros tokens?”\nValue (V): “¿Qué información traspaso a otros tokens, si es que me”eligen”?“"
-  },
-  {
-    "objectID": "clase-06b.html#atención-ejemplo-paso-a-paso",
-    "href": "clase-06b.html#atención-ejemplo-paso-a-paso",
-    "title": "",
-    "section": "Atención: ejemplo paso a paso",
-    "text": "Atención: ejemplo paso a paso\n\n\n# Secuencia de 4 tokens, dimensión 8\nT, d_model = 4, 8\nd_k = d_model  # por simpleza\n\ntorch.manual_seed(0)\nQ = torch.randn(T, d_k)\nK = torch.randn(T, d_k)\nV = torch.randn(T, d_k)\n\n# Scores: qué tan relevante es cada token para cada otro\nscores = Q @ K.T / d_k**0.5   # (T, T)\nweights = torch.softmax(scores, dim=-1)\n\nprint(\"Pesos de atención (4×4):\")\nprint(weights.detach().numpy().round(3))\n\n# Salida: suma ponderada de V\noutput = weights @ V           # (T, d_model)\nprint(\"\\nShape salida:\", output.shape)\n\n\nPesos de atención (4×4):\n[[0.121 0.741 0.106 0.032]\n [0.258 0.265 0.171 0.307]\n [0.336 0.017 0.187 0.46 ]\n [0.203 0.623 0.102 0.071]]\n\nShape salida: torch.Size([4, 8])"
+    "text": "Queries, Keys y Values\n\nLa atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:\n\n\n\nQuery (Q): “¿Qué información me haría cambiar la forma en que entiendo un token?”\nKey (K): “¿Qué información es relevante para el significado de otros tokens?”\nValue (V): “¿Qué información traspaso a otros tokens, si es que me”eligen”?“\n\n\n\nLa atención entre Q y K produce un peso para cada par de tokens. Esos pesos se aplican sobre V:\n\\[\\text{Attention}(Q, K, V) = \\text{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right) V\\]\n\n\nEl factor \\(\\sqrt{d_k}\\) escala los productos para evitar que el softmax sature con valores muy grandes."
   },
   {
     "objectID": "clase-06b.html#atención-multi-cabeza-multi-head-attention",
     "href": "clase-06b.html#atención-multi-cabeza-multi-head-attention",
     "title": "",
     "section": "Atención multi-cabeza (Multi-Head Attention)",
-    "text": "Atención multi-cabeza (Multi-Head Attention)\n\nEn la práctica, no se usa una sola cabeza de atención sino varias en paralelo. Cada cabeza aprende a atender a aspectos distintos de la secuencia:\n\n\n\n\n\nUna cabeza puede capturar relaciones sintácticas (sujeto → verbo).\nOtra puede capturar relaciones semánticas (ocupación → rama de actividad).\nOtra puede rastrear correferencias (pronombres → sustantivos).\n\n\n\nLas salidas de todas las cabezas se concatenan y proyectan:\n\\[\\text{MultiHead}(Q,K,V) = \\text{Concat}(\\text{head}_1, \\ldots, \\text{head}_h)\\,W^O\\]"
+    "text": "Atención multi-cabeza (Multi-Head Attention)\n\nEl mecanismo de atención corresponde a una “cabeza de atención” (tiene otros componentes)\n\n\nEn la práctica, no se usa una sola cabeza de atención sino varias en paralelo. Cada cabeza aprende a atender a aspectos distintos de la secuencia:\n\n\n\n\n\nUna cabeza puede capturar relaciones sintácticas (sujeto → verbo).\nOtra puede capturar relaciones semánticas (ocupación → rama de actividad).\nOtra puede rastrear correferencias (pronombres → sustantivos).\n\n\n\nLas salidas de todas las cabezas se concatenan y proyectan:\n\\[\\text{MultiHead}(Q,K,V) = \\text{Concat}(\\text{head}_1, \\ldots, \\text{head}_h)\\,W^O\\]"
   },
   {
     "objectID": "clase-06b.html#el-bloque-transformer",
