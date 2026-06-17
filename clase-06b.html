@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script src="clase-06b_files/libs/clipboard/clipboard.min.js"></script>
-<script src="clase-06b_files/libs/quarto-html/tabby.min.js"></script>
-<script src="clase-06b_files/libs/quarto-html/popper.min.js"></script>
-<script src="clase-06b_files/libs/quarto-html/tippy.umd.min.js"></script>
-<link href="clase-06b_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="clase-06b_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
-<link href="clase-06b_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/tabby.min.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
   <meta name="generator" content="quarto-1.2.335">
 
   <title>clase-06b</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
-  <link rel="stylesheet" href="clase-06b_files/libs/revealjs/dist/reset.css">
-  <link rel="stylesheet" href="clase-06b_files/libs/revealjs/dist/reveal.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reveal.css">
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
@@ -92,12 +92,12 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="clase-06b_files/libs/revealjs/dist/theme/quarto.css" id="theme">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto.css" id="theme">
   <link rel="stylesheet" href="ine_quarto_styles.css">
-  <link href="clase-06b_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
-  <link href="clase-06b_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
-  <link href="clase-06b_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
-  <link href="clase-06b_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <style type="text/css">
 
   .callout {
@@ -527,7 +527,13 @@
 <section id="queries-keys-y-values-1" class="slide level2">
 <h2>Queries, Keys y Values</h2>
 <p>La atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:</p>
-<p>::: {fragment .medium-par} - <strong>Query (Q)</strong>: <em>“¿Qué información me haría cambiar la forma en que entiendo un token?”</em> - <strong>Key (K)</strong>: <em>“¿Qué información es relevante para el significado de otros tokens?”</em> - <strong>Value (V)</strong>: <em>“¿Qué información traspaso a otros tokens, si es que me”eligen”?“</em> :::</p>
+<div class="fragment medium-par">
+<ul>
+<li><strong>Query (Q)</strong>: <em>“¿Qué información me haría cambiar la forma en que entiendo un token?”</em></li>
+<li><strong>Key (K)</strong>: <em>“¿Qué información es relevante para el significado de otros tokens?”</em></li>
+<li><strong>Value (V)</strong>: <em>“¿Qué información traspaso a otros tokens, si es que me”eligen”?“</em></li>
+</ul>
+</div>
 </section>
 <section id="atención-ejemplo-paso-a-paso" class="slide level2">
 <h2>Atención: ejemplo paso a paso</h2>
@@ -652,10 +658,9 @@ Shape salida: torch.Size([4, 8])</code></pre>
 <div class="fragment">
 <p><strong>Capacidades emergentes</strong> Nadie diseñó explícitamente la capacidad de GPT-3 para razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto (few-shot learning). Estas capacidades emergieron del escalamiento.</p>
 </div>
-</section></section>
-<section>
-<section id="encoder.-decoder-y-encoder-decoder" class="title-slide slide level1 center">
-<h1>Encoder,. Decoder y Encoder-Decoder</h1>
+</section>
+<section id="encoder-decoder-y-encoder-decoder" class="slide level2">
+<h2>Encoder, Decoder y Encoder-Decoder</h2>
 <div class="fragment">
 <p>El Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: encoder y decoder. La lógica era que el Encoder “codificaba” la información de un idioma en un vector numérico, y el Decoder tomaba esto y lo “decodificaba” en otro idioma.</p>
 </div>
@@ -663,8 +668,8 @@ Shape salida: torch.Size([4, 8])</code></pre>
 <p>Con el tiempo se descubrió que cada mitad es útil por separado, y para propósitos diferentes.</p>
 </div>
 </section>
-<section id="encoder.-decoder-y-encoder-decoder-1" class="slide level2">
-<h2>Encoder,. Decoder y Encoder-Decoder</h2>
+<section id="encoder-decoder-y-encoder-decoder-1" class="slide level2">
+<h2>Encoder, Decoder y Encoder-Decoder</h2>
 <div class="fragment">
 <p><strong>Encoder</strong> - leer y representar</p>
 <p>Toma una secuencia de tokens y produce una representación para cada uno Atención bidireccional: cada token ve todos los demás (izquierda y derecha) No genera nada: su salida son vectores, no palabras Útil cuando la tarea requiere entender el texto de entrada</p>
@@ -1178,6 +1183,7 @@ Shape salida: torch.Size([4, 8])</code></pre>
 </div>
 </div>
 </div>
+
 <p><img src="imagenes/logo_portada2.png" class="slide-logo"></p>
 <div class="footer footer-default">
 
@@ -1187,19 +1193,19 @@ Shape salida: torch.Size([4, 8])</code></pre>
   </div>
 
   <script>window.backupDefine = window.define; window.define = undefined;</script>
-  <script src="clase-06b_files/libs/revealjs/dist/reveal.js"></script>
+  <script src="site_libs/revealjs/dist/reveal.js"></script>
   <!-- reveal.js plugins -->
-  <script src="clase-06b_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
-  <script src="clase-06b_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
-  <script src="clase-06b_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
-  <script src="clase-06b_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
-  <script src="clase-06b_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-support/support.js"></script>
   
 
-  <script src="clase-06b_files/libs/revealjs/plugin/notes/notes.js"></script>
-  <script src="clase-06b_files/libs/revealjs/plugin/search/search.js"></script>
-  <script src="clase-06b_files/libs/revealjs/plugin/zoom/zoom.js"></script>
-  <script src="clase-06b_files/libs/revealjs/plugin/math/math.js"></script>
+  <script src="site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="site_libs/revealjs/plugin/math/math.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>
