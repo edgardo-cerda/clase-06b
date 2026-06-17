@@ -186,7 +186,7 @@ El factor $\sqrt{d_k}$ escala los productos para evitar que el softmax sature co
 
 La atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:
 
-::: {fragment .medium-par}
+::: {.fragment .medium-par}
 - **Query (Q)**: *"¿Qué información me haría cambiar la forma en que entiendo un token?"*
 - **Key (K)**: *"¿Qué información es relevante para el significado de otros tokens?"*
 - **Value (V)**: *"¿Qué información traspaso a otros tokens, si es que me "eligen"?"*
@@ -319,7 +319,7 @@ Los embeddings posicionales son sinusoides de distintas frecuencias, de modo que
 **Capacidades emergentes** Nadie diseñó explícitamente la capacidad de GPT-3 para razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto (few-shot learning). Estas capacidades emergieron del escalamiento.
 :::
 
-# Encoder,. Decoder y Encoder-Decoder
+## Encoder, Decoder y Encoder-Decoder
 
 ::: {.fragment}
 El Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: encoder y decoder. La lógica era que el Encoder "codificaba" la información de un idioma en un vector numérico, y el Decoder tomaba esto y lo "decodificaba" en otro idioma.
@@ -329,7 +329,7 @@ El Transformer original (2017) se diseñó para traducción automática, por lo 
 Con el tiempo se descubrió que cada mitad es útil por separado, y para propósitos diferentes.
 :::
 
-## Encoder,. Decoder y Encoder-Decoder
+## Encoder, Decoder y Encoder-Decoder
 
 ::: {.fragment}
 **Encoder** - leer y representar
