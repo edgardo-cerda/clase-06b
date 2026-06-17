@@ -399,7 +399,7 @@
 <section id="temario-de-hoy" class="slide level2">
 <h2>Temario de hoy</h2>
 <div class="medium-par">
-<p>El objetivo de esta clase es entender <strong>cómo funcionan los Transformers</strong> y cómo usarlos a través de <strong>fine-tuning</strong> para resolver problemas reales de procesamiento y análisis estadístico, viendo el ejemplo del Censo 2024.</p>
+<p>El objetivo de esta clase es entender <strong>cómo funcionan los Transformers</strong> y cómo usarlos a través de <strong>fine-tuning</strong> para resolver problemas reales de procesamiento y análisis estadístico.</p>
 <ol type="1">
 <li class="fragment"><strong>El problema que los transformers vinieron a resolver:</strong> Límites de las RNN y LSTM, y la aparición del Transformer.</li>
 <li class="fragment"><strong>Mecanismo de atención:</strong> La idea central de la arquitectura</li>
@@ -418,9 +418,7 @@
 </section>
 <section id="límites-de-las-rnn-y-lstm" class="slide level2">
 <h2>Límites de las RNN y LSTM</h2>
-<div class="fragment medium-par">
-<p>Las primeras redes que vimos las clases anteriores trataban cada entrada como <strong>independiente</strong>: no tienen noción de orden ni de contexto previo.</p>
-</div>
+<p>Las primeras redes neuronales que vimos las clases anteriores trataban cada entrada como <strong>independiente</strong>: no tienen noción de orden ni de contexto previo.</p>
 <div class="fragment medium-par">
 <p>Eso es un problema: el significado de una palabra depende de su contexto.</p>
 </div>
@@ -429,9 +427,7 @@
 <blockquote>
 <p>“Trabajo en una empresa que realiza <strong>minería</strong> de …”</p>
 </blockquote>
-</div>
-<div class="fragment">
-<p>En qué sector económico trabaja? La respuesta depende del contexto:</p>
+<p>En qué sector económico trabaja? La respuesta depende del contexto.</p>
 </div>
 <div class="fragment">
 <p>Minería de datos -&gt; Actividades profesionales, científicas y técnicas</p>
@@ -442,19 +438,20 @@
 </section>
 <section id="rnn-y-lstm" class="slide level2">
 <h2>RNN y LSTM</h2>
-<p>Para solucionar este problema surgieron las <strong>Redes Neuronales Recurrentes (RNN)</strong>, <strong>Long Short-Term Memory (LSTM)</strong>, entre otras:</p>
+<p>Para solucionar este problema surgieron las <strong>Redes Neuronales Recurrentes (RNN)</strong>, <strong>Long Short-Term Memory (LSTM)</strong>, entre otras, que permiten aprender del contexto.</p>
 <div class="fragment medium-par">
-<p>Permiten aprender del contexto, pero tienen otros problemas:</p>
+<p>Pero tienen otros problemas:</p>
 <ul>
 <li>La información <strong>se diluye</strong> a medida que la secuencia crece (Las LSTM mitigan el problema, pero no lo eliminan)</li>
-<li>Recurrencia hace difícil la paralelización, por lo que el costo computacional escala mal.</li>
+<li>Recurrencia hace difícil la paralelización, por lo que el <strong>costo computacional escala mal</strong>.</li>
 </ul>
 </div>
 </section>
-<section id="la-solución-atención-directa" class="slide level2">
-<h2>La solución: atención directa</h2>
+<section id="la-solución-transformers-y-su-foco-en-la-atención" class="slide level2">
+<h2>La solución: Transformers y su foco en la Atención</h2>
+<p>El paper original (“Attention Is All You Need”, Vaswani et al., 2017) propuso una arquitectura encoder-decoder para traducción automática. Hoy usamos variantes de ella, pero la estructura base es similar.</p>
 <div class="medium-par">
-<p>¿Y si en vez de leer de izquierda a derecha y acumular un estado, el modelo pudiera <strong>mirar directamente cualquier parte del texto</strong>, independiente de la distancia, cuando necesita entender qué dice un texto?</p>
+<p>En vez de leer de izquierda a derecha y acumular un estado latente, proponen una arquitectura que puede <strong>mirar directamente cualquier parte del texto</strong> cuando necesita entender qué dice un texto.</p>
 </div>
 <div class="fragment concepto-box">
 <p>Esa es la idea del mecanismo de <strong>atención</strong>: en vez de comprimir todo en un estado oculto, el modelo aprende a <strong>ponderar cuánto importa cada token</strong> para producir la representación actual.</p>
@@ -467,6 +464,19 @@
 <li>Escalar a datasets masivos y modelos con billones de parámetros.</li>
 </ul>
 </div>
+</section>
+<section id="por-qué-son-tan-bacanes-los-transformers" class="slide level2">
+<h2>¿Por qué son tan bacanes los Transformers?</h2>
+<p>3 motivos principales:</p>
+<div class="fragment">
+<p><strong>Paralelización masiva</strong>: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Esto no es una mejora incremental: es lo que hizo posible entrenar modelos con billones de parámetros.</p>
+</div>
+<div class="fragment">
+<p><strong>Preentrenamiento a escala</strong> Se pueden preentrenar en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.</p>
+</div>
+<div class="fragment">
+<p><strong>Capacidades emergentes</strong> Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes.</p>
+</div>
 </section></section>
 <section>
 <section id="el-mecanismo-de-atención" class="title-slide slide level1 center">
@@ -475,7 +485,6 @@
 </section>
 <section id="intuición" class="slide level2">
 <h2>Intuición</h2>
-<!-- El paper original ("Attention Is All You Need", Vaswani et al., 2017) propuso una arquitectura encoder-decoder para traducción automática. Hoy usamos variantes de ella, pero la estructura base es similar. -->
 <div class="medium-par">
 <p>La atención es un mecanismo de búsqueda suave aprendible (entrenable).</p>
 </div>
@@ -628,17 +637,7 @@ Shape salida: torch.Size([4, 8])</code></pre>
 <section id="visualizando-un-transformer" class="slide level2">
 <h2>Visualizando un Transformer:</h2>
 <p><a href="https://poloclub.github.io/transformer-explainer/">https://poloclub.github.io/transformer-explainer/</a></p>
-<p><a href="https://youtu.be/KJtZARuO3JY?si=RuD2RplooVP8Uwzt">Visualizing transformers and attention | Talk for TNG Big Tech Day ’24</a> ## ¿Por qué son tan bacanes los Transformers?</p>
-<p>3 motivos principales:</p>
-<div class="fragment">
-<p><strong>Paralelización masiva</strong>: Las RNN procesaban tokens en secuencia, una a la vez. Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Esto no es una mejora incremental: es lo que hizo posible entrenar modelos con billones de parámetros.</p>
-</div>
-<div class="fragment">
-<p><strong>Preentrenamiento a escala</strong> GPT-1 (2018) demostró que podías preentrenar un transformer en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. BERT lo hizo en la dirección bidireccional. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.</p>
-</div>
-<div class="fragment">
-<p><strong>Capacidades emergentes</strong> Nadie diseñó explícitamente la capacidad de GPT-3 para razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto (few-shot learning). Estas capacidades emergieron del escalamiento.</p>
-</div>
+<p><a href="https://youtu.be/KJtZARuO3JY?si=RuD2RplooVP8Uwzt">Visualizing transformers and attention | Talk for TNG Big Tech Day ’24</a></p>
 </section>
 <section id="encoder-decoder-y-encoder-decoder" class="slide level2">
 <h2>Encoder, Decoder y Encoder-Decoder</h2>

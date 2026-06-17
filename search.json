@@ -4,35 +4,42 @@
     "href": "clase-06b.html#temario-de-hoy",
     "title": "",
     "section": "Temario de hoy",
-    "text": "Temario de hoy\n\nEl objetivo de esta clase es entender cómo funcionan los Transformers y cómo usarlos a través de fine-tuning para resolver problemas reales de procesamiento y análisis estadístico, viendo el ejemplo del Censo 2024.\n\nEl problema que los transformers vinieron a resolver: Límites de las RNN y LSTM, y la aparición del Transformer.\nMecanismo de atención: La idea central de la arquitectura\nArquitectura Transformer: Bloque transformer, embeddings posicionales\nPre-entrenamiento y fine-tuning: La lógica del transfer learning\nModelos para español: BETO y la familia RoBERTa\nAplicaciones en el CPV2024: Codificación de ocupaciones y actividad económica\nEjercicio práctico: Fine-tuning de BETO con HuggingFace"
+    "text": "Temario de hoy\n\nEl objetivo de esta clase es entender cómo funcionan los Transformers y cómo usarlos a través de fine-tuning para resolver problemas reales de procesamiento y análisis estadístico.\n\nEl problema que los transformers vinieron a resolver: Límites de las RNN y LSTM, y la aparición del Transformer.\nMecanismo de atención: La idea central de la arquitectura\nArquitectura Transformer: Bloque transformer, embeddings posicionales\nPre-entrenamiento y fine-tuning: La lógica del transfer learning\nModelos para español: BETO y la familia RoBERTa\nAplicaciones en el CPV2024: Codificación de ocupaciones y actividad económica\nEjercicio práctico: Fine-tuning de BETO con HuggingFace"
   },
   {
     "objectID": "clase-06b.html#límites-de-las-rnn-y-lstm",
     "href": "clase-06b.html#límites-de-las-rnn-y-lstm",
     "title": "",
     "section": "Límites de las RNN y LSTM",
-    "text": "Límites de las RNN y LSTM\n\nLas primeras redes que vimos las clases anteriores trataban cada entrada como independiente: no tienen noción de orden ni de contexto previo.\n\n\nEso es un problema: el significado de una palabra depende de su contexto.\n\n\nEjemplo de respuesta en actividad económica:\n\n“Trabajo en una empresa que realiza minería de …”\n\n\n\nEn qué sector económico trabaja? La respuesta depende del contexto:\n\n\nMinería de datos -> Actividades profesionales, científicas y técnicas\n\n\nMinería de cobre -> Explotación de minas y canteras"
+    "text": "Límites de las RNN y LSTM\nLas primeras redes neuronales que vimos las clases anteriores trataban cada entrada como independiente: no tienen noción de orden ni de contexto previo.\n\nEso es un problema: el significado de una palabra depende de su contexto.\n\n\nEjemplo de respuesta en actividad económica:\n\n“Trabajo en una empresa que realiza minería de …”\n\nEn qué sector económico trabaja? La respuesta depende del contexto.\n\n\nMinería de datos -> Actividades profesionales, científicas y técnicas\n\n\nMinería de cobre -> Explotación de minas y canteras"
   },
   {
     "objectID": "clase-06b.html#rnn-y-lstm",
     "href": "clase-06b.html#rnn-y-lstm",
     "title": "",
     "section": "RNN y LSTM",
-    "text": "RNN y LSTM\nPara solucionar este problema surgieron las Redes Neuronales Recurrentes (RNN), Long Short-Term Memory (LSTM), entre otras:\n\nPermiten aprender del contexto, pero tienen otros problemas:\n\nLa información se diluye a medida que la secuencia crece (Las LSTM mitigan el problema, pero no lo eliminan)\nRecurrencia hace difícil la paralelización, por lo que el costo computacional escala mal."
+    "text": "RNN y LSTM\nPara solucionar este problema surgieron las Redes Neuronales Recurrentes (RNN), Long Short-Term Memory (LSTM), entre otras, que permiten aprender del contexto.\n\nPero tienen otros problemas:\n\nLa información se diluye a medida que la secuencia crece (Las LSTM mitigan el problema, pero no lo eliminan)\nRecurrencia hace difícil la paralelización, por lo que el costo computacional escala mal."
   },
   {
-    "objectID": "clase-06b.html#la-solución-atención-directa",
-    "href": "clase-06b.html#la-solución-atención-directa",
+    "objectID": "clase-06b.html#la-solución-transformers-y-su-foco-en-la-atención",
+    "href": "clase-06b.html#la-solución-transformers-y-su-foco-en-la-atención",
     "title": "",
-    "section": "La solución: atención directa",
-    "text": "La solución: atención directa\n\n¿Y si en vez de leer de izquierda a derecha y acumular un estado, el modelo pudiera mirar directamente cualquier parte del texto, independiente de la distancia, cuando necesita entender qué dice un texto?\n\n\nEsa es la idea del mecanismo de atención: en vez de comprimir todo en un estado oculto, el modelo aprende a ponderar cuánto importa cada token para producir la representación actual.\n\n\nLa estructura de los transformers permite:\n\nCapturar dependencias de largo alcance sin pérdida de información.\nParalelizar el cómputo (todos los tokens se procesan a la vez).\nEscalar a datasets masivos y modelos con billones de parámetros."
+    "section": "La solución: Transformers y su foco en la Atención",
+    "text": "La solución: Transformers y su foco en la Atención\nEl paper original (“Attention Is All You Need”, Vaswani et al., 2017) propuso una arquitectura encoder-decoder para traducción automática. Hoy usamos variantes de ella, pero la estructura base es similar.\n\nEn vez de leer de izquierda a derecha y acumular un estado latente, proponen una arquitectura que puede mirar directamente cualquier parte del texto cuando necesita entender qué dice un texto.\n\n\nEsa es la idea del mecanismo de atención: en vez de comprimir todo en un estado oculto, el modelo aprende a ponderar cuánto importa cada token para producir la representación actual.\n\n\nLa estructura de los transformers permite:\n\nCapturar dependencias de largo alcance sin pérdida de información.\nParalelizar el cómputo (todos los tokens se procesan a la vez).\nEscalar a datasets masivos y modelos con billones de parámetros."
+  },
+  {
+    "objectID": "clase-06b.html#por-qué-son-tan-bacanes-los-transformers",
+    "href": "clase-06b.html#por-qué-son-tan-bacanes-los-transformers",
+    "title": "",
+    "section": "¿Por qué son tan bacanes los Transformers?",
+    "text": "¿Por qué son tan bacanes los Transformers?\n3 motivos principales:\n\nParalelización masiva: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Esto no es una mejora incremental: es lo que hizo posible entrenar modelos con billones de parámetros.\n\n\nPreentrenamiento a escala Se pueden preentrenar en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.\n\n\nCapacidades emergentes Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes."
   },
   {
     "objectID": "clase-06b.html#intuición",
     "href": "clase-06b.html#intuición",
     "title": "",
     "section": "Intuición",
-    "text": "Intuición\n\n\nLa atención es un mecanismo de búsqueda suave aprendible (entrenable).\n\n\n\nCada celda muestra cuánto “atiende” la palabra del eje Y a la palabra del eje X al momento de traducir.\n\nDIAGRAMA"
+    "text": "Intuición\n\nLa atención es un mecanismo de búsqueda suave aprendible (entrenable).\n\n\n\nCada celda muestra cuánto “atiende” la palabra del eje Y a la palabra del eje X al momento de traducir.\n\nDIAGRAMA"
   },
   {
     "objectID": "clase-06b.html#queries-keys-y-values",
@@ -81,7 +88,7 @@
     "href": "clase-06b.html#visualizando-un-transformer",
     "title": "",
     "section": "Visualizando un Transformer:",
-    "text": "Visualizando un Transformer:\nhttps://poloclub.github.io/transformer-explainer/\nVisualizing transformers and attention | Talk for TNG Big Tech Day ’24 ## ¿Por qué son tan bacanes los Transformers?\n3 motivos principales:\n\nParalelización masiva: Las RNN procesaban tokens en secuencia, una a la vez. Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Esto no es una mejora incremental: es lo que hizo posible entrenar modelos con billones de parámetros.\n\n\nPreentrenamiento a escala GPT-1 (2018) demostró que podías preentrenar un transformer en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. BERT lo hizo en la dirección bidireccional. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.\n\n\nCapacidades emergentes Nadie diseñó explícitamente la capacidad de GPT-3 para razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto (few-shot learning). Estas capacidades emergieron del escalamiento."
+    "text": "Visualizando un Transformer:\nhttps://poloclub.github.io/transformer-explainer/\nVisualizing transformers and attention | Talk for TNG Big Tech Day ’24"
   },
   {
     "objectID": "clase-06b.html#encoder-decoder-y-encoder-decoder",
