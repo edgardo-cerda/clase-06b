@@ -403,7 +403,7 @@
 <ol type="1">
 <li class="fragment"><strong>El problema que los transformers vinieron a resolver:</strong> Límites de las RNN y LSTM, y la aparición del Transformer.</li>
 <li class="fragment"><strong>Mecanismo de atención:</strong> La idea central de la arquitectura</li>
-<li class="fragment"><strong>Arquitectura Transformer:</strong> Bloque transformer, embeddings posicionales</li>
+<li class="fragment"><strong>Arquitectura Transformer:</strong> Attention Head, Bloque transformer, Embeddings posicionales</li>
 <li class="fragment"><strong>Pre-entrenamiento y fine-tuning:</strong> La lógica del transfer learning</li>
 <li class="fragment"><strong>Modelos para español:</strong> BETO y la familia RoBERTa</li>
 <li class="fragment"><strong>Aplicaciones en el CPV2024:</strong> Codificación de ocupaciones y actividad económica</li>
@@ -438,7 +438,7 @@
 </section>
 <section id="rnn-y-lstm" class="slide level2">
 <h2>RNN y LSTM</h2>
-<p>Para solucionar este problema surgieron las <strong>Redes Neuronales Recurrentes (RNN)</strong>, <strong>Long Short-Term Memory (LSTM)</strong>, entre otras, que permiten aprender del contexto.</p>
+<p>Para solucionar este problema surgieron las <strong>Redes Neuronales Recurrentes (RNN)</strong>, <strong>Long Short-Term Memory (LSTM)</strong>, <strong>Gated Recurent Units (GRU)</strong>, entre otras, que permiten aprender del contexto.</p>
 <div class="fragment medium-par">
 <p>Pero tienen otros problemas:</p>
 <ul>
@@ -450,31 +450,32 @@
 <section id="la-solución-transformers-y-la-autoatención" class="slide level2">
 <h2>La solución: Transformers y la Autoatención</h2>
 <div class="fragment medium-par">
-<p>En vez de leer de izquierda a derecha y acumular un estado latente, los Transformers contienen son una arquitectura que puede <strong>mirar directamente cualquier parte del texto</strong> cuando necesita entender qué dice un texto.</p>
+<p>En vez de leer de izquierda a derecha y acumular un estado latente, los Transformers pueden <strong>mirar directamente cualquier parte del texto</strong> cuando necesitan entender qué dice un texto.</p>
 </div>
 <div class="fragment concepto-box">
 <p>Esa es la idea del mecanismo de <strong>atención (o Autoatención)</strong>: en vez de comprimir todo en un estado oculto, el modelo aprende a <strong>ponderar cuánto importa cada token</strong> para producir la representación actual.</p>
 </div>
-<div class="fragment medium-par">
-<p>Esto permite:</p>
-<ul>
-<li>Capturar dependencias de <strong>largo alcance</strong> sin pérdida de información.</li>
-<li><strong>Paralelizar</strong> el cómputo (todos los tokens se procesan a la vez).</li>
-<li>Escalar a datasets masivos y modelos con billones de parámetros.</li>
-</ul>
+<div class="fragment">
+<p>En el texto:</p>
+<blockquote>
+<p>“Fui al <strong>banco</strong> que está en la plaza a retirar dinero”</p>
+</blockquote>
+<p>Para representar la palabra <strong>banco</strong>, el modelo mira las demás palabras y le pone atención a las que son más relevantes. En función de eso, actualiza su valor.</p>
 </div>
 </section>
 <section id="por-qué-son-tan-bacanes-los-transformers" class="slide level2">
 <h2>¿Por qué son tan bacanes los Transformers?</h2>
-<p>3 motivos principales:</p>
 <div class="fragment">
-<p><strong>Paralelización masiva</strong>: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Esto no es una mejora incremental: es lo que hizo posible entrenar modelos con billones de parámetros.</p>
+<p>Capturar dependencias de <strong>largo alcance</strong> sin pérdida de información (eliminan el problema del Desvanecimiento o Explosión de pesos)</p>
 </div>
 <div class="fragment">
-<p><strong>Preentrenamiento a escala</strong> Se pueden preentrenar en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.</p>
+<p><strong>Paralelización masiva</strong>: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Es lo que hizo posible entrenar modelos con billones de parámetros.</p>
 </div>
 <div class="fragment">
-<p><strong>Capacidades emergentes</strong> Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes.</p>
+<p><strong>Preentrenamiento:</strong> Se pueden preentrenar en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.</p>
+</div>
+<div class="fragment">
+<p><strong>Capacidades emergentes:</strong> Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes.</p>
 </div>
 </section></section>
 <section>
