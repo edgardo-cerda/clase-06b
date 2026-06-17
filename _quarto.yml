@@ -1,4 +1,4 @@
 project:
-  type: default
+  type: website
   resources:
     - imagenes/
