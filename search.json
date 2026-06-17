@@ -4,35 +4,21 @@
     "href": "clase-06b.html#temario-de-hoy",
     "title": "",
     "section": "Temario de hoy",
-    "text": "Temario de hoy\n\nEl objetivo de esta clase es entender cómo funcionan los Transformers y cómo usarlos a través de fine-tuning para resolver problemas reales de procesamiento y análisis estadístico, viendo el ejemplo del Censo 2024.\n\nEl problema que los transformers vinieron a resolver: Límites de las RNN y LSTM y la aparición del Transformer\nMecanismo de atención: La idea central de la arquitectura\nArquitectura Transformer: Bloque transformer, embeddings posicionales\nPre-entrenamiento y fine-tuning: La lógica del transfer learning\nModelos para español: BETO y la familia RoBERTa\nAplicaciones en el CPV2024: Codificación de ocupaciones y actividad económica\nEjercicio práctico: Fine-tuning de BETO con HuggingFace"
+    "text": "Temario de hoy\n\nEl objetivo de esta clase es entender cómo funcionan los Transformers y cómo usarlos a través de fine-tuning para resolver problemas reales de procesamiento y análisis estadístico, viendo el ejemplo del Censo 2024.\n\nEl problema que los transformers vinieron a resolver: Límites de las RNN y LSTM, y la aparición del Transformer.\nMecanismo de atención: La idea central de la arquitectura\nArquitectura Transformer: Bloque transformer, embeddings posicionales\nPre-entrenamiento y fine-tuning: La lógica del transfer learning\nModelos para español: BETO y la familia RoBERTa\nAplicaciones en el CPV2024: Codificación de ocupaciones y actividad económica\nEjercicio práctico: Fine-tuning de BETO con HuggingFace"
   },
   {
     "objectID": "clase-06b.html#límites-de-las-rnn-y-lstm",
     "href": "clase-06b.html#límites-de-las-rnn-y-lstm",
     "title": "",
     "section": "Límites de las RNN y LSTM",
-    "text": "Límites de las RNN y LSTM\n\nLas redes que vimos la clase anterior tratan cada entrada como independiente: no tienen noción de orden ni de contexto previo.\n\n\nPara texto, eso es un problema: el significado de una palabra depende de su contexto.\n\n\nEjemplo de respuesta en actividad económica:\n\n“Trabajo en una empresa que realiza minería de …”\n\n\n\nEn qué sector económico trabaja? La respuesta depende del contexto:\nMinería de datos -> Actividades profesionales, científicas y técnicas Minería de cobre -> Explotación de minas y canteras"
+    "text": "Límites de las RNN y LSTM\n\nLas primeras redes que vimos las clases anteriores trataban cada entrada como independiente: no tienen noción de orden ni de contexto previo.\n\n\nEso es un problema: el significado de una palabra depende de su contexto.\n\n\nEjemplo de respuesta en actividad económica:\n\n“Trabajo en una empresa que realiza minería de …”\n\n\n\nEn qué sector económico trabaja? La respuesta depende del contexto:\n\n\nMinería de datos -> Actividades profesionales, científicas y técnicas\n\n\nMinería de cobre -> Explotación de minas y canteras"
   },
   {
-    "objectID": "clase-06b.html#límites-de-las-rnn-y-lstm-1",
-    "href": "clase-06b.html#límites-de-las-rnn-y-lstm-1",
+    "objectID": "clase-06b.html#rnn-y-lstm",
+    "href": "clase-06b.html#rnn-y-lstm",
     "title": "",
-    "section": "Límites de las RNN y LSTM",
-    "text": "Límites de las RNN y LSTM\nAntes de los transformers (2017), el estado del arte para solucionar este problema eran las Redes Neuronales Recurrentes (RNN) y su variante Long Short-Term Memory (LSTM).\n\nEstas resuelven el problema con una idea simple: además de procesar la entrada actual \\(x_t\\), mantienen un estado oculto \\(h_t\\) que “recuerda” lo que se procesó antes:\n\\[h_t = f(W_x \\, x_t + W_h \\, h_{t-1} + b)\\]\n\n\nEl estado oculto \\(h_t\\) es la “memoria” de la red: se actualiza en cada paso y pasa al siguiente. Al final de la secuencia, \\(h_T\\) resume todo lo leído."
-  },
-  {
-    "objectID": "clase-06b.html#el-problema-de-las-rnn-memoria-de-largo-alcance",
-    "href": "clase-06b.html#el-problema-de-las-rnn-memoria-de-largo-alcance",
-    "title": "",
-    "section": "El problema de las RNN: memoria de largo alcance",
-    "text": "El problema de las RNN: memoria de largo alcance\n\nOtro ejemplo:\n\n“El encuestado declaró trabajar como técnico electricista, realiza tarea tareas de instalación de cableado eléctrico y otras similares. Trabaja en una empresa constructora, pero también de forma independiente los fines de semana”\n\n\nCuando el modelo llega a la última palabra, ¿cuánto recuerda de “técnico electricista”?\nEl estado oculto tiene que “comprimir” todo lo anterior en un vector fijo.\nLa información se diluye a medida que la secuencia crece."
-  },
-  {
-    "objectID": "clase-06b.html#el-problema-de-las-rnn-memoria-de-largo-alcance-1",
-    "href": "clase-06b.html#el-problema-de-las-rnn-memoria-de-largo-alcance-1",
-    "title": "",
-    "section": "El problema de las RNN: memoria de largo alcance",
-    "text": "El problema de las RNN: memoria de largo alcance\nLa Long Short-Term Memory (LSTM) agrega un segundo vector de estado, la celda \\(c_t\\), protegida por tres compuertas aprendibles:\n\nLas compuertas permiten que la celda mantenga información útil por muchos pasos sin degradarse.\n\n\nLas LSTM mitigan el problema, pero no lo eliminan. Para secuencias largas o grandes volúmenes de datos, el costo computacional también escala mal: no se pueden paralelizar fácilmente."
+    "section": "RNN y LSTM",
+    "text": "RNN y LSTM\nPara solucionar este problema surgieron las Redes Neuronales Recurrentes (RNN), Long Short-Term Memory (LSTM), entre otras:\n\nPermiten aprender del contexto, pero tienen otros problemas:\n\nLa información se diluye a medida que la secuencia crece (Las LSTM mitigan el problema, pero no lo eliminan)\nRecurrencia hace difícil la paralelización, por lo que el costo computacional escala mal."
   },
   {
     "objectID": "clase-06b.html#la-solución-atención-directa",

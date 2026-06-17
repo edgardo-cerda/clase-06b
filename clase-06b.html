@@ -401,7 +401,7 @@
 <div class="medium-par">
 <p>El objetivo de esta clase es entender <strong>cómo funcionan los Transformers</strong> y cómo usarlos a través de <strong>fine-tuning</strong> para resolver problemas reales de procesamiento y análisis estadístico, viendo el ejemplo del Censo 2024.</p>
 <ol type="1">
-<li class="fragment"><strong>El problema que los transformers vinieron a resolver:</strong> Límites de las RNN y LSTM y la aparición del Transformer</li>
+<li class="fragment"><strong>El problema que los transformers vinieron a resolver:</strong> Límites de las RNN y LSTM, y la aparición del Transformer.</li>
 <li class="fragment"><strong>Mecanismo de atención:</strong> La idea central de la arquitectura</li>
 <li class="fragment"><strong>Arquitectura Transformer:</strong> Bloque transformer, embeddings posicionales</li>
 <li class="fragment"><strong>Pre-entrenamiento y fine-tuning:</strong> La lógica del transfer learning</li>
@@ -419,10 +419,10 @@
 <section id="límites-de-las-rnn-y-lstm" class="slide level2">
 <h2>Límites de las RNN y LSTM</h2>
 <div class="fragment medium-par">
-<p>Las redes que vimos la clase anterior tratan cada entrada como <strong>independiente</strong>: no tienen noción de orden ni de contexto previo.</p>
+<p>Las primeras redes que vimos las clases anteriores trataban cada entrada como <strong>independiente</strong>: no tienen noción de orden ni de contexto previo.</p>
 </div>
 <div class="fragment medium-par">
-<p>Para texto, eso es un problema: el significado de una palabra depende de su contexto.</p>
+<p>Eso es un problema: el significado de una palabra depende de su contexto.</p>
 </div>
 <div class="fragment">
 <p>Ejemplo de respuesta en actividad económica:</p>
@@ -432,42 +432,23 @@
 </div>
 <div class="fragment">
 <p>En qué sector económico trabaja? La respuesta depende del contexto:</p>
-<p>Minería de datos -&gt; Actividades profesionales, científicas y técnicas Minería de cobre -&gt; Explotación de minas y canteras</p>
 </div>
-</section>
-<section id="límites-de-las-rnn-y-lstm-1" class="slide level2">
-<h2>Límites de las RNN y LSTM</h2>
-<p>Antes de los transformers (2017), el estado del arte para solucionar este problema eran las <strong>Redes Neuronales Recurrentes (RNN)</strong> y su variante <strong>Long Short-Term Memory (LSTM)</strong>.</p>
-<div class="fragment medium-par">
-<p>Estas resuelven el problema con una idea simple: además de procesar la entrada actual <span class="math inline">\(x_t\)</span>, mantienen un <strong>estado oculto</strong> <span class="math inline">\(h_t\)</span> que “recuerda” lo que se procesó antes:</p>
-<p><span class="math display">\[h_t = f(W_x \, x_t + W_h \, h_{t-1} + b)\]</span></p>
-</div>
-<div class="fragment concepto-box">
-<p>El estado oculto <span class="math inline">\(h_t\)</span> es la “memoria” de la red: se actualiza en cada paso y pasa al siguiente. Al final de la secuencia, <span class="math inline">\(h_T\)</span> resume todo lo leído.</p>
-</div>
-</section>
-<section id="el-problema-de-las-rnn-memoria-de-largo-alcance" class="slide level2">
-<h2>El problema de las RNN: memoria de largo alcance</h2>
-<div class="medium-par">
-<p>Otro ejemplo:</p>
-<blockquote>
-<p><em>“El encuestado declaró trabajar como <strong>técnico electricista</strong>, realiza tarea tareas de instalación de cableado eléctrico y otras similares. Trabaja en una empresa constructora, pero también de forma independiente los fines de semana”</em></p>
-</blockquote>
-<ul>
-<li class="fragment">Cuando el modelo llega a la última palabra, ¿cuánto recuerda de <strong>“técnico electricista”</strong>?</li>
-<li class="fragment">El estado oculto tiene que “comprimir” todo lo anterior en un vector fijo.</li>
-<li class="fragment">La información <strong>se diluye</strong> a medida que la secuencia crece.</li>
-</ul>
-</div>
-</section>
-<section id="el-problema-de-las-rnn-memoria-de-largo-alcance-1" class="slide level2">
-<h2>El problema de las RNN: memoria de largo alcance</h2>
-<p>La <strong>Long Short-Term Memory (LSTM)</strong> agrega un segundo vector de estado, la <strong>celda</strong> <span class="math inline">\(c_t\)</span>, protegida por tres <strong>compuertas</strong> aprendibles:</p>
 <div class="fragment">
-<p>Las compuertas permiten que la celda mantenga información útil por muchos pasos sin degradarse.</p>
+<p>Minería de datos -&gt; Actividades profesionales, científicas y técnicas</p>
 </div>
-<div class="fragment nota-box">
-<p>Las LSTM mitigan el problema, pero no lo eliminan. Para secuencias largas o grandes volúmenes de datos, el costo computacional también escala mal: <strong>no se pueden paralelizar</strong> fácilmente.</p>
+<div class="fragment">
+<p>Minería de cobre -&gt; Explotación de minas y canteras</p>
+</div>
+</section>
+<section id="rnn-y-lstm" class="slide level2">
+<h2>RNN y LSTM</h2>
+<p>Para solucionar este problema surgieron las <strong>Redes Neuronales Recurrentes (RNN)</strong>, <strong>Long Short-Term Memory (LSTM)</strong>, entre otras:</p>
+<div class="fragment medium-par">
+<p>Permiten aprender del contexto, pero tienen otros problemas:</p>
+<ul>
+<li>La información <strong>se diluye</strong> a medida que la secuencia crece (Las LSTM mitigan el problema, pero no lo eliminan)</li>
+<li>Recurrencia hace difícil la paralelización, por lo que el costo computacional escala mal.</li>
+</ul>
 </div>
 </section>
 <section id="la-solución-atención-directa" class="slide level2">
