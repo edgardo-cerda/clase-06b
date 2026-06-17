@@ -398,17 +398,16 @@
 </section>
 <section id="temario-de-hoy" class="slide level2">
 <h2>Temario de hoy</h2>
-<div class="medium-par">
-<p>El objetivo de esta clase es entender <strong>cómo funcionan los Transformers</strong> y cómo usarlos a través de <strong>fine-tuning</strong> para resolver problemas reales de procesamiento y análisis estadístico.</p>
+<p>::: {.medium-par .incremental} El objetivo de esta clase es entender <strong>cómo funcionan los Transformers</strong> y cómo usarlos a través de <strong>fine-tuning</strong> para resolver problemas reales de procesamiento y análisis estadístico.</p>
 <ol type="1">
-<li class="fragment"><strong>El problema que los transformers vinieron a resolver:</strong> Límites de las RNN y LSTM, y la aparición del Transformer.</li>
-<li class="fragment"><strong>Mecanismo de atención:</strong> La idea central de la arquitectura</li>
-<li class="fragment"><strong>Arquitectura Transformer:</strong> Attention Head, Bloque transformer, Embeddings posicionales</li>
-<li class="fragment"><strong>Pre-entrenamiento y fine-tuning:</strong> La lógica del transfer learning</li>
-<li class="fragment"><strong>Modelos para español:</strong> BETO y la familia RoBERTa</li>
-<li class="fragment"><strong>Ejercicio práctico:</strong> Fine-tuning de BETO con HuggingFace</li>
+<li><strong>El problema que los transformers vinieron a resolver:</strong> Límites de las RNN y LSTM, y la aparición del Transformer.</li>
+<li><strong>Mecanismo de atención:</strong> La idea central de la arquitectura</li>
+<li><strong>Arquitectura Transformer:</strong> Attention Head, Bloque transformer, Embeddings posicionales</li>
+<li><strong>Pre-entrenamiento y fine-tuning:</strong> La lógica del transfer learning</li>
+<li><strong>Modelos para español:</strong> BETO y la familia RoBERTa</li>
+<li><strong>Ejercicio práctico:</strong> Fine-tuning de BETO con HuggingFace</li>
 </ol>
-</div>
+<p>:::Y</p>
 </section></section>
 <section>
 <section id="el-problema-que-los-transformers-vinieron-a-resolver" class="title-slide slide level1 center">
@@ -803,12 +802,12 @@
 </div>
 </section></section>
 <section>
-<section id="aplicaciones-en-el-cpv2024" class="title-slide slide level1 center">
-<h1>Aplicaciones en el CPV2024</h1>
+<section id="ejercicio-práctico" class="title-slide slide level1 center">
+<h1>Ejercicio práctico</h1>
 
 </section>
-<section id="el-problema-de-la-codificación-censal" class="slide level2">
-<h2>El problema de la codificación censal</h2>
+<section id="el-problema-de-la-codificación" class="slide level2">
+<h2>El problema de la codificación</h2>
 <div class="medium-par">
 <p>En el Censo 2024, las preguntas de <strong>ocupación</strong> y <strong>rama de actividad</strong> se capturan como texto libre:</p>
 <ul>
@@ -825,17 +824,12 @@
 <div class="fragment nota-box">
 <p>La codificación manual es costosa y propensa a inconsistencias entre codificadores. Un modelo de fine-tuning puede automatizar el proceso y mejorar la consistencia.</p>
 </div>
-</section></section>
-<section>
-<section id="ejercicio-práctico" class="title-slide slide level1 center">
-<h1>Ejercicio práctico</h1>
-
 </section>
 <section id="codificación-de-ocupaciones-ciuo-08" class="slide level2">
 <h2>Codificación de ocupaciones (CIUO-08)</h2>
 <div class="medium-par">
-<p><strong>Entrada</strong>: texto libre de la glosa de ocupación</p>
-<p><strong>Salida</strong>: código CIUO-08 a 1 dígito (10 grandes grupos)</p>
+<p><strong>Entrada</strong>: texto libre de la glosa de ocupación, y de tareas y deberes.</p>
+<p><strong>Salida</strong>: código CIUO-08 a 1 dígito (10 grandes grupos).</p>
 </div>
 <div class="medium-par">
 <table>
@@ -882,7 +876,7 @@
 <p><strong>Note</strong></p>
 </div>
 <div class="callout-content">
-<p>Comenzamos con 1 dígito (10 clases) como primer paso. El modelo puede refinarse luego para 2, 3 y 4 dígitos, donde el problema se vuelve mucho más difícil.</p>
+<p>Ejericio práctico con 1 dígito (10 clases) como primer paso. El modelo puede refinarse luego para 2, 3 y 4 dígitos, donde el problema se vuelve más difícil.</p>
 </div>
 </div>
 </div>

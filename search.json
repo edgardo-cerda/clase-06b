@@ -4,7 +4,7 @@
     "href": "clase-06b.html#temario-de-hoy",
     "title": "",
     "section": "Temario de hoy",
-    "text": "Temario de hoy\n\nEl objetivo de esta clase es entender cómo funcionan los Transformers y cómo usarlos a través de fine-tuning para resolver problemas reales de procesamiento y análisis estadístico.\n\nEl problema que los transformers vinieron a resolver: Límites de las RNN y LSTM, y la aparición del Transformer.\nMecanismo de atención: La idea central de la arquitectura\nArquitectura Transformer: Attention Head, Bloque transformer, Embeddings posicionales\nPre-entrenamiento y fine-tuning: La lógica del transfer learning\nModelos para español: BETO y la familia RoBERTa\nEjercicio práctico: Fine-tuning de BETO con HuggingFace"
+    "text": "Temario de hoy\n::: {.medium-par .incremental} El objetivo de esta clase es entender cómo funcionan los Transformers y cómo usarlos a través de fine-tuning para resolver problemas reales de procesamiento y análisis estadístico.\n\nEl problema que los transformers vinieron a resolver: Límites de las RNN y LSTM, y la aparición del Transformer.\nMecanismo de atención: La idea central de la arquitectura\nArquitectura Transformer: Attention Head, Bloque transformer, Embeddings posicionales\nPre-entrenamiento y fine-tuning: La lógica del transfer learning\nModelos para español: BETO y la familia RoBERTa\nEjercicio práctico: Fine-tuning de BETO con HuggingFace\n\n:::Y"
   },
   {
     "objectID": "clase-06b.html#límites-de-las-rnn-y-lstm",
@@ -147,18 +147,18 @@
     "text": "Otros modelos relevantes\n\n\n\n\n\n\n\n\n\n\nModelo\nBase\nEntrenado en\nHuggingFace\n\n\n\n\nBETO\nBERT\nWikipedia ES\ndccuchile/bert-base-spanish-wwm-cased\n\n\nRoBERTa-es\nRoBERTa\n0.9 TB texto español\nPlanTL-GOB-ES/roberta-base-bne\n\n\nmBERT\nBERT\nWikipedia 104 idiomas\nbert-base-multilingual-cased\n\n\nXLM-RoBERTa\nRoBERTa\n100 idiomas\nxlm-roberta-base\n\n\n\n\n\n¿Cuál elegir? Para glosas de ocupación y actividad económica en Chile:\n\nBETO es una excelente línea base, fácil de usar y bien documentada.\nRoBERTa-es (BNE) suele superar a BETO en benchmarks; entrenado con corpus más diverso.\nXLM-RoBERTa útil si el corpus tiene mezcla de idiomas o dialectos."
   },
   {
-    "objectID": "clase-06b.html#el-problema-de-la-codificación-censal",
-    "href": "clase-06b.html#el-problema-de-la-codificación-censal",
+    "objectID": "clase-06b.html#el-problema-de-la-codificación",
+    "href": "clase-06b.html#el-problema-de-la-codificación",
     "title": "",
-    "section": "El problema de la codificación censal",
-    "text": "El problema de la codificación censal\n\nEn el Censo 2024, las preguntas de ocupación y rama de actividad se capturan como texto libre:\n\n“¿Cuál es su ocupación principal?” → “Técnico electricista”\n“¿Qué tareas y deberes cumple en su trabajo?” → “Instalar sistemas eléctricos”\n“¿A qué se dedica la empresa en la cual trabaja?” → “Construcción de edificios”\n\nEstas respuestas deben codificarse según clasificadores internacionales:\n\nCIUO-08: Clasificación Internacional Uniforme de Ocupaciones (OIT)\nCAENES: Clasificación de Actividades Económicas para Encuestas Sociodemográficas (INE)\n\n\n\nLa codificación manual es costosa y propensa a inconsistencias entre codificadores. Un modelo de fine-tuning puede automatizar el proceso y mejorar la consistencia."
+    "section": "El problema de la codificación",
+    "text": "El problema de la codificación\n\nEn el Censo 2024, las preguntas de ocupación y rama de actividad se capturan como texto libre:\n\n“¿Cuál es su ocupación principal?” → “Técnico electricista”\n“¿Qué tareas y deberes cumple en su trabajo?” → “Instalar sistemas eléctricos”\n“¿A qué se dedica la empresa en la cual trabaja?” → “Construcción de edificios”\n\nEstas respuestas deben codificarse según clasificadores internacionales:\n\nCIUO-08: Clasificación Internacional Uniforme de Ocupaciones (OIT)\nCAENES: Clasificación de Actividades Económicas para Encuestas Sociodemográficas (INE)\n\n\n\nLa codificación manual es costosa y propensa a inconsistencias entre codificadores. Un modelo de fine-tuning puede automatizar el proceso y mejorar la consistencia."
   },
   {
     "objectID": "clase-06b.html#codificación-de-ocupaciones-ciuo-08",
     "href": "clase-06b.html#codificación-de-ocupaciones-ciuo-08",
     "title": "",
     "section": "Codificación de ocupaciones (CIUO-08)",
-    "text": "Codificación de ocupaciones (CIUO-08)\n\nEntrada: texto libre de la glosa de ocupación\nSalida: código CIUO-08 a 1 dígito (10 grandes grupos)\n\n\n\n\n\nCódigo\nGrupo\n\n\n\n\n1\nDirectores y gerentes\n\n\n2\nProfesionales científicos e intelectuales\n\n\n3\nTécnicos y profesionales de nivel medio\n\n\n4\nPersonal de apoyo administrativo\n\n\n…\n…\n\n\n9\nOcupaciones elementales\n\n\n\n\n\n\n\n\n\n\nNote\n\n\nComenzamos con 1 dígito (10 clases) como primer paso. El modelo puede refinarse luego para 2, 3 y 4 dígitos, donde el problema se vuelve mucho más difícil."
+    "text": "Codificación de ocupaciones (CIUO-08)\n\nEntrada: texto libre de la glosa de ocupación, y de tareas y deberes.\nSalida: código CIUO-08 a 1 dígito (10 grandes grupos).\n\n\n\n\n\nCódigo\nGrupo\n\n\n\n\n1\nDirectores y gerentes\n\n\n2\nProfesionales científicos e intelectuales\n\n\n3\nTécnicos y profesionales de nivel medio\n\n\n4\nPersonal de apoyo administrativo\n\n\n…\n…\n\n\n9\nOcupaciones elementales\n\n\n\n\n\n\n\n\n\n\nNote\n\n\nEjericio práctico con 1 dígito (10 clases) como primer paso. El modelo puede refinarse luego para 2, 3 y 4 dígitos, donde el problema se vuelve más difícil."
   },
   {
     "objectID": "clase-06b.html#pipeline-completo-con-huggingface",
