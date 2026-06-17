@@ -450,23 +450,16 @@
 <section id="la-solución-transformers-y-la-autoatención" class="slide level2">
 <h2>La solución: Transformers y la Autoatención</h2>
 <div class="fragment medium-par">
-<p>En vez de leer de izquierda a derecha y acumular un estado latente, los Transformers pueden <strong>mirar directamente cualquier parte del texto</strong> cuando necesitan entender qué dice un texto.</p>
+<p>En vez de leer de izquierda a derecha y acumular un estado latente, los Transformers <strong>miran directamente todas las parte del texto</strong> para entender qué dice un texto, pero poniéndole más o menos atención a algunas partes.</p>
 </div>
 <div class="fragment concepto-box">
-<p>Esa es la idea del mecanismo de <strong>atención (o Autoatención)</strong>: en vez de comprimir todo en un estado oculto, el modelo aprende a <strong>ponderar cuánto importa cada token</strong> para producir la representación actual.</p>
-</div>
-<div class="fragment">
-<p>En el texto:</p>
-<blockquote>
-<p>“Fui al <strong>banco</strong> que está en la plaza a retirar dinero”</p>
-</blockquote>
-<p>Para representar la palabra <strong>banco</strong>, el modelo mira las demás palabras y le pone atención a las que son más relevantes. En función de eso, actualiza su valor.</p>
+<p>Esa es la idea del mecanismo de <strong>Atención (o Autoatención)</strong>: en vez de comprimir todo en un estado oculto, el modelo aprende a <strong>ponderar cuánto importa cada token</strong> para producir la representación actual.</p>
 </div>
 </section>
 <section id="por-qué-son-tan-bacanes-los-transformers" class="slide level2">
 <h2>¿Por qué son tan bacanes los Transformers?</h2>
 <div class="fragment">
-<p>Capturar dependencias de <strong>largo alcance</strong> sin pérdida de información (eliminan el problema del Desvanecimiento o Explosión de pesos)</p>
+<p>Capturan dependencias de <strong>largo alcance</strong> sin pérdida de información (eliminan el problema del Desvanecimiento o Explosión de pesos)</p>
 </div>
 <div class="fragment">
 <p><strong>Paralelización masiva</strong>: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Es lo que hizo posible entrenar modelos con billones de parámetros.</p>
@@ -494,6 +487,13 @@
 <div class="fragment medium-par">
 <p>Esto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto.</p>
 </div>
+<div class="fragment">
+<p>En el texto:</p>
+<blockquote>
+<p>“Fui al <strong>banco</strong> que está junto a la plaza a retirar dinero”</p>
+</blockquote>
+<p>Para representar la palabra <strong>banco</strong>, el modelo mira las demás palabras y le pone atención a las que son más “relevantes”. En función de eso, actualiza su valor (y así con todas los tokens del texto).</p>
+</div>
 <p>FALTA UN DIAGRAMA</p>
 </section>
 <section id="queries-keys-y-values" class="slide level2">
@@ -508,13 +508,6 @@
 <li class="fragment"><strong>Value (V)</strong>: <em>“¿Qué información entrego si me eligen?”</em> — el contenido que se pasa.</li>
 </ul>
 </div>
-<div class="fragment medium-par">
-<p>La atención entre Q y K produce un <strong>peso</strong> para cada par de tokens. Esos pesos se aplican sobre V:</p>
-<p><span class="math display">\[\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V\]</span></p>
-</div>
-<div class="fragment small-par">
-<p>El factor <span class="math inline">\(\sqrt{d_k}\)</span> escala los productos para evitar que el softmax sature con valores muy grandes.</p>
-</div>
 </section>
 <section id="queries-keys-y-values-1" class="slide level2">
 <h2>Queries, Keys y Values</h2>
@@ -528,11 +521,11 @@
 <li><strong>Value (V)</strong>: <em>“¿Qué información traspaso a otros tokens, si es que me”eligen”?“</em></li>
 </ul>
 </div>
-<div class="medium-par">
+<div class="fragment medium-par">
 <p>La atención entre Q y K produce un <strong>peso</strong> para cada par de tokens. Esos pesos se aplican sobre V:</p>
 <p><span class="math display">\[\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V\]</span></p>
 </div>
-<div class="small-par">
+<div class="fragment small-par">
 <p>El factor <span class="math inline">\(\sqrt{d_k}\)</span> escala los productos para evitar que el softmax sature con valores muy grandes.</p>
 </div>
 </section></section>
@@ -544,7 +537,7 @@
 <section id="atención-multi-cabeza-multi-head-attention" class="slide level2">
 <h2>Atención multi-cabeza (Multi-Head Attention)</h2>
 <div class="medium-par">
-<p>El mecanismo de atención corresponde a una “cabeza de atención” (tiene otros componentes)</p>
+<p>El mecanismo de atención corresponde a una “cabeza de atención” (junto a otros componentes)</p>
 </div>
 <div class="medium-par">
 <p>En la práctica, no se usa una sola cabeza de atención sino varias en paralelo. Cada cabeza aprende a atender a <strong>aspectos distintos</strong> de la secuencia:</p>

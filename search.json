@@ -25,28 +25,28 @@
     "href": "clase-06b.html#la-solución-transformers-y-la-autoatención",
     "title": "",
     "section": "La solución: Transformers y la Autoatención",
-    "text": "La solución: Transformers y la Autoatención\n\nEn vez de leer de izquierda a derecha y acumular un estado latente, los Transformers pueden mirar directamente cualquier parte del texto cuando necesitan entender qué dice un texto.\n\n\nEsa es la idea del mecanismo de atención (o Autoatención): en vez de comprimir todo en un estado oculto, el modelo aprende a ponderar cuánto importa cada token para producir la representación actual.\n\n\nEn el texto:\n\n“Fui al banco que está en la plaza a retirar dinero”\n\nPara representar la palabra banco, el modelo mira las demás palabras y le pone atención a las que son más relevantes. En función de eso, actualiza su valor."
+    "text": "La solución: Transformers y la Autoatención\n\nEn vez de leer de izquierda a derecha y acumular un estado latente, los Transformers miran directamente todas las parte del texto para entender qué dice un texto, pero poniéndole más o menos atención a algunas partes.\n\n\nEsa es la idea del mecanismo de Atención (o Autoatención): en vez de comprimir todo en un estado oculto, el modelo aprende a ponderar cuánto importa cada token para producir la representación actual."
   },
   {
     "objectID": "clase-06b.html#por-qué-son-tan-bacanes-los-transformers",
     "href": "clase-06b.html#por-qué-son-tan-bacanes-los-transformers",
     "title": "",
     "section": "¿Por qué son tan bacanes los Transformers?",
-    "text": "¿Por qué son tan bacanes los Transformers?\n\nCapturar dependencias de largo alcance sin pérdida de información (eliminan el problema del Desvanecimiento o Explosión de pesos)\n\n\nParalelización masiva: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Es lo que hizo posible entrenar modelos con billones de parámetros.\n\n\nPreentrenamiento: Se pueden preentrenar en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.\n\n\nCapacidades emergentes: Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes."
+    "text": "¿Por qué son tan bacanes los Transformers?\n\nCapturan dependencias de largo alcance sin pérdida de información (eliminan el problema del Desvanecimiento o Explosión de pesos)\n\n\nParalelización masiva: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Es lo que hizo posible entrenar modelos con billones de parámetros.\n\n\nPreentrenamiento: Se pueden preentrenar en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.\n\n\nCapacidades emergentes: Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes."
   },
   {
     "objectID": "clase-06b.html#intuición",
     "href": "clase-06b.html#intuición",
     "title": "",
     "section": "Intuición",
-    "text": "Intuición\n\nLa atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).\n\n\nLos transformers aprenden a qué y cómo poner atención para “entender” los tokens de un texto.\n\n\nEsto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto.\n\nFALTA UN DIAGRAMA"
+    "text": "Intuición\n\nLa atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).\n\n\nLos transformers aprenden a qué y cómo poner atención para “entender” los tokens de un texto.\n\n\nEsto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto.\n\n\nEn el texto:\n\n“Fui al banco que está junto a la plaza a retirar dinero”\n\nPara representar la palabra banco, el modelo mira las demás palabras y le pone atención a las que son más “relevantes”. En función de eso, actualiza su valor (y así con todas los tokens del texto).\n\nFALTA UN DIAGRAMA"
   },
   {
     "objectID": "clase-06b.html#queries-keys-y-values",
     "href": "clase-06b.html#queries-keys-y-values",
     "title": "",
     "section": "Queries, Keys y Values",
-    "text": "Queries, Keys y Values\n\nLa atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:\n\n\n\nQuery (Q): “¿Qué información necesito?” — lo que estoy buscando.\nKey (K): “¿Qué información tengo yo?” — lo que cada token ofrece.\nValue (V): “¿Qué información entrego si me eligen?” — el contenido que se pasa.\n\n\n\nLa atención entre Q y K produce un peso para cada par de tokens. Esos pesos se aplican sobre V:\n\\[\\text{Attention}(Q, K, V) = \\text{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right) V\\]\n\n\nEl factor \\(\\sqrt{d_k}\\) escala los productos para evitar que el softmax sature con valores muy grandes."
+    "text": "Queries, Keys y Values\n\nLa atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:\n\n\n\nQuery (Q): “¿Qué información necesito?” — lo que estoy buscando.\nKey (K): “¿Qué información tengo yo?” — lo que cada token ofrece.\nValue (V): “¿Qué información entrego si me eligen?” — el contenido que se pasa."
   },
   {
     "objectID": "clase-06b.html#queries-keys-y-values-1",
@@ -60,7 +60,7 @@
     "href": "clase-06b.html#atención-multi-cabeza-multi-head-attention",
     "title": "",
     "section": "Atención multi-cabeza (Multi-Head Attention)",
-    "text": "Atención multi-cabeza (Multi-Head Attention)\n\nEl mecanismo de atención corresponde a una “cabeza de atención” (tiene otros componentes)\n\n\nEn la práctica, no se usa una sola cabeza de atención sino varias en paralelo. Cada cabeza aprende a atender a aspectos distintos de la secuencia:\n\n\n\n\n\nUna cabeza puede capturar relaciones sintácticas (sujeto → verbo).\nOtra puede capturar relaciones semánticas (ocupación → rama de actividad).\nOtra puede rastrear correferencias (pronombres → sustantivos).\n\n\n\nLas salidas de todas las cabezas se concatenan y proyectan:\n\\[\\text{MultiHead}(Q,K,V) = \\text{Concat}(\\text{head}_1, \\ldots, \\text{head}_h)\\,W^O\\]"
+    "text": "Atención multi-cabeza (Multi-Head Attention)\n\nEl mecanismo de atención corresponde a una “cabeza de atención” (junto a otros componentes)\n\n\nEn la práctica, no se usa una sola cabeza de atención sino varias en paralelo. Cada cabeza aprende a atender a aspectos distintos de la secuencia:\n\n\n\n\n\nUna cabeza puede capturar relaciones sintácticas (sujeto → verbo).\nOtra puede capturar relaciones semánticas (ocupación → rama de actividad).\nOtra puede rastrear correferencias (pronombres → sustantivos).\n\n\n\nLas salidas de todas las cabezas se concatenan y proyectan:\n\\[\\text{MultiHead}(Q,K,V) = \\text{Concat}(\\text{head}_1, \\ldots, \\text{head}_h)\\,W^O\\]"
   },
   {
     "objectID": "clase-06b.html#el-bloque-transformer",
