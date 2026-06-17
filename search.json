@@ -25,7 +25,7 @@
     "href": "clase-06b.html#la-solución-transformers-y-la-autoatención",
     "title": "",
     "section": "La solución: Transformers y la Autoatención",
-    "text": "La solución: Transformers y la Autoatención\n\nEn vez de leer de izquierda a derecha y acumular un estado latente, los Transformers miran directamente todas las parte del texto para entender qué dice un texto, pero poniéndole más o menos atención a algunas partes.\n\n\nEsa es la idea del mecanismo de Atención (o Autoatención): en vez de comprimir todo en un estado oculto, el modelo aprende a ponderar cuánto importa cada token para producir la representación actual."
+    "text": "La solución: Transformers y la Autoatención\n\nEn vez de leer de izquierda a derecha y acumular un estado latente, los Transformers miran todas las parte del texto para entender qué dice un texto, pero poniéndole más o menos atención a algunas partes.\n\n\nEsa es la idea del mecanismo de Atención (o Autoatención): en vez de comprimir todo en un estado oculto, el modelo aprende a ponderar cuánto importa cada token para producir la representación actual."
   },
   {
     "objectID": "clase-06b.html#por-qué-son-tan-bacanes-los-transformers",
@@ -84,25 +84,25 @@
     "text": "Visualizando un Transformer:\nhttps://poloclub.github.io/transformer-explainer/\nVisualizing transformers and attention | Talk for TNG Big Tech Day ’24"
   },
   {
-    "objectID": "clase-06b.html#encoder-decoder-y-encoder-decoder",
-    "href": "clase-06b.html#encoder-decoder-y-encoder-decoder",
+    "objectID": "clase-06b.html#estructura-encoder-decoder",
+    "href": "clase-06b.html#estructura-encoder-decoder",
     "title": "",
-    "section": "Encoder, Decoder y Encoder-Decoder",
-    "text": "Encoder, Decoder y Encoder-Decoder\n\nEl Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: encoder y decoder. La lógica era que el Encoder “codificaba” la información de un idioma en un vector numérico, y el Decoder tomaba esto y lo “decodificaba” en otro idioma.\n\n\nCon el tiempo se descubrió que cada mitad es útil por separado, y para propósitos diferentes."
+    "section": "Estructura Encoder-Decoder",
+    "text": "Estructura Encoder-Decoder\n\nEl Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: Encoder y Decoder. La lógica era que el Encoder “codificaba” la información de un idioma en un vector numérico, y el Decoder tomaba esto y lo “decodificaba” en otro idioma.\n\n\nCon el tiempo se encontró que cada mitad es útil por separado, y para propósitos diferentes."
   },
   {
-    "objectID": "clase-06b.html#encoder-decoder-y-encoder-decoder-1",
-    "href": "clase-06b.html#encoder-decoder-y-encoder-decoder-1",
+    "objectID": "clase-06b.html#estructura-encoder-decoder-1",
+    "href": "clase-06b.html#estructura-encoder-decoder-1",
     "title": "",
-    "section": "Encoder, Decoder y Encoder-Decoder",
-    "text": "Encoder, Decoder y Encoder-Decoder\n\nEncoder - leer y representar\nToma una secuencia de tokens y produce una representación para cada uno Atención bidireccional: cada token ve todos los demás (izquierda y derecha) No genera nada: su salida son vectores, no palabras Útil cuando la tarea requiere entender el texto de entrada\n\n\nDecoder - generar secuencias\nToma una secuencia de tokens y produce una predicción del siguiente token Atención causal: cada token solo ve los anteriores, nunca los siguientes Esta restricción es necesaria para que la generación sea coherente: no puede “hacer trampa” mirando el futuro Útil cuando la tarea requiere producir texto nuevo\n\n\nEncoder-Decoder - transformar una secuencia en otra\nEl encoder lee y comprende la entrada completa El decoder genera la salida token a token, pero en cada paso puede atender al encoder (cross-attention) Útil cuando entrada y salida son secuencias distintas"
+    "section": "Estructura Encoder-Decoder",
+    "text": "Estructura Encoder-Decoder\n\nEncoder - leer y representar\nToma una secuencia de tokens y produce una representación para cada uno Atención bidireccional: cada token ve todos los demás (izquierda y derecha) No genera nada: su salida son vectores, no palabras Útil cuando la tarea requiere entender el texto de entrada\n\n\nDecoder - generar secuencias\nToma una secuencia de tokens y produce una predicción del siguiente token Atención causal: cada token solo ve los anteriores, nunca los siguientes Esta restricción es necesaria para que la generación sea coherente: no puede “hacer trampa” mirando el futuro Útil cuando la tarea requiere producir texto nuevo\n\n\nEncoder-Decoder - transformar una secuencia en otra\nEl encoder lee y comprende la entrada completa El decoder genera la salida token a token, pero en cada paso puede atender al encoder (cross-attention) Útil cuando entrada y salida son secuencias distintas"
   },
   {
     "objectID": "clase-06b.html#modelos-actuales-claude-gpt-4-etc.",
     "href": "clase-06b.html#modelos-actuales-claude-gpt-4-etc.",
     "title": "",
     "section": "Modelos actuales (Claude, GPT-4, etc.)",
-    "text": "Modelos actuales (Claude, GPT-4, etc.)\nClaude, GPT-4, Gemini y todos los grandes modelos de lenguaje actuales son, en su núcleo, transformers decoder-only.\nEntrenados con predicción de siguiente token sobre cantidades enormes de texto, seguido de refinamiento con retroalimentación humana (RLHF o variantes).\nLa arquitectura del paper de 2017 es reconocible, pero hay décadas de mejoras acumuladas."
+    "text": "Modelos actuales (Claude, GPT-4, etc.)\nClaude, GPT-4, Gemini y todos los grandes modelos de lenguaje actuales son, en su núcleo, transformers decoder-only.\nEntrenados con predicción de siguiente token sobre cantidades enormes de texto, seguido de refinamiento con retroalimentación humana (RLHF o variantes)."
   },
   {
     "objectID": "clase-06b.html#bert-el-encoder-por-excelencia",
@@ -116,14 +116,14 @@
     "href": "clase-06b.html#la-analogía-del-profesional-especializado",
     "title": "",
     "section": "La analogía del profesional especializado",
-    "text": "La analogía del profesional especializado\n\nImaginemos el ciclo de formación de un profesional:\n\n\n\n\nPre-entrenamiento = educación general\n\nLee millones de textos.\nAprende gramática, semántica, hechos del mundo.\nNo sabe nada específico de codificación censal.\nCosto: enorme (miles de GPUs, semanas).\n\n\n\n\nFine-tuning = especialización\n\nToma ese conocimiento general.\nLo ajusta con ejemplos del dominio específico.\nAprende la tarea concreta (p/e CIUO-08).\nCosto: manejable (1 GPU, horas o días).\n\n\n\n\n\nNo necesitamos entrenar desde cero. Partimos de un modelo que ya “entiende” el español y le enseñamos nuestra tarea específica."
+    "text": "La analogía del profesional especializado\n\nImaginemos el ciclo de formación de un profesional:\n\n\n\n\nPre-entrenamiento = educación general\n\nLee millones de textos.\nAprende gramática, semántica, hechos del mundo.\nNo sabe nada específico de codificación censal.\nCosto: enorme (miles de GPUs, semanas).\n\n\n\n\nFine-tuning = especialización\n\nToma ese conocimiento general.\nLo ajusta con ejemplos del dominio específico.\nAprende la tarea concreta (p/e CIUO-08).\nCosto: manejable (1 GPU, horas o días).\n\n\n\n\n\nNo necesitamos entrenar desde cero. Partimos de un modelo que ya “entiende” el español y le enseñamos nuestra tarea específica, por lo que se necesitan mucho menos datos de entrenamiento."
   },
   {
     "objectID": "clase-06b.html#qué-ocurre-durante-el-fine-tuning",
     "href": "clase-06b.html#qué-ocurre-durante-el-fine-tuning",
     "title": "",
     "section": "¿Qué ocurre durante el fine-tuning?",
-    "text": "¿Qué ocurre durante el fine-tuning?\n\n\n\n\nTomamos el modelo pre-entrenado (BERT, BETO…).\nAgregamos una cabeza de clasificación: una capa lineal sobre el token [CLS].\nEntrenamos con nuestros datos etiquetados, ajustando todos los pesos (o solo parte de ellos).\nUsamos un learning rate muy pequeño para no “olvidar” lo pre-entrenado.\n\n\n\n\n\n\n\n\n\n\n\n\nNote\n\n\nEl token [CLS] es un token especial que BERT agrega al inicio de cada texto. Su representación final captura el significado global de la oración y se usa como input para la capa de clasificación.\n\n\n\n\n¿Cuántos datos necesito para fine-tuning?\n\n\nMucho menos de lo que se necesitaría para entrenar desde cero:"
+    "text": "¿Qué ocurre durante el fine-tuning?\n\n\n\n\nTomamos el modelo pre-entrenado (BERT, BETO…).\nAgregamos una cabeza de clasificación: una capa lineal sobre el token [CLS].\nEntrenamos con nuestros datos etiquetados, ajustando todos los pesos (o solo parte de ellos).\nUsamos un learning rate muy pequeño para no “olvidar” lo pre-entrenado.\n\n\n\n\n\n\n\n\n\n\n\n\nNote\n\n\nEl token [CLS] es un token especial que BERT agrega al inicio de cada texto. Su representación final captura el significado global de la oración y se usa como input para la capa de clasificación."
   },
   {
     "objectID": "clase-06b.html#el-problema-del-idioma",
@@ -137,14 +137,14 @@
     "href": "clase-06b.html#beto-bert-para-español",
     "title": "",
     "section": "BETO: BERT para español",
-    "text": "BETO: BERT para español\n\nBETO es la versión de BERT entrenada por el Departamento de Ciencias de la Computación de la Universidad de Chile:\n\nPre-entrenado en el Spanish Wikipedia (más de 3 GB de texto).\nMismo vocabulario y arquitectura que BERT-base (30.000 tokens en español).\nPublicado en HuggingFace como dccuchile/bert-base-spanish-wwm-cased.\nVersión cased (distingue mayúsculas) y uncased."
+    "text": "BETO: BERT para español\n\nBETO es la versión de BERT entrenada por el Departamento de Ciencias de la Computación de la Universidad de Chile:\n\nPre-entrenado en el Spanish Wikipedia (más de 3 GB de texto).\nMismo vocabulario y arquitectura que BERT-base (30.000 tokens en español).\nPublicado en HuggingFace como dccuchile/bert-base-spanish-wwm-cased."
   },
   {
-    "objectID": "clase-06b.html#otros-modelos-relevantes-para-el-censo",
-    "href": "clase-06b.html#otros-modelos-relevantes-para-el-censo",
+    "objectID": "clase-06b.html#otros-modelos-relevantes",
+    "href": "clase-06b.html#otros-modelos-relevantes",
     "title": "",
-    "section": "Otros modelos relevantes para el Censo",
-    "text": "Otros modelos relevantes para el Censo\n\n\n\n\n\n\n\n\n\n\nModelo\nBase\nEntrenado en\nHuggingFace\n\n\n\n\nBETO\nBERT\nWikipedia ES\ndccuchile/bert-base-spanish-wwm-cased\n\n\nRoBERTa-es\nRoBERTa\n0.9 TB texto español\nPlanTL-GOB-ES/roberta-base-bne\n\n\nmBERT\nBERT\nWikipedia 104 idiomas\nbert-base-multilingual-cased\n\n\nXLM-RoBERTa\nRoBERTa\n100 idiomas\nxlm-roberta-base\n\n\n\n\n\n¿Cuál elegir? Para glosas de ocupación y actividad económica en Chile:\n\nBETO es una excelente línea base, fácil de usar y bien documentada.\nRoBERTa-es (BNE) suele superar a BETO en benchmarks; entrenado con corpus más diverso.\nXLM-RoBERTa útil si el corpus tiene mezcla de idiomas o dialectos."
+    "section": "Otros modelos relevantes",
+    "text": "Otros modelos relevantes\n\n\n\n\n\n\n\n\n\n\nModelo\nBase\nEntrenado en\nHuggingFace\n\n\n\n\nBETO\nBERT\nWikipedia ES\ndccuchile/bert-base-spanish-wwm-cased\n\n\nRoBERTa-es\nRoBERTa\n0.9 TB texto español\nPlanTL-GOB-ES/roberta-base-bne\n\n\nmBERT\nBERT\nWikipedia 104 idiomas\nbert-base-multilingual-cased\n\n\nXLM-RoBERTa\nRoBERTa\n100 idiomas\nxlm-roberta-base\n\n\n\n\n\n¿Cuál elegir? Para glosas de ocupación y actividad económica en Chile:\n\nBETO es una excelente línea base, fácil de usar y bien documentada.\nRoBERTa-es (BNE) suele superar a BETO en benchmarks; entrenado con corpus más diverso.\nXLM-RoBERTa útil si el corpus tiene mezcla de idiomas o dialectos."
   },
   {
     "objectID": "clase-06b.html#el-problema-de-la-codificación-censal",
@@ -203,18 +203,11 @@
     "text": "Inferencia: usar el modelo en producción\n\nfrom transformers import pipeline\n\nclasificador = pipeline(\n    \"text-classification\",\n    model=\"modelos/beto-ciuo-final\",\n    tokenizer=\"modelos/beto-ciuo-final\"\n)\n\nglosas = [\n    \"Técnico electricista en empresa de distribución\",\n    \"Profesora de enseñanza básica en colegio municipal\",\n    \"Cajera en supermercado\",\n    \"Ingeniero agrónomo en empresa exportadora de fruta\",\n]\n\nresultados = clasificador(glosas)\nfor glosa, res in zip(glosas, resultados):\n    print(f\"{glosa[:45]:<45} → {res['label']} ({res['score']:.3f})\")"
   },
   {
-    "objectID": "clase-06b.html#resultados-en-contexto-censal",
-    "href": "clase-06b.html#resultados-en-contexto-censal",
+    "objectID": "clase-06b.html#resultados",
+    "href": "clase-06b.html#resultados",
     "title": "",
-    "section": "Resultados en contexto censal",
-    "text": "Resultados en contexto censal\n\n\n\n\n\n\n\n\n\n\nEl fine-tuning de BETO supera significativamente a los enfoques anteriores. Los números son referenciales; los resultados reales dependen de la calidad y cantidad de los datos de entrenamiento."
-  },
-  {
-    "objectID": "clase-06b.html#consideraciones-prácticas-para-el-censo",
-    "href": "clase-06b.html#consideraciones-prácticas-para-el-censo",
-    "title": "",
-    "section": "Consideraciones prácticas para el Censo",
-    "text": "Consideraciones prácticas para el Censo\n\nDatos de entrenamiento\n\nLas glosas de censos y encuestas anteriores (EPE, CASEN, Censo 2017) son una fuente valiosa.\nImportante: usar datos ya codificados por codificadores expertos, no predicciones de otro modelo.\n\nEvaluación\n\nAdemás de accuracy global, revisar el desempeño por grupo CIUO: algunos grupos son más difíciles (p/e grupo 5 vs. grupo 9).\nMétricas: accuracy, F1 macro, matriz de confusión.\n\nGobernanza\n\nEl modelo es una herramienta de apoyo, no un reemplazo: siempre debe existir revisión humana de una muestra.\nDocumentar el dataset de entrenamiento, versiones del modelo y métricas de evaluación."
+    "section": "Resultados",
+    "text": "Resultados"
   },
   {
     "objectID": "clase-06b.html#qué-vimos-hoy",
@@ -222,12 +215,5 @@
     "title": "",
     "section": "Qué vimos hoy",
     "text": "Qué vimos hoy\n\n\nEl problema de las RNN: pérdida de memoria en secuencias largas, dificultad para paralelizar.\nMecanismo de atención: Q, K, V — cada token puede mirar directamente cualquier otro.\nArquitectura Transformer: bloques de Multi-Head Attention + Feed-Forward + residuales.\nEncoder vs. Decoder: para clasificación censal, usamos encoders (BERT/BETO).\nPre-entrenamiento + fine-tuning: aprovechamos conocimiento general para adaptarlo a CIUO/CAENES.\nBETO y el ecosistema HuggingFace: pipeline completo en Python.\nAplicaciones en CPV2024: codificación de ocupaciones, rama de actividad, detección de inconsistencias."
-  },
-  {
-    "objectID": "clase-06b.html#masked-language-modeling",
-    "href": "clase-06b.html#masked-language-modeling",
-    "title": "",
-    "section": "Masked Language Modeling",
-    "text": "Masked Language Modeling\n\n¿Cómo se pre-entrena BERT/BETO? Con Masked Language Modeling (MLM):\n\n\n\nSe toma un texto en español (p/e de Wikipedia).\nSe enmascara el 15% de los tokens: “El técnico [MASK] instaló el [MASK] en el edificio”.\nEl modelo debe predecir las palabras enmascaradas a partir del contexto bidireccional.\nLa pérdida es cross-entropy sobre los tokens enmascarados.\n\n\n\n\n\n\n\n\nNote\n\n\nGracias a este proceso, BETO aprende representaciones ricas del español sin necesitar etiquetas humanas. Solo necesita texto crudo, de los cuales hay abundancia en internet."
   }
 ]
