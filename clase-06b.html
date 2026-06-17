@@ -654,20 +654,37 @@ Shape salida: torch.Size([4, 8])</code></pre>
 <div class="fragment">
 <p><strong>Capacidades emergentes</strong> Nadie diseñó explícitamente la capacidad de GPT-3 para razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto (few-shot learning). Estas capacidades emergieron del escalamiento.</p>
 </div>
-</section>
-<section id="encoder-vs.-decoder-vs.-encoder-decoder" class="slide level2">
-<h2>Encoder vs.&nbsp;Decoder vs.&nbsp;Encoder-Decoder</h2>
+</section></section>
+<section>
+<section id="encoder.-decoder-y-encoder-decoder" class="title-slide slide level1 center">
+<h1>Encoder,. Decoder y Encoder-Decoder</h1>
 <div class="fragment">
-<p>El Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: encoder y decoder. Encoder “codificaba” la información de un idioma en un vector numérico, y el decoder tomaba esto y lo “decodificaba” en otro idioma.</p>
+<p>El Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: encoder y decoder. La lógica era que el Encoder “codificaba” la información de un idioma en un vector numérico, y el Decoder tomaba esto y lo “decodificaba” en otro idioma.</p>
 </div>
 <div class="fragment">
-<p>Con el tiempo se descubrió que cada mitad es útil por separado.</p>
+<p>Con el tiempo se descubrió que cada mitad es útil por separado, y para propósitos diferentes.</p>
+</div>
+</section>
+<section id="encoder.-decoder-y-encoder-decoder-1" class="slide level2">
+<h2>Encoder,. Decoder y Encoder-Decoder</h2>
+<div class="fragment">
+<p><strong>Encoder</strong> - leer y representar</p>
+<p>Toma una secuencia de tokens y produce una representación para cada uno Atención bidireccional: cada token ve todos los demás (izquierda y derecha) No genera nada: su salida son vectores, no palabras Útil cuando la tarea requiere entender el texto de entrada</p>
+</div>
+<div class="fragment">
+<p><strong>Decoder</strong> - generar secuencias</p>
+<p>Toma una secuencia de tokens y produce una predicción del siguiente token Atención causal: cada token solo ve los anteriores, nunca los siguientes Esta restricción es necesaria para que la generación sea coherente: no puede “hacer trampa” mirando el futuro Útil cuando la tarea requiere producir texto nuevo</p>
+</div>
+<div class="fragment">
+<p><strong>Encoder-Decoder</strong> - transformar una secuencia en otra</p>
+<p>El encoder lee y comprende la entrada completa El decoder genera la salida token a token, pero en cada paso puede atender al encoder (cross-attention) Útil cuando entrada y salida son secuencias distintas</p>
 </div>
 </section>
 <section id="modelos-actuales-claude-gpt-4-etc." class="slide level2">
 <h2>Modelos actuales (Claude, GPT-4, etc.)</h2>
-<p>Claude, GPT-4, Gemini y todos los grandes modelos de lenguaje actuales son, en su núcleo, transformers decoder-only entrenados con predicción de siguiente token sobre cantidades enormes de texto, seguido de refinamiento con retroalimentación humana (RLHF o variantes).</p>
-<p>La arquitectura del paper de 2017 es reconocible, pero hay décadas de mejoras acumuladas: normalización de capas, embeddings posicionales aprendidos, atención con ventanas, mezcla de expertos (MoE), contextos de millones de tokens, y mucho más.</p>
+<p>Claude, GPT-4, Gemini y todos los grandes modelos de lenguaje actuales son, en su núcleo, transformers decoder-only.</p>
+<p>Entrenados con predicción de siguiente token sobre cantidades enormes de texto, seguido de refinamiento con retroalimentación humana (RLHF o variantes).</p>
+<p>La arquitectura del paper de 2017 es reconocible, pero hay décadas de mejoras acumuladas.</p>
 </section>
 <section id="bert-el-encoder-por-excelencia" class="slide level2">
 <h2>BERT: el encoder por excelencia</h2>

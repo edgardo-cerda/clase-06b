@@ -300,10 +300,9 @@ Los embeddings posicionales son sinusoides de distintas frecuencias, de modo que
 
 ## Visualizando un Transformer:
 
-
 [https://poloclub.github.io/transformer-explainer/](https://poloclub.github.io/transformer-explainer/)
 
-
+[Visualizing transformers and attention | Talk for TNG Big Tech Day '24](https://youtu.be/KJtZARuO3JY?si=RuD2RplooVP8Uwzt)
 ## ¿Por qué son tan bacanes los Transformers?
 
 3 motivos principales:
@@ -320,22 +319,51 @@ Los embeddings posicionales son sinusoides de distintas frecuencias, de modo que
 **Capacidades emergentes** Nadie diseñó explícitamente la capacidad de GPT-3 para razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto (few-shot learning). Estas capacidades emergieron del escalamiento.
 :::
 
-## Encoder vs. Decoder vs. Encoder-Decoder
+# Encoder,. Decoder y Encoder-Decoder
 
 ::: {.fragment}
-El Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: encoder y decoder. Encoder "codificaba" la información de un idioma en un vector numérico, y el decoder tomaba esto y lo "decodificaba" en otro idioma.
+El Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: encoder y decoder. La lógica era que el Encoder "codificaba" la información de un idioma en un vector numérico, y el Decoder tomaba esto y lo "decodificaba" en otro idioma.
 :::
 
 ::: {.fragment}
-Con el tiempo se descubrió que cada mitad es útil por separado.
+Con el tiempo se descubrió que cada mitad es útil por separado, y para propósitos diferentes.
 :::
 
+## Encoder,. Decoder y Encoder-Decoder
+
+::: {.fragment}
+**Encoder** - leer y representar
+
+Toma una secuencia de tokens y produce una representación para cada uno
+Atención bidireccional: cada token ve todos los demás (izquierda y derecha)
+No genera nada: su salida son vectores, no palabras
+Útil cuando la tarea requiere entender el texto de entrada
+:::
+
+::: {.fragment}
+**Decoder** - generar secuencias
+
+Toma una secuencia de tokens y produce una predicción del siguiente token
+Atención causal: cada token solo ve los anteriores, nunca los siguientes
+Esta restricción es necesaria para que la generación sea coherente: no puede "hacer trampa" mirando el futuro
+Útil cuando la tarea requiere producir texto nuevo
+:::
+
+::: {.fragment}
+**Encoder-Decoder** - transformar una secuencia en otra
+
+El encoder lee y comprende la entrada completa
+El decoder genera la salida token a token, pero en cada paso puede atender al encoder (cross-attention)
+Útil cuando entrada y salida son secuencias distintas
+:::
 
 ## Modelos actuales (Claude, GPT-4, etc.)
 
-Claude, GPT-4, Gemini y todos los grandes modelos de lenguaje actuales son, en su núcleo, transformers decoder-only entrenados con predicción de siguiente token sobre cantidades enormes de texto, seguido de refinamiento con retroalimentación humana (RLHF o variantes).
+Claude, GPT-4, Gemini y todos los grandes modelos de lenguaje actuales son, en su núcleo, transformers decoder-only.
 
-La arquitectura del paper de 2017 es reconocible, pero hay décadas de mejoras acumuladas: normalización de capas, embeddings posicionales aprendidos, atención con ventanas, mezcla de expertos (MoE), contextos de millones de tokens, y mucho más.
+Entrenados con predicción de siguiente token sobre cantidades enormes de texto, seguido de refinamiento con retroalimentación humana (RLHF o variantes).
+
+La arquitectura del paper de 2017 es reconocible, pero hay décadas de mejoras acumuladas.
 
 ## BERT: el encoder por excelencia
 
