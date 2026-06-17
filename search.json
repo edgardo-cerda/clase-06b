@@ -4,7 +4,7 @@
     "href": "clase-06b.html#temario-de-hoy",
     "title": "",
     "section": "Temario de hoy",
-    "text": "Temario de hoy\n\nEl objetivo de esta clase es entender cómo funcionan los Transformers y cómo usarlos a través de fine-tuning para resolver problemas reales de procesamiento y análisis estadístico.\n\nEl problema que los transformers vinieron a resolver: Límites de las RNN y LSTM, y la aparición del Transformer.\nMecanismo de atención: La idea central de la arquitectura\nArquitectura Transformer: Attention Head, Bloque transformer, Embeddings posicionales\nPre-entrenamiento y fine-tuning: La lógica del transfer learning\nModelos para español: BETO y la familia RoBERTa\nAplicaciones en el CPV2024: Codificación de ocupaciones y actividad económica\nEjercicio práctico: Fine-tuning de BETO con HuggingFace"
+    "text": "Temario de hoy\n\nEl objetivo de esta clase es entender cómo funcionan los Transformers y cómo usarlos a través de fine-tuning para resolver problemas reales de procesamiento y análisis estadístico.\n\nEl problema que los transformers vinieron a resolver: Límites de las RNN y LSTM, y la aparición del Transformer.\nMecanismo de atención: La idea central de la arquitectura\nArquitectura Transformer: Attention Head, Bloque transformer, Embeddings posicionales\nPre-entrenamiento y fine-tuning: La lógica del transfer learning\nModelos para español: BETO y la familia RoBERTa\nEjercicio práctico: Fine-tuning de BETO con HuggingFace"
   },
   {
     "objectID": "clase-06b.html#límites-de-las-rnn-y-lstm",
