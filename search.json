@@ -11,7 +11,7 @@
     "href": "clase-06b.html#límites-de-las-rnn-y-lstm",
     "title": "",
     "section": "Límites de las RNN y LSTM",
-    "text": "Límites de las RNN y LSTM\n\nProblema: el significado de una palabra depende de su contexto.\n\n\n\n“Trabajo en una empresa que realiza minería de …”\n\n\n\nEn qué sector económico trabajo? La respuesta depende del contexto.\n\nMinería de datos -> Actividades profesionales, científicas y técnicas\nMinería de cobre -> Explotación de minas y canteras\n\n\n\nHasta 2017, el estado del arte para solucionar este problema eran las Redes Neuronales Recurrentes (RNN), Long Short-Term Memory (LSTM), Gated Recurent Units (GRU), entre otras.\n\n\nPero tienen otros problemas:\n\nLa información se diluye a medida que la secuencia crece (Las LSTM mitigan el problema, pero no lo eliminan)\nRecurrencia hace difícil la paralelización, por lo que el costo computacional escala mal."
+    "text": "Límites de las RNN y LSTM\n\nProblema: el significado de una palabra depende de su contexto.\n\n\n\n“Trabajo en una empresa que realiza minería de …”\n\n\n\nEn qué sector económico trabajo? La respuesta depende del contexto.\n\nMinería de datos -> Actividades profesionales, científicas y técnicas\nMinería de cobre -> Explotación de minas y canteras\n\n\n\nHasta 2017, el estado del arte para solucionar este problema eran las Redes Neuronales Recurrentes (RNN), Long Short-Term Memory (LSTM), Gated Recurent Units (GRU), entre otras.\n\n\nPero tienen problemas:\n\nLa información se diluye a medida que la secuencia crece (Las LSTM mitigan el problema, pero no lo eliminan)\nRecurrencia hace difícil la paralelización, por lo que el costo computacional escala mal."
   },
   {
     "objectID": "clase-06b.html#la-solución-transformers-y-la-autoatención",
@@ -25,21 +25,21 @@
     "href": "clase-06b.html#por-qué-son-tan-bacanes-los-transformers",
     "title": "",
     "section": "¿Por qué son tan bacanes los Transformers?",
-    "text": "¿Por qué son tan bacanes los Transformers?\n\nParalelización masiva: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Es lo que hizo posible entrenar modelos con billones de parámetros.\n\n\nPreentrenamiento: Se pueden preentrenar en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.\n\n\nCapacidades emergentes: Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes, como el razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto."
+    "text": "¿Por qué son tan bacanes los Transformers?\n\nParalelización masiva: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Es lo que hizo posible entrenar modelos con billones de parámetros.\n\n\nPreentrenamiento: Se pueden preentrenar en texto no supervisado (predicción de siguiente token o tokens enmascarados) y luego afinar para tareas específicas. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.\n\n\nCapacidades emergentes: Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes, como el razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto."
   },
   {
     "objectID": "clase-06b.html#intuición",
     "href": "clase-06b.html#intuición",
     "title": "",
     "section": "Intuición",
-    "text": "Intuición\n:::: columns\n::: {.column width=55%}\n\nLa atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).\n\n\nLos transformers aprenden a qué y cómo poner atención para “entender” los tokens de un texto.\n\n\nEsto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto.\n\n::: {.column width=45%}"
+    "text": "Intuición\n:::: columns\n::: {.column width=50%}\n\nLa atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).\n\n\nLos transformers aprenden a qué y cómo poner atención para “entender” los tokens de un texto.\n\n\nEsto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto."
   },
   {
     "objectID": "clase-06b.html#intuición-1",
     "href": "clase-06b.html#intuición-1",
     "title": "",
     "section": "Intuición",
-    "text": "Intuición\n\nEn el texto:\n\n“Fui al banco que está junto a la plaza a retirar dinero”\n\nPara representar la palabra banco, el modelo mira las demás palabras y le pone atención a las que son más “relevantes”. En función de eso, actualiza su valor (y así con todas los tokens del texto)."
+    "text": "Intuición\n\nPara representar la palabra banco, el modelo mira las demás palabras y le pone atención a las que son más “relevantes”. En función de eso, actualiza su valor (y así con todas los tokens del texto)."
   },
   {
     "objectID": "clase-06b.html#queries-keys-y-values",
@@ -70,18 +70,11 @@
     "text": "El bloque Transformer\n\nUn bloque Transformer combina Multi-Head Attention con una red feed-forward, rodeados de normalización de capa y conexiones residuales:\n\n\n\n\n\nMulti-Head Attention: cada token atiende a todos los demás.\nAdd & Norm: conexión residual + LayerNorm (estabiliza el entrenamiento).\nFeed-Forward: una red MLP pequeña aplicada posición a posición.\nAdd & Norm: otra conexión residual.\n\n\n\nUn Transformer completo = apilar \\(N\\) de estos bloques (BERT usa 12 ó 24)."
   },
   {
-    "objectID": "clase-06b.html#embeddings-posicionales",
-    "href": "clase-06b.html#embeddings-posicionales",
-    "title": "",
-    "section": "Embeddings posicionales",
-    "text": "Embeddings posicionales\n\nLa atención no sabe en qué posición está cada token (procesa todo en paralelo). Para introducir el orden de la secuencia, se suman embeddings posicionales a los embeddings de entrada:\n\n\n\n\n\n\n\nNote\n\n\nLos embeddings posicionales son sinusoides de distintas frecuencias, de modo que el modelo puede inferir la distancia relativa entre posiciones."
-  },
-  {
     "objectID": "clase-06b.html#visualizando-un-transformer",
     "href": "clase-06b.html#visualizando-un-transformer",
     "title": "",
     "section": "Visualizando un Transformer:",
-    "text": "Visualizando un Transformer:\nhttps://poloclub.github.io/transformer-explainer/\nVisualizing transformers and attention | Talk for TNG Big Tech Day ’24"
+    "text": "Visualizando un Transformer:\n\nRecurso muy bueno para visualizar un transformer:\n\nhttps://poloclub.github.io/transformer-explainer/\n\nCharla en Youtube muy buena para entender y visualizar qué hace un Transformer\n\nVisualizing transformers and attention | Talk for TNG Big Tech Day ’24"
   },
   {
     "objectID": "clase-06b.html#estructura-encoder-decoder",
@@ -95,7 +88,7 @@
     "href": "clase-06b.html#estructura-encoder-decoder-1",
     "title": "",
     "section": "Estructura Encoder-Decoder",
-    "text": "Estructura Encoder-Decoder\n\nEncoder - leer y representar\nToma una secuencia de tokens y produce una representación para cada uno Atención bidireccional: cada token ve todos los demás (izquierda y derecha) No genera nada: su salida son vectores, no palabras Útil cuando la tarea requiere entender el texto de entrada\n\n\nDecoder - generar secuencias\nToma una secuencia de tokens y produce una predicción del siguiente token Atención causal: cada token solo ve los anteriores, nunca los siguientes Esta restricción es necesaria para que la generación sea coherente: no puede “hacer trampa” mirando el futuro Útil cuando la tarea requiere producir texto nuevo\n\n\nEncoder-Decoder - transformar una secuencia en otra\nEl encoder lee y comprende la entrada completa El decoder genera la salida token a token, pero en cada paso puede atender al encoder (cross-attention) Útil cuando entrada y salida son secuencias distintas"
+    "text": "Estructura Encoder-Decoder\n\nEncoder - leer y representar\n\nToma una secuencia de tokens y produce una representación para cada uno\nAtención bidireccional: cada token ve todos los demás (izquierda y derecha)\nNo genera nada: su salida son vectores, no palabras\nÚtil cuando la tarea requiere entender el texto de entrada\n\n\n\nDecoder - generar secuencias\n\nToma una secuencia de tokens y produce una predicción del siguiente token\nAtención causal: cada token solo ve los anteriores, nunca los siguientes\nEsta restricción es necesaria para que la generación sea coherente: no puede “hacer trampa” mirando el futuro\nÚtil cuando la tarea requiere producir texto nuevo"
   },
   {
     "objectID": "clase-06b.html#modelos-actuales-claude-gpt-4-etc.",
@@ -112,18 +105,18 @@
     "text": "BERT: el encoder por excelencia\n\nBERT (Bidirectional Encoder Representations from Transformers, Google 2018) fue el modelo que democratizó el uso de Transformers en NLP:\n\n12 capas Transformer, 110M de parámetros (versión base).\nPre-entrenado en Wikipedia + BooksCorpus en inglés.\nBidireccional: cada token ve todo el contexto (izquierda y derecha).\nTarea de pre-entrenamiento: Masked Language Modeling (MLM) y Next Sentence Prediction.\n\n\n\nCon BERT, por primera vez fue posible tomar un modelo ya entrenado y adaptarlo a tareas específicas con muy pocos datos propios: el fine-tuning."
   },
   {
-    "objectID": "clase-06b.html#la-analogía-del-profesional-especializado",
-    "href": "clase-06b.html#la-analogía-del-profesional-especializado",
+    "objectID": "clase-06b.html#fine-tuning",
+    "href": "clase-06b.html#fine-tuning",
     "title": "",
-    "section": "La analogía del profesional especializado",
-    "text": "La analogía del profesional especializado\n\nImaginemos el ciclo de formación de un profesional:\n\n\n\n\nPre-entrenamiento = educación general\n\nLee millones de textos.\nAprende gramática, semántica, hechos del mundo.\nNo sabe nada específico de codificación censal.\nCosto: enorme (miles de GPUs, semanas).\n\n\n\n\nFine-tuning = especialización\n\nToma ese conocimiento general.\nLo ajusta con ejemplos del dominio específico.\nAprende la tarea concreta (p/e CIUO-08).\nCosto: manejable (1 GPU, horas o días).\n\n\n\n\n\nNo necesitamos entrenar desde cero. Partimos de un modelo que ya “entiende” el español y le enseñamos nuestra tarea específica, por lo que se necesitan mucho menos datos de entrenamiento."
+    "section": "Fine-tuning",
+    "text": "Fine-tuning\n\nCuando queremos realizar una tarea con modelos de IA, no necesitamos entrenar desde cero. Podemos partir de un modelo que ya “entiende” el español y le enseñamos nuestra tarea específica, por lo que se necesitan mucho menos datos de entrenamiento.\n\n\nEl fine-tuning (o ajuste fino) es una técnica de inteligencia artificial donde un modelo previamente entrenado recibe entrenamiento adicional con un conjunto de datos más pequeño y específico. Esto permite adaptar sus conocimientos generales para que realice tareas específicas."
   },
   {
     "objectID": "clase-06b.html#qué-ocurre-durante-el-fine-tuning",
     "href": "clase-06b.html#qué-ocurre-durante-el-fine-tuning",
     "title": "",
     "section": "¿Qué ocurre durante el fine-tuning?",
-    "text": "¿Qué ocurre durante el fine-tuning?\n\n\n\n\nTomamos el modelo pre-entrenado (BERT, BETO…).\nAgregamos una cabeza de clasificación: una capa lineal sobre el token [CLS].\nEntrenamos con nuestros datos etiquetados, ajustando todos los pesos (o solo parte de ellos).\nUsamos un learning rate muy pequeño para no “olvidar” lo pre-entrenado.\n\n\n\n\n\n\n\n\n\n\n\n\nNote\n\n\nEl token [CLS] es un token especial que BERT agrega al inicio de cada texto. Su representación final captura el significado global de la oración y se usa como input para la capa de clasificación."
+    "text": "¿Qué ocurre durante el fine-tuning?\n\n\nTomamos el modelo pre-entrenado (BERT, BETO…).\nAgregamos una cabeza de clasificación: una capa lineal sobre el token [CLS].\nEntrenamos con nuestros datos etiquetados, ajustando todos los pesos (o solo parte de ellos).\nUsamos un learning rate muy pequeño para no “olvidar” lo pre-entrenado.\n\n\n\n\n\n\n\n\nNote\n\n\nEl token [CLS] es un token especial que BERT agrega al inicio de cada texto. Su representación final captura el significado global de la oración y se usa como input para la capa de clasificación."
   },
   {
     "objectID": "clase-06b.html#el-problema-del-idioma",
@@ -189,11 +182,11 @@
     "text": "Paso 3: tokenización\n\nfrom transformers import AutoTokenizer\nfrom datasets import Dataset\n\nMODEL = \"dccuchile/bert-base-spanish-wwm-cased\"\ntokenizer = AutoTokenizer.from_pretrained(MODEL)\n\ndef tokenize(batch):\n    return tokenizer(\n        batch[\"texto\"],\n        truncation=True,\n        padding=\"max_length\",\n        max_length=64           # <1>\n    )\n\nds_train = Dataset.from_pandas(train_df[[\"texto\", \"label\"]].reset_index(drop=True))\nds_test  = Dataset.from_pandas(test_df[[\"texto\", \"label\"]].reset_index(drop=True))\n\nds_train = ds_train.map(tokenize, batched=True)\nds_test  = ds_test.map(tokenize, batched=True)\n\nds_train.set_format(type=\"torch\", columns=[\"input_ids\", \"attention_mask\", \"label\"]) # <2>\nds_test.set_format(type=\"torch\",  columns=[\"input_ids\", \"attention_mask\", \"label\"])\n\n\n64 tokens es suficiente para glosas cortas de ocupación y ahorra memoria en GPU.\nSin set_format, el Trainer puede fallar al intentar armar los batches: los tensores de PyTorch deben ser explícitamente del tipo correcto."
   },
   {
-    "objectID": "clase-06b.html#paso-4-modelo-métricas-y-entrenamiento",
-    "href": "clase-06b.html#paso-4-modelo-métricas-y-entrenamiento",
+    "objectID": "clase-06b.html#paso-4-modelo",
+    "href": "clase-06b.html#paso-4-modelo",
     "title": "",
-    "section": "Paso 4: modelo, métricas y entrenamiento",
-    "text": "Paso 4: modelo, métricas y entrenamiento\n\nfrom transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments\n\nmodel = AutoModelForSequenceClassification.from_pretrained(  # <1>\n    MODEL, num_labels=df[\"label\"].nunique()\n)\n\ndef compute_metrics(eval_pred):\n    logits, labels = eval_pred\n    preds = np.argmax(logits, axis=-1)\n    return {\n        \"accuracy\":    round(accuracy_score(labels, preds), 4),\n        \"f1_macro\":    round(f1_score(labels, preds, average=\"macro\",    zero_division=0), 4), # <2>\n        \"f1_weighted\": round(f1_score(labels, preds, average=\"weighted\", zero_division=0), 4),\n    }\n\ntrainer = Trainer(\n    model=model,\n    args=TrainingArguments(\n        output_dir=\"./modelo_ciuo08\",\n        num_train_epochs=3,\n        per_device_train_batch_size=32,\n        learning_rate=2e-5,             # <3>\n        eval_strategy=\"epoch\",\n        logging_strategy=\"epoch\",\n        report_to=\"none\",               # <4>\n        save_strategy=\"no\",\n    ),\n    train_dataset=ds_train,\n    eval_dataset=ds_test,\n    compute_metrics=compute_metrics,\n)\ntrainer.train()\n\n\nAl cargar el modelo verán avisos sobre pesos no utilizados (los de MLM) y pesos faltantes (la cabeza de clasificación). Ambos son normales.\nF1 macro pondera cada clase por igual, independiente de su tamaño. Es más informativo que la accuracy cuando las clases están desbalanceadas.\nLearning rate entre 2e-5 y 5e-5 es estándar para fine-tuning de BERT. Valores más altos pueden degradar los pesos pre-entrenados.\nEvita que el Trainer intente conectarse a Weights & Biases. Si no se incluye, puede generar errores en entornos sin esa librería configurada."
+    "section": "Paso 4: modelo",
+    "text": "Paso 4: modelo\n\nfrom transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments\n\nmodel = AutoModelForSequenceClassification.from_pretrained(  # <1>\n    MODEL, num_labels=df[\"label\"].nunique()\n)\n\ndef compute_metrics(eval_pred):\n    logits, labels = eval_pred\n    preds = np.argmax(logits, axis=-1)\n    return {\n        \"accuracy\":    round(accuracy_score(labels, preds), 4),\n        \"f1_macro\":    round(f1_score(labels, preds, average=\"macro\",    zero_division=0), 4), # <2>\n        \"f1_weighted\": round(f1_score(labels, preds, average=\"weighted\", zero_division=0), 4),\n    }\n\ntrainer = Trainer(\n    model=model,\n    args=TrainingArguments(\n        output_dir=\"./modelo_ciuo08\",\n        num_train_epochs=3,\n        per_device_train_batch_size=32,\n        learning_rate=2e-5,             # <3>\n        eval_strategy=\"epoch\",\n        logging_strategy=\"epoch\",\n        report_to=\"none\",               # <4>\n        save_strategy=\"no\",\n    ),\n    train_dataset=ds_train,\n    eval_dataset=ds_test,\n    compute_metrics=compute_metrics,\n)\ntrainer.train()\n\n\nAl cargar el modelo verán avisos sobre pesos no utilizados (los de MLM) y pesos faltantes (la cabeza de clasificación). Ambos son normales.\nF1 macro pondera cada clase por igual, independiente de su tamaño. Es más informativo que la accuracy cuando las clases están desbalanceadas.\nLearning rate entre 2e-5 y 5e-5 es estándar para fine-tuning de BERT."
   },
   {
     "objectID": "clase-06b.html#paso-5-evaluación-detallada",
@@ -210,11 +203,11 @@
     "text": "Paso 6: inferencia con decodificación real\n\nfrom transformers import pipeline\n\nDIRECTORIO_FINAL = \"./modelo_ciuo08/final\"\ntrainer.save_model(DIRECTORIO_FINAL)\ntokenizer.save_pretrained(DIRECTORIO_FINAL)\n\nclasificador = pipeline(\"text-classification\", model=DIRECTORIO_FINAL,\n                        tokenizer=DIRECTORIO_FINAL, device=-1)\n\ndef predecir_ciuo(texto):\n    resultado = clasificador(texto, truncation=True, max_length=64)[0]\n    idx     = int(resultado[\"label\"].split(\"_\")[1])  # <1>\n    codigo  = le.classes_[idx]\n    return {\"codigo_ciuo_1d\": int(codigo), \"confianza\": round(resultado[\"score\"], 4)}\n\nglosas = [\n    \"OCUPACIÓN: ENFERMERA; TAREA: ADMINISTRAR MEDICAMENTOS Y CONTROLAR SIGNOS VITALES\",\n    \"OCUPACIÓN: CONDUCTOR DE CAMIÓN; TAREA: TRANSPORTAR CARGA ENTRE REGIONES\",\n    \"OCUPACIÓN: TEMPORERO AGRÍCOLA; TAREA: COSECHAR UVA EN TEMPORADA\",\n]\nfor glosa in glosas:\n    r = predecir_ciuo(glosa)\n    print(f\"GG {r['codigo_ciuo_1d']}  ({r['confianza']:.1%})  →  {glosa[:65]}\")\n\n\npipeline devuelve \"LABEL_0\", \"LABEL_1\", etc. — índices internos, no códigos CIUO. le.classes_[idx] recupera el código CIUO original a partir de ese índice."
   },
   {
-    "objectID": "clase-06b.html#resultados-esperados",
-    "href": "clase-06b.html#resultados-esperados",
+    "objectID": "clase-06b.html#resultados",
+    "href": "clase-06b.html#resultados",
     "title": "",
-    "section": "Resultados esperados",
-    "text": "Resultados esperados\n\nCon el dataset de auditorías de Nomenclaturas (~50.000 glosas), resultados orientativos:\n\n\n\n\n\nNivel CIUO\nClases\nAccuracy\nF1 macro\n\n\n\n\n1 dígito\n10\n85–92%\n80–88%\n\n\n2 dígitos\n~43\n75–85%\n68–78%\n\n\n4 dígitos\n~436\n60–75%\n45–65%\n\n\n\n\n\nEl F1 macro es el indicador más relevante: pondera cada gran grupo por igual. La accuracy puede ser alta aunque el modelo falle en grupos minoritarios.\n\n\n\n\n\n\n\nNote\n\n\nEstos números son referenciales, basados en la literatura y experiencia con datos similares. Los resultados reales dependen de la calidad y distribución del dataset de entrenamiento."
+    "section": "Resultados",
+    "text": "Resultados\n\nCon el dataset de auditorías de Nomenclaturas (~10.000 glosas):"
   },
   {
     "objectID": "clase-06b.html#qué-vimos-hoy",

@@ -392,7 +392,7 @@
 <section>
 <section id="section" class="title-slide slide level1 center">
 <h1></h1>
-<p><span class="center-justified"><img src="imagenes/logo_portada2.png" width="20%"></span></p>
+<p><img src="imagenes/logo_portada2.png" width="20%"></p>
 <p><span class="big-par center-justified"><strong>Transformers y Fine-Tuning</strong></span></p>
 <p><span class="big-par center-justified"><strong>Junio 2026</strong></span></p>
 </section>
@@ -436,7 +436,7 @@
 <p>Hasta 2017, el estado del arte para solucionar este problema eran las <strong>Redes Neuronales Recurrentes (RNN)</strong>, <strong>Long Short-Term Memory (LSTM)</strong>, <strong>Gated Recurent Units (GRU)</strong>, entre otras.</p>
 </div>
 <div class="fragment medium-par">
-<p>Pero tienen otros problemas:</p>
+<p>Pero tienen problemas:</p>
 <ul>
 <li>La información <strong>se diluye</strong> a medida que la secuencia crece (Las LSTM mitigan el problema, pero no lo eliminan)</li>
 <li>Recurrencia hace difícil la paralelización, por lo que el <strong>costo computacional escala mal</strong>.</li>
@@ -458,7 +458,7 @@
 <p><strong>Paralelización masiva</strong>: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Es lo que hizo posible entrenar modelos con billones de parámetros.</p>
 </div>
 <div class="fragment">
-<p><strong>Preentrenamiento:</strong> Se pueden preentrenar en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.</p>
+<p><strong>Preentrenamiento:</strong> Se pueden preentrenar en texto no supervisado (predicción de siguiente token o tokens enmascarados) y luego afinar para tareas específicas. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.</p>
 </div>
 <div class="fragment">
 <p><strong>Capacidades emergentes:</strong> Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes, como el razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto.</p>
@@ -472,7 +472,7 @@
 <section id="intuición" class="slide level2">
 <h2>Intuición</h2>
 <p>:::: columns</p>
-<p>::: {.column width=55%}</p>
+<p>::: {.column width=50%}</p>
 <div class="fragment medium-par">
 <p>La atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).</p>
 </div>
@@ -482,19 +482,16 @@
 <div class="fragment medium-par">
 <p>Esto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto.</p>
 </div>
-<p>::: {.column width=45%}</p>
-<p><img data-src="imagenes/transformers.webp"></p>
+<div class="column" style="width:50%;">
+<p><img data-src="imagenes/transformers.webp" width="350" height="500"></p>
+</div>
 </section>
 <section id="intuición-1" class="slide level2">
 <h2>Intuición</h2>
 <div class="fragment">
-<p>En el texto:</p>
-<blockquote>
-<p>“Fui al <strong>banco</strong> que está junto a la plaza a retirar dinero”</p>
-</blockquote>
 <p>Para representar la palabra <strong>banco</strong>, el modelo mira las demás palabras y le pone atención a las que son más “relevantes”. En función de eso, actualiza su valor (y así con todas los tokens del texto).</p>
 </div>
-<p><img data-src="imagenes/ejemplo_atencion.png"></p>
+<p><img data-src="imagenes/ejemplo_atencion.png" width="800"></p>
 </section>
 <section id="queries-keys-y-values" class="slide level2">
 <h2>Queries, Keys y Values</h2>
@@ -583,28 +580,15 @@
 </div>
 </div>
 </section>
-<section id="embeddings-posicionales" class="slide level2">
-<h2>Embeddings posicionales</h2>
-<div class="medium-par">
-<p>La atención no sabe en qué posición está cada token (procesa todo en paralelo). Para introducir el <strong>orden de la secuencia</strong>, se suman embeddings posicionales a los embeddings de entrada:</p>
-</div>
-<div class="callout callout-note callout-captioned callout-style-default">
-<div class="callout-body">
-<div class="callout-caption">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p>Los embeddings posicionales son sinusoides de distintas frecuencias, de modo que el modelo puede inferir la distancia relativa entre posiciones.</p>
-</div>
-</div>
-</div>
-</section>
 <section id="visualizando-un-transformer" class="slide level2">
 <h2>Visualizando un Transformer:</h2>
-<p><a href="https://poloclub.github.io/transformer-explainer/">https://poloclub.github.io/transformer-explainer/</a></p>
+<ul>
+<li>Recurso muy bueno para visualizar un transformer:</li>
+</ul>
+<p><a href="https://poloclub.github.io/transformer-explainer/" class="uri">https://poloclub.github.io/transformer-explainer/</a></p>
+<ul>
+<li>Charla en Youtube muy buena para entender y visualizar qué hace un Transformer</li>
+</ul>
 <p><a href="https://youtu.be/KJtZARuO3JY?si=RuD2RplooVP8Uwzt">Visualizing transformers and attention | Talk for TNG Big Tech Day ’24</a></p>
 </section>
 <section id="estructura-encoder-decoder" class="slide level2">
@@ -620,15 +604,21 @@
 <h2>Estructura Encoder-Decoder</h2>
 <div class="fragment">
 <p><strong>Encoder</strong> - leer y representar</p>
-<p>Toma una secuencia de tokens y produce una representación para cada uno Atención bidireccional: cada token ve todos los demás (izquierda y derecha) No genera nada: su salida son vectores, no palabras Útil cuando la tarea requiere entender el texto de entrada</p>
+<ul>
+<li><p>Toma una secuencia de tokens y produce una representación para cada uno</p></li>
+<li><p>Atención bidireccional: cada token ve todos los demás (izquierda y derecha)</p></li>
+<li><p>No genera nada: su salida son vectores, no palabras</p></li>
+<li><p>Útil cuando la tarea requiere entender el texto de entrada</p></li>
+</ul>
 </div>
 <div class="fragment">
 <p><strong>Decoder</strong> - generar secuencias</p>
-<p>Toma una secuencia de tokens y produce una predicción del siguiente token Atención causal: cada token solo ve los anteriores, nunca los siguientes Esta restricción es necesaria para que la generación sea coherente: no puede “hacer trampa” mirando el futuro Útil cuando la tarea requiere producir texto nuevo</p>
-</div>
-<div class="fragment">
-<p><strong>Encoder-Decoder</strong> - transformar una secuencia en otra</p>
-<p>El encoder lee y comprende la entrada completa El decoder genera la salida token a token, pero en cada paso puede atender al encoder (cross-attention) Útil cuando entrada y salida son secuencias distintas</p>
+<ul>
+<li><p>Toma una secuencia de tokens y produce una predicción del siguiente token</p></li>
+<li><p>Atención causal: cada token solo ve los anteriores, nunca los siguientes</p></li>
+<li><p>Esta restricción es necesaria para que la generación sea coherente: no puede “hacer trampa” mirando el futuro</p></li>
+<li><p>Útil cuando la tarea requiere producir texto nuevo</p></li>
+</ul>
 </div>
 </section>
 <section id="modelos-actuales-claude-gpt-4-etc." class="slide level2">
@@ -656,42 +646,17 @@
 <h1>Pre-entrenamiento y fine-tuning</h1>
 
 </section>
-<section id="la-analogía-del-profesional-especializado" class="slide level2">
-<h2>La analogía del profesional especializado</h2>
-<div class="medium-par">
-<p>Imaginemos el ciclo de formación de un profesional:</p>
-</div>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="medium-par">
-<p><strong>Pre-entrenamiento</strong> = educación general</p>
-<ul>
-<li class="fragment">Lee millones de textos.</li>
-<li class="fragment">Aprende gramática, semántica, hechos del mundo.</li>
-<li class="fragment">No sabe nada específico de codificación censal.</li>
-<li class="fragment">Costo: <strong>enorme</strong> (miles de GPUs, semanas).</li>
-</ul>
-</div>
-</div><div class="column" style="width:50%;">
-<div class="medium-par">
-<p><strong>Fine-tuning</strong> = especialización</p>
-<ul>
-<li class="fragment">Toma ese conocimiento general.</li>
-<li class="fragment">Lo ajusta con ejemplos del dominio específico.</li>
-<li class="fragment">Aprende la tarea concreta (p/e CIUO-08).</li>
-<li class="fragment">Costo: <strong>manejable</strong> (1 GPU, horas o días).</li>
-</ul>
-</div>
-</div>
-</div>
+<section id="fine-tuning" class="slide level2">
+<h2>Fine-tuning</h2>
 <div class="fragment concepto-box">
-<p>No necesitamos entrenar desde cero. Partimos de un modelo que ya “entiende” el español y le enseñamos nuestra tarea específica, por lo que se necesitan mucho menos datos de entrenamiento.</p>
+<p>Cuando queremos realizar una tarea con modelos de IA, no necesitamos entrenar desde cero. Podemos partir de un modelo que ya “entiende” el español y le enseñamos nuestra tarea específica, por lo que se necesitan mucho menos datos de entrenamiento.</p>
+</div>
+<div class="fragment medium-par">
+<p>El fine-tuning (o ajuste fino) es una técnica de inteligencia artificial donde un modelo previamente entrenado recibe entrenamiento adicional con un conjunto de datos más pequeño y específico. Esto permite adaptar sus conocimientos generales para que realice tareas específicas.</p>
 </div>
 </section>
 <section id="qué-ocurre-durante-el-fine-tuning" class="slide level2">
 <h2>¿Qué ocurre durante el fine-tuning?</h2>
-<div class="columns">
-<div class="column" style="width:60%;">
 <div class="medium-par">
 <ol type="1">
 <li class="fragment">Tomamos el modelo pre-entrenado (BERT, BETO…).</li>
@@ -699,10 +664,6 @@
 <li class="fragment">Entrenamos con nuestros datos etiquetados, ajustando <strong>todos los pesos</strong> (o solo parte de ellos).</li>
 <li class="fragment">Usamos un learning rate muy pequeño para no “olvidar” lo pre-entrenado.</li>
 </ol>
-</div>
-</div><div class="column" style="width:40%;">
-<!-- ![](imagenes/fine_tuning_schema.png) -->
-</div>
 </div>
 <div class="callout callout-note callout-captioned callout-style-default">
 <div class="callout-body">
@@ -970,8 +931,8 @@
 <li>Sin <code>set_format</code>, el <code>Trainer</code> puede fallar al intentar armar los batches: los tensores de PyTorch deben ser explícitamente del tipo correcto.</li>
 </ol>
 </section>
-<section id="paso-4-modelo-métricas-y-entrenamiento" class="slide level2">
-<h2>Paso 4: modelo, métricas y entrenamiento</h2>
+<section id="paso-4-modelo" class="slide level2">
+<h2>Paso 4: modelo</h2>
 <div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForSequenceClassification, Trainer, TrainingArguments</span>
 <span id="cb4-2"><a href="#cb4-2"></a></span>
@@ -1009,8 +970,7 @@
 <ol type="1">
 <li>Al cargar el modelo verán avisos sobre pesos no utilizados (los de MLM) y pesos faltantes (la cabeza de clasificación). Ambos son normales.</li>
 <li>F1 macro pondera cada clase por igual, independiente de su tamaño. Es más informativo que la accuracy cuando las clases están desbalanceadas.</li>
-<li>Learning rate entre 2e-5 y 5e-5 es estándar para fine-tuning de BERT. Valores más altos pueden degradar los pesos pre-entrenados.</li>
-<li>Evita que el Trainer intente conectarse a Weights &amp; Biases. Si no se incluye, puede generar errores en entornos sin esa librería configurada.</li>
+<li>Learning rate entre 2e-5 y 5e-5 es estándar para fine-tuning de BERT.</li>
 </ol>
 </section>
 <section id="paso-5-evaluación-detallada" class="slide level2">
@@ -1079,59 +1039,12 @@
 <li><code>pipeline</code> devuelve <code>"LABEL_0"</code>, <code>"LABEL_1"</code>, etc. — índices internos, no códigos CIUO. <code>le.classes_[idx]</code> recupera el código CIUO original a partir de ese índice.</li>
 </ol>
 </section>
-<section id="resultados-esperados" class="slide level2">
-<h2>Resultados esperados</h2>
+<section id="resultados" class="slide level2">
+<h2>Resultados</h2>
 <div class="medium-par">
-<p>Con el dataset de auditorías de Nomenclaturas (~50.000 glosas), resultados orientativos:</p>
+<p>Con el dataset de auditorías de Nomenclaturas (~10.000 glosas):</p>
 </div>
-<div class="medium-par">
-<table>
-<thead>
-<tr class="header">
-<th>Nivel CIUO</th>
-<th>Clases</th>
-<th>Accuracy</th>
-<th>F1 macro</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>1 dígito</strong></td>
-<td>10</td>
-<td>85–92%</td>
-<td>80–88%</td>
-</tr>
-<tr class="even">
-<td><strong>2 dígitos</strong></td>
-<td>~43</td>
-<td>75–85%</td>
-<td>68–78%</td>
-</tr>
-<tr class="odd">
-<td><strong>4 dígitos</strong></td>
-<td>~436</td>
-<td>60–75%</td>
-<td>45–65%</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="fragment nota-box">
-<p>El F1 macro es el indicador más relevante: pondera cada gran grupo por igual. La accuracy puede ser alta aunque el modelo falle en grupos minoritarios.</p>
-</div>
-<div class="callout callout-note callout-captioned callout-style-default">
-<div class="callout-body">
-<div class="callout-caption">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p>Estos números son referenciales, basados en la literatura y experiencia con datos similares. Los resultados reales dependen de la calidad y distribución del dataset de entrenamiento.</p>
-</div>
-</div>
-</div>
+<p><img data-src="imagenes/resultado_modelo.png" width="350" height="500"></p>
 </section></section>
 <section>
 <section id="cierre" class="title-slide slide level1 center">
