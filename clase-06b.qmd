@@ -140,6 +140,14 @@ el contexto.
 
 ## Intuición
 
+Para representar la palabra **banco**, el modelo mira las demás palabras
+y le pone atención a las que son más "relevantes". En función de eso,
+actualiza su valor (y así con todas los tokens del texto).
+
+![](imagenes/ejemplo_atencion.png){width="800"}
+
+## Intuición
+
 :::: columns
 
 ::: {.column width=50%}
@@ -164,15 +172,7 @@ texto.
 ![](imagenes/transformers.webp){width="350" height="500"}
 :::
 
-## Intuición
-
-::: fragment
-Para representar la palabra **banco**, el modelo mira las demás palabras
-y le pone atención a las que son más "relevantes". En función de eso,
-actualiza su valor (y así con todas los tokens del texto).
-:::
-
-![](imagenes/ejemplo_atencion.png){width="800"}
+::::
 
 ## Queries, Keys y Values
 
