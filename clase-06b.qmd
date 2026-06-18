@@ -148,10 +148,8 @@ actualiza su valor (y así con todas los tokens del texto).
 
 ## Intuición
 
-:::: columns
-
-::: {.column width=50%}
-
+::: columns
+::: {.column width="50%"}
 ::: {.fragment .medium-par}
 La atención es una parte de los Transformers. Es un mecanismo de
 búsqueda aprendible (entrenable).
@@ -167,14 +165,12 @@ Esto permite actualizar la representación de cada token de un texto en
 función de cuánta atención se le pone a las diferentes partes del mismo
 texto.
 :::
-
 :::
 
 ::: {.column width="50%"}
 ![](imagenes/transformers.webp){width="350" height="500"}
 :::
-
-::::
+:::
 
 ## Queries, Keys y Values
 
@@ -185,11 +181,12 @@ La atención se implementa con tres matrices aprendibles.
 ::: {.incremental .medium-par}
 Para cada token se definen 3 vectores:
 
--   **Query (Q)**: *"¿Qué información necesito para entender el token?"* - lo que estoy
-    buscando.
--   **Key (K)**: *"¿Qué información tiene el token que puede ayudar a entender otros tokens?"* - lo que cada token
-    ofrece.
--   **Value (V)**: *"¿Qué información entrego si lo eligen eligen?"* - el contenido que se pasa.
+-   **Query (Q)**: *"¿Qué información necesito para entender el
+    token?"* - lo que estoy buscando.
+-   **Key (K)**: *"¿Qué información tiene el token que puede ayudar a
+    entender otros tokens?"* - lo que cada token ofrece.
+-   **Value (V)**: *"¿Qué información entrego si lo eligen eligen?"* -
+    el contenido que se pasa.
 :::
 
 ::: {.fragment .medium-par}
@@ -203,6 +200,10 @@ $$\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\r
 El factor $\sqrt{d_k}$ escala los productos para evitar que el softmax
 sature con valores muy grandes.
 :::
+
+## Queries, Keys y Values
+
+![](imagenes/esquema_QKV.png){width="800" height="575"}
 
 # Arquitectura Transformer
 
@@ -268,26 +269,23 @@ Un Transformer completo = apilar $N$ de estos bloques (BERT usa 12 ó
 
 ## Estructura Encoder-Decoder
 
-:::: columns
-
-::: {.column width=50%}
-
+::: columns
+::: {.column width="50%"}
 El Transformer original (2017) se diseñó para traducción automática, por
 lo que tenía dos mitades: Encoder y Decoder. La lógica era que el
 Encoder "codificaba" la información de un idioma en un vector numérico,
 y el Decoder tomaba esto y lo "decodificaba" en otro idioma.
 
 ::: fragment
-Pero cada mitad resultó ser más útil por separado, y para propósitos diferentes.
+Pero cada mitad resultó ser más útil por separado, y para propósitos
+diferentes.
+:::
 :::
 
-:::
-
-::: {.column width=50%}
+::: {.column width="50%"}
 ![](imagenes/transformers.webp){width="350" height="500"}
 :::
-
-::::
+:::
 
 ## Estructura Encoder-Decoder
 
@@ -455,7 +453,7 @@ se capturan como texto libre:
     de edificios"
 :::
 
-::: {.fragment}
+::: fragment
 Estas respuestas deben codificarse según clasificadores internacionales:
 
 -   **CIUO-08**: Clasificación Internacional Uniforme de Ocupaciones
@@ -490,13 +488,15 @@ deberes.
 | 9      | Ocupaciones elementales                   |
 :::
 
-
 ## Pipeline completo con HuggingFace
 
 ::: {.incremental .medium-par}
-- HuggingFace `transformers` es una biblioteca de código abierto que proporciona herramientas para crear, entrenar y desplegar modelos de inteligencia artificial de última generación.
+-   HuggingFace `transformers` es una biblioteca de código abierto que
+    proporciona herramientas para crear, entrenar y desplegar modelos de
+    inteligencia artificial de última generación.
 
-- Permite hacer fine-tuning de BETO en pocas líneas. El pipeline completo tiene cinco etapas:
+-   Permite hacer fine-tuning de BETO en pocas líneas. El pipeline
+    completo tiene cinco etapas:
 :::
 
 ::: {.incremental .medium-par}
@@ -631,7 +631,6 @@ trainer = Trainer(
 trainer.train()
 ```
 
-
 ## Paso 4c: guardar modelo
 
 ```{python}
@@ -666,7 +665,6 @@ print(reporte)
 1.  `le.classes_` contiene los códigos CIUO originales en el orden en
     que `LabelEncoder` los asignó. Así cada fila del reporte muestra el
     gran grupo CIUO real, no un índice interno.
-
 
 ## Paso 6: predección
 
@@ -704,8 +702,7 @@ for glosa in glosas:
 
 Con el dataset de auditorías de Nomenclaturas (\~10.000 glosas):
 
-![](imagenes/entrenamiento_modelo.png){width="750" height="450"}
-
+![](imagenes/entrenamiento_modelo.png){width="700" height="400"}
 
 ## Resultados
 
