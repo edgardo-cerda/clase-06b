@@ -584,7 +584,7 @@
 <div class="column" style="width:50%;">
 <p>El Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: Encoder y Decoder. La lógica era que el Encoder “codificaba” la información de un idioma en un vector numérico, y el Decoder tomaba esto y lo “decodificaba” en otro idioma.</p>
 <div class="fragment">
-<p>Con el tiempo se encontró que cada mitad es útil por separado, y para propósitos diferentes.</p>
+<p>Pero cada mitad resultó ser más útil por separado, y para propósitos diferentes.</p>
 </div>
 </div><div class="column" style="width:50%;">
 <p><img data-src="imagenes/transformers.webp" width="350" height="500"></p>
@@ -946,47 +946,6 @@
 <span id="cb5-16"><a href="#cb5-16"></a>)</span>
 <span id="cb5-17"><a href="#cb5-17"></a>trainer.train()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<table>
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Parámetro</th>
-<th>Valor</th>
-<th>Significado</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>num_train_epochs</code></td>
-<td>3</td>
-<td>Pasadas completas sobre los datos de entrenamiento</td>
-</tr>
-<tr class="even">
-<td><code>per_device_train_batch_size</code></td>
-<td>32</td>
-<td>Ejemplos por paso de actualización</td>
-</tr>
-<tr class="odd">
-<td><code>learning_rate</code></td>
-<td>2e-5</td>
-<td>Tasa de aprendizaje (estándar para fine-tuning BERT)</td>
-</tr>
-<tr class="even">
-<td><code>eval_strategy</code></td>
-<td><code>"epoch"</code></td>
-<td>Evaluar al final de cada época</td>
-</tr>
-<tr class="odd">
-<td><code>logging_strategy</code></td>
-<td><code>"epoch"</code></td>
-<td>Reportar métricas al final de cada época</td>
-</tr>
-</tbody>
-</table>
 </section>
 <section id="paso-4c-guardar-modelo" class="slide level2">
 <h2>Paso 4c: guardar modelo</h2>
@@ -1048,10 +1007,13 @@
 </section>
 <section id="resultados" class="slide level2">
 <h2>Resultados</h2>
-<div class="medium-par">
 <p>Con el dataset de auditorías de Nomenclaturas (~10.000 glosas):</p>
-</div>
-<p><img data-src="imagenes/resultado_modelo.png" width="400" height="500"></p>
+<p><img data-src="imagenes/entrenamiento_modelo.png" width="600" height="500"></p>
+</section>
+<section id="resultados-1" class="slide level2">
+<h2>Resultados</h2>
+<p>Con el dataset de auditorías de Nomenclaturas (~10.000 glosas):</p>
+<p><img data-src="imagenes/resultado_modelo.png" width="450" height="500"></p>
 </section></section>
 <section>
 <section id="cierre" class="title-slide slide level1 center">

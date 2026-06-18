@@ -140,11 +140,11 @@ el contexto.
 
 ## Intuición
 
+![](imagenes/ejemplo_atencion.png){width="800"}
+
 Para representar la palabra **banco**, el modelo mira las demás palabras
 y le pone atención a las que son más "relevantes". En función de eso,
 actualiza su valor (y así con todas los tokens del texto).
-
-![](imagenes/ejemplo_atencion.png){width="800"}
 
 ## Intuición
 
@@ -179,33 +179,17 @@ texto.
 ## Queries, Keys y Values
 
 ::: medium-par
-La atención se implementa con tres matrices aprendibles. Para cada token
-en la secuencia:
+La atención se implementa con tres matrices aprendibles.
 :::
 
 ::: {.incremental .medium-par}
--   **Query (Q)**: *"¿Qué información necesito?"* --- lo que estoy
+Para cada token se definen 3 vectores:
+
+-   **Query (Q)**: *"¿Qué información necesito para entender el token?"* - lo que estoy
     buscando.
--   **Key (K)**: *"¿Qué información tengo yo?"* --- lo que cada token
+-   **Key (K)**: *"¿Qué información tiene el token que puede ayudar a entender otros tokens?"* - lo que cada token
     ofrece.
--   **Value (V)**: *"¿Qué información entrego si me eligen?"* --- el
-    contenido que se pasa.
-:::
-
-## Queries, Keys y Values
-
-::: medium-par
-La atención se implementa con tres matrices aprendibles. Para cada token
-en la secuencia:
-:::
-
-::: medium-par
--   **Query (Q)**: *"¿Qué información me haría cambiar la forma en que
-    entiendo un token?"*
--   **Key (K)**: *"¿Qué información es relevante para el significado de
-    otros tokens?"*
--   **Value (V)**: *"¿Qué información traspaso a otros tokens, si es que
-    me"eligen"?"*
+-   **Value (V)**: *"¿Qué información entrego si lo eligen eligen?"* - el contenido que se pasa.
 :::
 
 ::: {.fragment .medium-par}
@@ -396,7 +380,7 @@ conocimientos generales para que realice tareas específicas.
     pre-entrenado.
 :::
 
-::: {.incremental .concepto-box}
+::: {.fragment .concepto-box}
 El token `[CLS]` es un token especial que BERT agrega al inicio de cada
 texto. Su representación final captura el significado global de la
 oración y se usa como input para la capa de clasificación.
@@ -506,17 +490,13 @@ deberes.
 | 9      | Ocupaciones elementales                   |
 :::
 
-::: {.fragment .callout-note .small-callout}
-Ejericio práctico con 1 dígito (10 clases) como primer paso. El modelo
-puede refinarse luego para 2, 3 y 4 dígitos, donde el problema se vuelve
-más difícil.
-:::
 
 ## Pipeline completo con HuggingFace
 
-::: medium-par
-HuggingFace `transformers` permite hacer fine-tuning de BETO en pocas
-líneas. El pipeline completo tiene cinco etapas:
+::: {.incremental .medium-par}
+- HuggingFace `transformers` es una biblioteca de código abierto que proporciona herramientas para crear, entrenar y desplegar modelos de inteligencia artificial de última generación.
+
+- Permite hacer fine-tuning de BETO en pocas líneas. El pipeline completo tiene cinco etapas:
 :::
 
 ::: {.incremental .medium-par}
@@ -588,7 +568,6 @@ print(f"Entrenamiento: {len(train_df):,}  |  Test: {len(test_df):,}")
 from transformers import AutoTokenizer
 from datasets import Dataset
 
-MODEL = "dccuchile/bert-base-spanish-wwm-cased"
 tokenizer = AutoTokenizer.from_pretrained(MODEL)
 
 def tokenize(batch):
@@ -622,12 +601,11 @@ ds_test.set_format(type="torch",  columns=["input_ids", "attention_mask", "label
 #| eval: false
 from transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments
 
+MODEL = "dccuchile/bert-base-spanish-wwm-cased"
 model = AutoModelForSequenceClassification.from_pretrained(
     MODEL, num_labels=df["label"].nunique()
 )
 ```
-
-![](imagenes/salida_modelo.png){width="800" height="500"}
 
 ## Paso 4b: entrenar modelo
 
@@ -690,7 +668,7 @@ print(reporte)
     gran grupo CIUO real, no un índice interno.
 
 
-## Paso 6: inferencia con decodificación real
+## Paso 6: predección
 
 ```{python}
 #| echo: true
@@ -722,15 +700,14 @@ for glosa in glosas:
     internos, no códigos CIUO. `le.classes_[idx]` recupera el código
     CIUO original a partir de ese índice.
 
-## Resultados
+## Resultados del entrenamiento
 
 Con el dataset de auditorías de Nomenclaturas (\~10.000 glosas):
 
-![](imagenes/entrenamiento_modelo.png){width="600" height="500"}
+![](imagenes/entrenamiento_modelo.png){width="750" height="450"}
+
 
 ## Resultados
-
-Con el dataset de auditorías de Nomenclaturas (\~10.000 glosas):
 
 ![](imagenes/resultado_modelo.png){width="450" height="500"}
 
@@ -745,13 +722,12 @@ Con el dataset de auditorías de Nomenclaturas (\~10.000 glosas):
     directamente cualquier otro.
 3.  **Arquitectura Transformer**: bloques de Multi-Head Attention +
     Feed-Forward + residuales.
-4.  **Encoder vs. Decoder**: para clasificación censal, usamos encoders
+4.  **Encoder vs. Decoder**: para clasificación, usamos encoders
     (BERT/BETO).
 5.  **Pre-entrenamiento + fine-tuning**: aprovechamos conocimiento
     general para adaptarlo a CIUO/CAENES.
 6.  **BETO y el ecosistema HuggingFace**: pipeline completo en Python.
-7.  **Aplicaciones en CPV2024**: codificación automática de ocupaciones
-    (CIUO-08) y rama de actividad (CAENES).
+7.  **Aplicaciones**: codificación automática de ocupaciones (CIUO-08).
 :::
 
 # Gracias
