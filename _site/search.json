@@ -39,7 +39,7 @@
     "href": "clase-06b.html#intuición-1",
     "title": "",
     "section": "Intuición",
-    "text": "Intuición\n:::: columns\n\n\nLa atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).\n\n\nLos transformers aprenden a qué y cómo poner atención para “entender” los tokens de un texto.\n\n\nEsto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto."
+    "text": "Intuición\n\n\n\nLa atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).\n\n\nLos transformers aprenden a qué y cómo poner atención para “entender” los tokens de un texto.\n\n\nEsto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto."
   },
   {
     "objectID": "clase-06b.html#queries-keys-y-values",
@@ -60,14 +60,14 @@
     "href": "clase-06b.html#atención-multi-cabeza-multi-head-attention",
     "title": "",
     "section": "Atención multi-cabeza (Multi-Head Attention)",
-    "text": "Atención multi-cabeza (Multi-Head Attention)\n\nEl mecanismo de atención corresponde a una “cabeza de atención” (junto a otros componentes)\n\n\nEn la práctica, no se usa una sola cabeza de atención sino varias en paralelo. Cada cabeza aprende a atender a aspectos distintos de la secuencia:\n\n\n\n\n\nUna cabeza puede capturar relaciones sintácticas (sujeto → verbo).\nOtra puede capturar relaciones semánticas (ocupación → rama de actividad).\nOtra puede rastrear correferencias (pronombres → sustantivos).\n\n\n\nLas salidas de todas las cabezas se concatenan y proyectan:\n\\[\\text{MultiHead}(Q,K,V) = \\text{Concat}(\\text{head}_1, \\ldots, \\text{head}_h)\\,W^O\\]"
+    "text": "Atención multi-cabeza (Multi-Head Attention)\n\nEl mecanismo de atención corresponde a una “cabeza de atención” (junto a otros componentes)\n\n\nEn la práctica, no se usa una sola cabeza de atención sino varias en paralelo. Cada cabeza aprende a atender a aspectos distintos de la secuencia:\n\n\n\nUna cabeza puede capturar relaciones sintácticas (sujeto → verbo).\nOtra puede capturar relaciones semánticas (ocupación → rama de actividad).\nOtra puede rastrear correferencias (pronombres → sustantivos).\n\n\n\nLas salidas de todas las cabezas se concatenan y proyectan:\n\\[\\text{MultiHead}(Q,K,V) = \\text{Concat}(\\text{head}_1, \\ldots, \\text{head}_h)\\,W^O\\]"
   },
   {
     "objectID": "clase-06b.html#el-bloque-transformer",
     "href": "clase-06b.html#el-bloque-transformer",
     "title": "",
     "section": "El bloque Transformer",
-    "text": "El bloque Transformer\n\nUn bloque Transformer combina Multi-Head Attention con una red feed-forward, rodeados de normalización de capa y conexiones residuales:\n\n\n\n\n\nMulti-Head Attention: cada token atiende a todos los demás.\nAdd & Norm: conexión residual + LayerNorm (estabiliza el entrenamiento).\nFeed-Forward: una red MLP pequeña aplicada posición a posición.\nAdd & Norm: otra conexión residual.\n\n\n\nUn Transformer completo = apilar \\(N\\) de estos bloques (BERT usa 12 ó 24)."
+    "text": "El bloque Transformer\n\nUn bloque Transformer combina Multi-Head Attention con una red feed-forward, rodeados de normalización de capa y conexiones residuales:\n\n\n\nMulti-Head Attention: cada token atiende a todos los demás.\nAdd & Norm: conexión residual + LayerNorm (estabiliza el entrenamiento).\nFeed-Forward: una red MLP pequeña aplicada posición a posición.\nAdd & Norm: otra conexión residual.\n\n\n\nUn Transformer completo = apilar \\(N\\) de estos bloques (BERT usa 12 ó 24)."
   },
   {
     "objectID": "clase-06b.html#visualizando-un-transformer",
@@ -81,14 +81,14 @@
     "href": "clase-06b.html#estructura-encoder-decoder",
     "title": "",
     "section": "Estructura Encoder-Decoder",
-    "text": "Estructura Encoder-Decoder\n\nEl Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: Encoder y Decoder. La lógica era que el Encoder “codificaba” la información de un idioma en un vector numérico, y el Decoder tomaba esto y lo “decodificaba” en otro idioma.\n\n\nCon el tiempo se encontró que cada mitad es útil por separado, y para propósitos diferentes."
+    "text": "Estructura Encoder-Decoder\n\n\nEl Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: Encoder y Decoder. La lógica era que el Encoder “codificaba” la información de un idioma en un vector numérico, y el Decoder tomaba esto y lo “decodificaba” en otro idioma.\n\nCon el tiempo se encontró que cada mitad es útil por separado, y para propósitos diferentes."
   },
   {
     "objectID": "clase-06b.html#estructura-encoder-decoder-1",
     "href": "clase-06b.html#estructura-encoder-decoder-1",
     "title": "",
     "section": "Estructura Encoder-Decoder",
-    "text": "Estructura Encoder-Decoder\n\nEncoder - leer y representar\n\nToma una secuencia de tokens y produce una representación para cada uno\nAtención bidireccional: cada token ve todos los demás (izquierda y derecha)\nNo genera nada: su salida son vectores, no palabras\nÚtil cuando la tarea requiere entender el texto de entrada\n\n\n\nDecoder - generar secuencias\n\nToma una secuencia de tokens y produce una predicción del siguiente token\nAtención causal: cada token solo ve los anteriores, nunca los siguientes\nEsta restricción es necesaria para que la generación sea coherente: no puede “hacer trampa” mirando el futuro\nÚtil cuando la tarea requiere producir texto nuevo"
+    "text": "Estructura Encoder-Decoder\n\nEncoder - leer y representar\n\nToma una secuencia de tokens y produce una representación para cada uno\nAtención bidireccional: cada token ve todos los demás (izquierda y derecha)\nNo genera predicciones de texto: su salida son vectores, no palabras\nÚtil cuando la tarea requiere entender el texto de entrada\n\n\n\nDecoder - generar secuencias\n\nToma una secuencia de tokens y produce una predicción del siguiente token\nAtención causal: cada token solo ve los anteriores, nunca los siguientes\nEsta restricción es necesaria para que la generación sea coherente: no puede “hacer trampa” mirando el futuro\nÚtil cuando la tarea requiere producir texto nuevo"
   },
   {
     "objectID": "clase-06b.html#modelos-actuales-claude-gpt-4-etc.",

@@ -371,14 +371,14 @@ adaptarlo a tareas específicas con muy pocos datos propios: el
 
 ## Fine-tuning
 
-::: {.fragment .concepto-box}
+::: {.fragment .medium-par}
 Cuando queremos realizar una tarea con modelos de IA, no necesitamos
 entrenar desde cero. Podemos partir de un modelo que ya "entiende" el
 español y le enseñamos nuestra tarea específica, por lo que se necesitan
 mucho menos datos de entrenamiento.
 :::
 
-::: {.fragment .medium-par}
+::: {.fragment .concepto-box}
 El fine-tuning (o ajuste fino) es una técnica de inteligencia artificial
 donde un modelo previamente entrenado recibe entrenamiento adicional con
 un conjunto de datos más pequeño y específico. Esto permite adaptar sus
@@ -397,7 +397,7 @@ conocimientos generales para que realice tareas específicas.
     pre-entrenado.
 :::
 
-::: {.incremental .callout-note .small-callout}
+::: {.incremental .concepto-box}
 El token `[CLS]` es un token especial que BERT agrega al inicio de cada
 texto. Su representación final captura el significado global de la
 oración y se usa como input para la capa de clasificación.
@@ -470,7 +470,9 @@ se capturan como texto libre:
     eléctricos"
 -   *"¿A qué se dedica la empresa en la cual trabaja?"* → "Construcción
     de edificios"
+:::
 
+::: {.fragment}
 Estas respuestas deben codificarse según clasificadores internacionales:
 
 -   **CIUO-08**: Clasificación Internacional Uniforme de Ocupaciones
@@ -614,36 +616,33 @@ ds_test.set_format(type="torch",  columns=["input_ids", "attention_mask", "label
     batches: los tensores de PyTorch deben ser explícitamente del tipo
     correcto.
 
-## Paso 4: modelo
+## Paso 4a: modelo
 
 ```{python}
 #| echo: true
 #| eval: false
 from transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments
 
-model = AutoModelForSequenceClassification.from_pretrained(  # <1>
+model = AutoModelForSequenceClassification.from_pretrained(
     MODEL, num_labels=df["label"].nunique()
 )
+```
 
-def compute_metrics(eval_pred):
-    logits, labels = eval_pred
-    preds = np.argmax(logits, axis=-1)
-    return {
-        "accuracy":    round(accuracy_score(labels, preds), 4),
-        "f1_macro":    round(f1_score(labels, preds, average="macro",    zero_division=0), 4), # <2>
-        "f1_weighted": round(f1_score(labels, preds, average="weighted", zero_division=0), 4),
-    }
+![](imagenes/salida_modelo.png){width="800" height="500"}
 
+## Paso 4b: entrenar modelo
+
+```{python}
 trainer = Trainer(
     model=model,
     args=TrainingArguments(
         output_dir="./modelo_ciuo08",
         num_train_epochs=3,
         per_device_train_batch_size=32,
-        learning_rate=2e-5,             # <3>
+        learning_rate=2e-5,             
         eval_strategy="epoch",
         logging_strategy="epoch",
-        report_to="none",               # <4>
+        report_to="none",              
         save_strategy="no",
     ),
     train_dataset=ds_train,
@@ -653,16 +652,26 @@ trainer = Trainer(
 trainer.train()
 ```
 
-1.  Al cargar el modelo verán avisos sobre pesos no utilizados (los de
-    MLM) y pesos faltantes (la cabeza de clasificación). Ambos son
-    normales.
-2.  F1 macro pondera cada clase por igual, independiente de su tamaño.
-    Es más informativo que la accuracy cuando las clases están
-    desbalanceadas.
-3.  Learning rate entre 2e-5 y 5e-5 es estándar para fine-tuning de
-    BERT.
+| Parámetro | Valor | Significado |
+|---|---|---|
+| `num_train_epochs` | 3 | Pasadas completas sobre los datos de entrenamiento |
+| `per_device_train_batch_size` | 32 | Ejemplos por paso de actualización |
+| `learning_rate` | 2e-5 | Tasa de aprendizaje (estándar para fine-tuning BERT) |
+| `eval_strategy` | `"epoch"` | Evaluar al final de cada época |
+| `logging_strategy` | `"epoch"` | Reportar métricas al final de cada época |
 
-## Paso 5: evaluación detallada
+
+## Paso 4c: guardar modelo
+
+```{python}
+#| echo: true
+#| eval: false
+
+trainer.save_model(DIRECTORIO_FINAL)
+tokenizer.save_pretrained(DIRECTORIO_FINAL)
+```
+
+## Paso 5: evaluación
 
 ```{python}
 #| echo: true
@@ -687,12 +696,6 @@ print(reporte)
     que `LabelEncoder` los asignó. Así cada fila del reporte muestra el
     gran grupo CIUO real, no un índice interno.
 
-::: {.fragment .callout-note .small-callout}
-El reporte muestra precisión, recall y F1 **por cada gran grupo CIUO**.
-Es la métrica más útil para detectar qué grupos son difíciles de
-clasificar (p/e Grupo 5 Servicios vs. Grupo 9 Ocupaciones elementales
-suelen confundirse).
-:::
 
 ## Paso 6: inferencia con decodificación real
 
@@ -702,8 +705,6 @@ suelen confundirse).
 from transformers import pipeline
 
 DIRECTORIO_FINAL = "./modelo_ciuo08/final"
-trainer.save_model(DIRECTORIO_FINAL)
-tokenizer.save_pretrained(DIRECTORIO_FINAL)
 
 clasificador = pipeline("text-classification", model=DIRECTORIO_FINAL,
                         tokenizer=DIRECTORIO_FINAL, device=-1)
@@ -734,7 +735,7 @@ for glosa in glosas:
 Con el dataset de auditorías de Nomenclaturas (\~10.000 glosas):
 :::
 
-![](imagenes/resultado_modelo.png){width="350" height="500"}
+![](imagenes/resultado_modelo.png){width="400" height="500"}
 
 
 # Cierre

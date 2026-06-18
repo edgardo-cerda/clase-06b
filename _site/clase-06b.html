@@ -476,7 +476,7 @@
 </section>
 <section id="intuición-1" class="slide level2">
 <h2>Intuición</h2>
-<p>:::: columns</p>
+<div class="columns">
 <div class="column" style="width:50%;">
 <div class="fragment medium-par">
 <p>La atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).</p>
@@ -487,7 +487,7 @@
 <div class="fragment medium-par">
 <p>Esto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto.</p>
 </div>
-<div class="column" style="width:50%;">
+</div><div class="column" style="width:50%;">
 <p><img data-src="imagenes/transformers.webp" width="350" height="500"></p>
 </div>
 </div>
@@ -538,8 +538,6 @@
 <div class="medium-par">
 <p>En la práctica, no se usa una sola cabeza de atención sino varias en paralelo. Cada cabeza aprende a atender a <strong>aspectos distintos</strong> de la secuencia:</p>
 </div>
-<div class="columns">
-<div class="column" style="width:55%;">
 <div class="medium-par">
 <ul>
 <li class="fragment">Una cabeza puede capturar <strong>relaciones sintácticas</strong> (sujeto → verbo).</li>
@@ -551,18 +549,12 @@
 <p>Las salidas de todas las cabezas se concatenan y proyectan:</p>
 <p><span class="math display">\[\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\,W^O\]</span></p>
 </div>
-</div><div class="column" style="width:45%;">
-<!-- ![](imagenes/multi_head_attention.png) -->
-</div>
-</div>
 </section>
 <section id="el-bloque-transformer" class="slide level2">
 <h2>El bloque Transformer</h2>
 <div class="medium-par">
 <p>Un bloque Transformer combina Multi-Head Attention con una red feed-forward, rodeados de <strong>normalización de capa</strong> y <strong>conexiones residuales</strong>:</p>
 </div>
-<div class="columns">
-<div class="column" style="width:50%;">
 <div class="medium-par">
 <ol type="1">
 <li class="fragment"><strong>Multi-Head Attention</strong>: cada token atiende a todos los demás.</li>
@@ -573,10 +565,6 @@
 </div>
 <div class="fragment small-par">
 <p>Un Transformer completo = apilar <span class="math inline">\(N\)</span> de estos bloques (BERT usa 12 ó 24).</p>
-</div>
-</div><div class="column" style="width:50%;">
-<!-- ![](imagenes/transformer_block.png) -->
-</div>
 </div>
 </section>
 <section id="visualizando-un-transformer" class="slide level2">
@@ -592,11 +580,15 @@
 </section>
 <section id="estructura-encoder-decoder" class="slide level2">
 <h2>Estructura Encoder-Decoder</h2>
-<div class="fragment">
+<div class="columns">
+<div class="column" style="width:50%;">
 <p>El Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: Encoder y Decoder. La lógica era que el Encoder “codificaba” la información de un idioma en un vector numérico, y el Decoder tomaba esto y lo “decodificaba” en otro idioma.</p>
-</div>
 <div class="fragment">
 <p>Con el tiempo se encontró que cada mitad es útil por separado, y para propósitos diferentes.</p>
+</div>
+</div><div class="column" style="width:50%;">
+<p><img data-src="imagenes/transformers.webp" width="350" height="500"></p>
+</div>
 </div>
 </section>
 <section id="estructura-encoder-decoder-1" class="slide level2">
@@ -606,7 +598,7 @@
 <ul>
 <li><p>Toma una secuencia de tokens y produce una representación para cada uno</p></li>
 <li><p>Atención bidireccional: cada token ve todos los demás (izquierda y derecha)</p></li>
-<li><p>No genera nada: su salida son vectores, no palabras</p></li>
+<li><p>No genera predicciones de texto: su salida son vectores, no palabras</p></li>
 <li><p>Útil cuando la tarea requiere entender el texto de entrada</p></li>
 </ul>
 </div>
