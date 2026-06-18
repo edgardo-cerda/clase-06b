@@ -56,38 +56,31 @@ El objetivo de esta clase es entender **cómo funcionan los Transformers** y có
 5. **Modelos para español:** BETO y la familia RoBERTa
 6. **Ejercicio práctico:** Fine-tuning de BETO con HuggingFace
 
-:::Y
+:::
 
 # El problema que los transformers vinieron a resolver
 
 ## Límites de las RNN y LSTM
 
-Las primeras redes neuronales que vimos las clases anteriores trataban cada entrada como **independiente**: no tienen noción de orden ni de contexto previo.
-
 ::: {.fragment .medium-par}
-Eso es un problema: el significado de una palabra depende de su contexto.
+Problema: el significado de una palabra depende de su contexto.
 :::
 
 ::: {.fragment}
-Ejemplo de respuesta en actividad económica:
-
 > "Trabajo en una empresa que realiza **minería** de ..."
-
-En qué sector económico trabaja? La respuesta depende del contexto.
-
 :::
 
 ::: {.fragment}
-Minería de datos -> Actividades profesionales, científicas y técnicas
+
+En qué sector económico trabajo? La respuesta depende del contexto.
+
+ - Minería de datos -> Actividades profesionales, científicas y técnicas
+ - Minería de cobre -> Explotación de minas y canteras
 :::
 
 ::: {.fragment}
-Minería de cobre -> Explotación de minas y canteras
+Hasta 2017, el estado del arte para solucionar este problema eran las  **Redes Neuronales Recurrentes (RNN)**, **Long Short-Term Memory (LSTM)**, **Gated Recurent Units (GRU)**, entre otras.
 :::
-
-##  RNN y LSTM
-
-Para solucionar este problema surgieron las  **Redes Neuronales Recurrentes (RNN)**, **Long Short-Term Memory (LSTM)**, **Gated Recurent Units (GRU)**, entre otras, que permiten aprender del contexto.
 
 ::: {.fragment .medium-par}
 Pero tienen otros problemas:
@@ -109,10 +102,6 @@ Esa es la idea del mecanismo de **Atención (o Autoatención)**: en vez de compr
 ## ¿Por qué son tan bacanes los Transformers?
 
 ::: {.fragment}
-Capturan dependencias de **largo alcance** sin pérdida de información (eliminan el problema del Desvanecimiento o Explosión de pesos)
-:::
-
-::: {.fragment}
 **Paralelización masiva**: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Es lo que hizo posible entrenar modelos con billones de parámetros.
 :::
 
@@ -121,12 +110,16 @@ Capturan dependencias de **largo alcance** sin pérdida de información (elimina
 :::
 
 ::: {.fragment}
-**Capacidades emergentes:** Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes.
+**Capacidades emergentes:** Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes, como el razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto.
 :::
 
 # El mecanismo de atención
 
 ## Intuición
+
+:::: columns
+
+::: {.column width=55%}
 
 ::: {.fragment .medium-par}
 La atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).
@@ -140,6 +133,13 @@ Los transformers aprenden a qué y cómo poner atención para "entender" los tok
 Esto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto.
 :::
 
+::: {.column width=45%}
+
+![](imagenes/transformers.webp)
+
+## Intuición
+
+
 ::: {.fragment}
 En el texto:
 
@@ -148,7 +148,7 @@ En el texto:
 Para representar la palabra **banco**, el modelo mira las demás palabras y le pone atención a las que son más "relevantes". En función de eso, actualiza su valor (y así con todas los tokens del texto).
 :::
 
-FALTA UN DIAGRAMA
+![](imagenes/ejemplo_atencion.png)
 
 ## Queries, Keys y Values
 
@@ -496,160 +496,211 @@ Ejericio práctico con 1 dígito (10 clases) como primer paso. El modelo puede r
 ## Pipeline completo con HuggingFace
 
 ::: {.medium-par}
-HuggingFace `transformers` permite hacer fine-tuning de BETO en pocas líneas. El pipeline completo tiene cuatro etapas:
+HuggingFace `transformers` permite hacer fine-tuning de BETO en pocas líneas. El pipeline completo tiene cinco etapas:
 :::
 
 ::: {.incremental .medium-par}
-1. **Cargar el tokenizador y el modelo base**
-2. **Preparar el dataset** (tokenizar, crear DataLoaders)
-3. **Configurar el Trainer** (optimizador, épocas, métricas)
-4. **Entrenar y evaluar**
+1. **Carga y preparación de datos**
+2. **Codificación de etiquetas y split train/test**
+3. **Tokenización**
+4. **Configurar el Trainer y entrenar**
+5. **Evaluación e inferencia**
 :::
 
 ::: {.fragment .nota-box}
-Usaremos un dataset de glosas auditadas por el equipo de Nomenclaturas, proveniente de distintas encuestas o Censos realizados por el INE, con etiquetas CIUO-08 a 1 dígito. El código es idéntico al que usarían con datos reales.
+Usaremos un dataset de glosas auditadas por el equipo de Nomenclaturas, proveniente de distintas encuestas o Censos realizados por el INE, con etiquetas CIUO-08 a 1 dígito.
 :::
 
-## Paso 1: cargar tokenizador y modelo
+## Paso 1: carga de datos
 
 ```{python}
 #| echo: true
 #| eval: false
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import classification_report, accuracy_score, f1_score
 
-MODEL_NAME = "dccuchile/bert-base-spanish-wwm-cased"
-NUM_LABELS = 10  # CIUO-08 a 1 dígito: grupos 1-9 + grupo 0
+df = pd.read_csv("codigos_ciuo_auditorias_nomenclaturas.csv")
+df = df[["texto", "codigo_ciuo_1d"]].dropna().reset_index(drop=True) # <1>
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-model = AutoModelForSequenceClassification.from_pretrained(
-    MODEL_NAME,
-    num_labels=NUM_LABELS
-)
+print(f"Total de registros: {len(df):,}")
+print(df["codigo_ciuo_1d"].value_counts().sort_index())
 ```
+1. `texto` es la concatenación de ocupación y tareas. Usar ambos campos mejora la clasificación porque el modelo dispone de más contexto que solo el nombre del cargo.
 
-::: {.fragment .callout-note .small-callout}
-`AutoModelForSequenceClassification` toma el encoder BERT y le agrega automáticamente una cabeza de clasificación (capa lineal sobre `[CLS]`) con `num_labels` salidas.
-:::
-
-## Paso 2: tokenizar el dataset
+## Paso 2: codificación de etiquetas y split
 
 ```{python}
 #| echo: true
 #| eval: false
+le = LabelEncoder()                                    # <1>
+df["label"] = le.fit_transform(df["codigo_ciuo_1d"])
+
+train_df, test_df = train_test_split(
+    df,
+    test_size=0.2,
+    random_state=42,
+    stratify=df["label"]                               # <2>
+)
+print(f"Entrenamiento: {len(train_df):,}  |  Test: {len(test_df):,}")
+```
+1. PyTorch necesita enteros contiguos desde 0. `LabelEncoder` hace ese mapeo automáticamente: si en los datos solo aparecen los grupos 1, 2, 3 y 5, los convierte a 0, 1, 2, 3. El objeto `le` guarda el mapeo inverso para recuperar los códigos CIUO originales al final.
+2. `stratify` garantiza que la proporción de cada grupo CIUO sea la misma en train y test, lo que es importante cuando hay clases con pocos ejemplos.
+
+## Paso 3: tokenización
+
+```{python}
+#| echo: true
+#| eval: false
+from transformers import AutoTokenizer
 from datasets import Dataset
 
-# Suponemos que tenemos un DataFrame con columnas 'glosa' y 'ciuo_1d'
-df_train = pd.read_parquet("data/ciuo_train.parquet")
-df_val   = pd.read_parquet("data/ciuo_val.parquet")
+MODEL = "dccuchile/bert-base-spanish-wwm-cased"
+tokenizer = AutoTokenizer.from_pretrained(MODEL)
 
 def tokenize(batch):
     return tokenizer(
-        batch["glosa"],
+        batch["texto"],
         truncation=True,
         padding="max_length",
-        max_length=64       # <1>
+        max_length=64           # <1>
     )
 
-ds_train = Dataset.from_pandas(df_train).map(tokenize, batched=True)
-ds_val   = Dataset.from_pandas(df_val).map(tokenize, batched=True)
+ds_train = Dataset.from_pandas(train_df[["texto", "label"]].reset_index(drop=True))
+ds_test  = Dataset.from_pandas(test_df[["texto", "label"]].reset_index(drop=True))
 
-ds_train = ds_train.rename_column("ciuo_1d", "labels")
-ds_val   = ds_val.rename_column("ciuo_1d", "labels")
+ds_train = ds_train.map(tokenize, batched=True)
+ds_test  = ds_test.map(tokenize, batched=True)
+
+ds_train.set_format(type="torch", columns=["input_ids", "attention_mask", "label"]) # <2>
+ds_test.set_format(type="torch",  columns=["input_ids", "attention_mask", "label"])
 ```
-1. Las glosas de ocupación son cortas; 64 tokens es suficiente y ahorra memoria.
+1. 64 tokens es suficiente para glosas cortas de ocupación y ahorra memoria en GPU.
+2. Sin `set_format`, el `Trainer` puede fallar al intentar armar los batches: los tensores de PyTorch deben ser explícitamente del tipo correcto.
 
-## Paso 3: configurar el Trainer
+## Paso 4: modelo, métricas y entrenamiento
 
 ```{python}
 #| echo: true
 #| eval: false
-from transformers import TrainingArguments, Trainer
-import evaluate
+from transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments
 
-accuracy = evaluate.load("accuracy")
+model = AutoModelForSequenceClassification.from_pretrained(  # <1>
+    MODEL, num_labels=df["label"].nunique()
+)
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
-    preds = logits.argmax(axis=-1)
-    return accuracy.compute(predictions=preds, references=labels)
-
-args = TrainingArguments(
-    output_dir="checkpoints/beto-ciuo",
-    num_train_epochs=5,            # <1>
-    per_device_train_batch_size=32,
-    per_device_eval_batch_size=64,
-    learning_rate=2e-5,            # <2>
-    weight_decay=0.01,
-    evaluation_strategy="epoch",
-    save_strategy="epoch",
-    load_best_model_at_end=True,
-)
+    preds = np.argmax(logits, axis=-1)
+    return {
+        "accuracy":    round(accuracy_score(labels, preds), 4),
+        "f1_macro":    round(f1_score(labels, preds, average="macro",    zero_division=0), 4), # <2>
+        "f1_weighted": round(f1_score(labels, preds, average="weighted", zero_division=0), 4),
+    }
 
 trainer = Trainer(
     model=model,
-    args=args,
+    args=TrainingArguments(
+        output_dir="./modelo_ciuo08",
+        num_train_epochs=3,
+        per_device_train_batch_size=32,
+        learning_rate=2e-5,             # <3>
+        eval_strategy="epoch",
+        logging_strategy="epoch",
+        report_to="none",               # <4>
+        save_strategy="no",
+    ),
     train_dataset=ds_train,
-    eval_dataset=ds_val,
+    eval_dataset=ds_test,
     compute_metrics=compute_metrics,
 )
+trainer.train()
 ```
-1. Con fine-tuning, pocas épocas suelen ser suficientes. Más épocas pueden llevar a overfitting.
-2. Learning rate pequeño (2e-5 a 5e-5) es estándar para fine-tuning de BERT. Valores más altos pueden "romper" los pesos pre-entrenados.
+1. Al cargar el modelo verán avisos sobre pesos no utilizados (los de MLM) y pesos faltantes (la cabeza de clasificación). Ambos son normales.
+2. F1 macro pondera cada clase por igual, independiente de su tamaño. Es más informativo que la accuracy cuando las clases están desbalanceadas.
+3. Learning rate entre 2e-5 y 5e-5 es estándar para fine-tuning de BERT. Valores más altos pueden degradar los pesos pre-entrenados.
+4. Evita que el Trainer intente conectarse a Weights & Biases. Si no se incluye, puede generar errores en entornos sin esa librería configurada.
 
-## Paso 4: entrenar y evaluar
+## Paso 5: evaluación detallada
 
 ```{python}
 #| echo: true
 #| eval: false
-# Entrenamiento
-trainer.train()
+from sklearn.metrics import classification_report
 
-# Evaluación final
-results = trainer.evaluate()
-print(f"Accuracy en validación: {results['eval_accuracy']:.3f}")
+salida = trainer.predict(ds_test)
+preds  = np.argmax(salida.predictions, axis=-1)
+etiquetas_reales = np.array(ds_test["label"])
 
-# Guardar modelo
-trainer.save_model("modelos/beto-ciuo-final")
-tokenizer.save_pretrained("modelos/beto-ciuo-final")
+nombres_clases = [f"GG {c}" for c in le.classes_]  # <1>
+
+reporte = classification_report(
+    etiquetas_reales, preds,
+    target_names=nombres_clases,
+    zero_division=0
+)
+print(reporte)
 ```
+1. `le.classes_` contiene los códigos CIUO originales en el orden en que `LabelEncoder` los asignó. Así cada fila del reporte muestra el gran grupo CIUO real, no un índice interno.
 
-::: {.fragment .medium-par}
-**Resultados esperados** con ~50.000 glosas etiquetadas:
-
-Tabla con resultados
-
+::: {.fragment .callout-note .small-callout}
+El reporte muestra precisión, recall y F1 **por cada gran grupo CIUO**. Es la métrica más útil para detectar qué grupos son difíciles de clasificar (p/e Grupo 5 Servicios vs. Grupo 9 Ocupaciones elementales suelen confundirse).
 :::
 
-## Inferencia: usar el modelo en producción
+## Paso 6: inferencia con decodificación real
 
 ```{python}
 #| echo: true
 #| eval: false
 from transformers import pipeline
 
-clasificador = pipeline(
-    "text-classification",
-    model="modelos/beto-ciuo-final",
-    tokenizer="modelos/beto-ciuo-final"
-)
+DIRECTORIO_FINAL = "./modelo_ciuo08/final"
+trainer.save_model(DIRECTORIO_FINAL)
+tokenizer.save_pretrained(DIRECTORIO_FINAL)
+
+clasificador = pipeline("text-classification", model=DIRECTORIO_FINAL,
+                        tokenizer=DIRECTORIO_FINAL, device=-1)
+
+def predecir_ciuo(texto):
+    resultado = clasificador(texto, truncation=True, max_length=64)[0]
+    idx     = int(resultado["label"].split("_")[1])  # <1>
+    codigo  = le.classes_[idx]
+    return {"codigo_ciuo_1d": int(codigo), "confianza": round(resultado["score"], 4)}
 
 glosas = [
-    "Técnico electricista en empresa de distribución",
-    "Profesora de enseñanza básica en colegio municipal",
-    "Cajera en supermercado",
-    "Ingeniero agrónomo en empresa exportadora de fruta",
+    "OCUPACIÓN: ENFERMERA; TAREA: ADMINISTRAR MEDICAMENTOS Y CONTROLAR SIGNOS VITALES",
+    "OCUPACIÓN: CONDUCTOR DE CAMIÓN; TAREA: TRANSPORTAR CARGA ENTRE REGIONES",
+    "OCUPACIÓN: TEMPORERO AGRÍCOLA; TAREA: COSECHAR UVA EN TEMPORADA",
 ]
-
-resultados = clasificador(glosas)
-for glosa, res in zip(glosas, resultados):
-    print(f"{glosa[:45]:<45} → {res['label']} ({res['score']:.3f})")
+for glosa in glosas:
+    r = predecir_ciuo(glosa)
+    print(f"GG {r['codigo_ciuo_1d']}  ({r['confianza']:.1%})  →  {glosa[:65]}")
 ```
+1. `pipeline` devuelve `"LABEL_0"`, `"LABEL_1"`, etc. — índices internos, no códigos CIUO. `le.classes_[idx]` recupera el código CIUO original a partir de ese índice.
 
-<!-- ::: {.fragment .callout-note .small-callout} -->
-<!-- El objeto `pipeline` envuelve tokenización + inferencia + decodificación del label. Se puede usar directamente en un script de procesamiento masivo o en una API REST. -->
-<!-- ::: -->
+## Resultados esperados
 
-## Resultados
+::: {.medium-par}
+Con el dataset de auditorías de Nomenclaturas (~50.000 glosas), resultados orientativos:
+:::
+
+::: {.medium-par}
+| Nivel CIUO | Clases | Accuracy | F1 macro |
+|---|---|---|---|
+| **1 dígito** | 10 | 85–92% | 80–88% |
+| **2 dígitos** | ~43 | 75–85% | 68–78% |
+| **4 dígitos** | ~436 | 60–75% | 45–65% |
+:::
+
+::: {.fragment .nota-box}
+El F1 macro es el indicador más relevante: pondera cada gran grupo por igual. La accuracy puede ser alta aunque el modelo falle en grupos minoritarios.
+:::
+
+::: {.fragment .callout-note .small-callout}
+Estos números son referenciales, basados en la literatura y experiencia con datos similares. Los resultados reales dependen de la calidad y distribución del dataset de entrenamiento.
+:::
 
 
 # Cierre
@@ -663,8 +714,7 @@ for glosa, res in zip(glosas, resultados):
 4. **Encoder vs. Decoder**: para clasificación censal, usamos encoders (BERT/BETO).
 5. **Pre-entrenamiento + fine-tuning**: aprovechamos conocimiento general para adaptarlo a CIUO/CAENES.
 6. **BETO y el ecosistema HuggingFace**: pipeline completo en Python.
-7. **Aplicaciones en CPV2024**: codificación de ocupaciones, rama de actividad, detección de inconsistencias.
+7. **Aplicaciones en CPV2024**: codificación automática de ocupaciones (CIUO-08) y rama de actividad (CAENES).
 :::
 
 # Gracias
-

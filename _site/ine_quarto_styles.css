@@ -321,4 +321,9 @@ Settings for colors
   width: 40%;
 }
 
+.reveal ul,
+.reveal ol {
+  font-size: 22px;   
+  line-height: 1.5;
+}
 
