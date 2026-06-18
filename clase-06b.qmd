@@ -294,8 +294,7 @@ Encoder "codificaba" la información de un idioma en un vector numérico,
 y el Decoder tomaba esto y lo "decodificaba" en otro idioma.
 
 ::: fragment
-Con el tiempo se encontró que cada mitad es útil por separado, y para
-propósitos diferentes.
+Pero cada mitad resultó ser más útil por separado, y para propósitos diferentes.
 :::
 
 :::
@@ -654,14 +653,6 @@ trainer = Trainer(
 trainer.train()
 ```
 
-| Parámetro | Valor | Significado |
-|---|---|---|
-| `num_train_epochs` | 3 | Pasadas completas sobre los datos de entrenamiento |
-| `per_device_train_batch_size` | 32 | Ejemplos por paso de actualización |
-| `learning_rate` | 2e-5 | Tasa de aprendizaje (estándar para fine-tuning BERT) |
-| `eval_strategy` | `"epoch"` | Evaluar al final de cada época |
-| `logging_strategy` | `"epoch"` | Reportar métricas al final de cada época |
-
 
 ## Paso 4c: guardar modelo
 
@@ -733,12 +724,15 @@ for glosa in glosas:
 
 ## Resultados
 
-::: medium-par
 Con el dataset de auditorías de Nomenclaturas (\~10.000 glosas):
-:::
 
-![](imagenes/resultado_modelo.png){width="400" height="500"}
+![](imagenes/entrenamiento_modelo.png){width="600" height="500"}
 
+## Resultados
+
+Con el dataset de auditorías de Nomenclaturas (\~10.000 glosas):
+
+![](imagenes/resultado_modelo.png){width="450" height="500"}
 
 # Cierre
 

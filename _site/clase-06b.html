@@ -639,10 +639,10 @@
 </section>
 <section id="fine-tuning" class="slide level2">
 <h2>Fine-tuning</h2>
-<div class="fragment concepto-box">
+<div class="fragment medium-par">
 <p>Cuando queremos realizar una tarea con modelos de IA, no necesitamos entrenar desde cero. Podemos partir de un modelo que ya “entiende” el español y le enseñamos nuestra tarea específica, por lo que se necesitan mucho menos datos de entrenamiento.</p>
 </div>
-<div class="fragment medium-par">
+<div class="fragment concepto-box">
 <p>El fine-tuning (o ajuste fino) es una técnica de inteligencia artificial donde un modelo previamente entrenado recibe entrenamiento adicional con un conjunto de datos más pequeño y específico. Esto permite adaptar sus conocimientos generales para que realice tareas específicas.</p>
 </div>
 </section>
@@ -656,18 +656,8 @@
 <li class="fragment">Usamos un learning rate muy pequeño para no “olvidar” lo pre-entrenado.</li>
 </ol>
 </div>
-<div class="callout callout-note callout-captioned callout-style-default">
-<div class="callout-body">
-<div class="callout-caption">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
+<div class="concepto-box">
 <p>El token <code>[CLS]</code> es un token especial que BERT agrega al inicio de cada texto. Su representación final captura el significado global de la oración y se usa como input para la capa de clasificación.</p>
-</div>
-</div>
 </div>
 </section></section>
 <section>
@@ -769,10 +759,12 @@
 <li class="fragment"><em>“¿Qué tareas y deberes cumple en su trabajo?”</em> → “Instalar sistemas eléctricos”</li>
 <li class="fragment"><em>“¿A qué se dedica la empresa en la cual trabaja?”</em> → “Construcción de edificios”</li>
 </ul>
+</div>
+<div class="fragment">
 <p>Estas respuestas deben codificarse según clasificadores internacionales:</p>
 <ul>
-<li class="fragment"><strong>CIUO-08</strong>: Clasificación Internacional Uniforme de Ocupaciones (OIT)</li>
-<li class="fragment"><strong>CAENES</strong>: Clasificación de Actividades Económicas para Encuestas Sociodemográficas (INE)</li>
+<li><strong>CIUO-08</strong>: Clasificación Internacional Uniforme de Ocupaciones (OIT)</li>
+<li><strong>CAENES</strong>: Clasificación de Actividades Económicas para Encuestas Sociodemográficas (INE)</li>
 </ul>
 </div>
 <div class="fragment nota-box">
@@ -922,109 +914,133 @@
 <li>Sin <code>set_format</code>, el <code>Trainer</code> puede fallar al intentar armar los batches: los tensores de PyTorch deben ser explícitamente del tipo correcto.</li>
 </ol>
 </section>
-<section id="paso-4-modelo" class="slide level2">
-<h2>Paso 4: modelo</h2>
+<section id="paso-4a-modelo" class="slide level2">
+<h2>Paso 4a: modelo</h2>
 <div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForSequenceClassification, Trainer, TrainingArguments</span>
 <span id="cb4-2"><a href="#cb4-2"></a></span>
-<span id="cb4-3"><a href="#cb4-3"></a>model <span class="op">=</span> AutoModelForSequenceClassification.from_pretrained(  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a>model <span class="op">=</span> AutoModelForSequenceClassification.from_pretrained(</span>
 <span id="cb4-4"><a href="#cb4-4"></a>    MODEL, num_labels<span class="op">=</span>df[<span class="st">"label"</span>].nunique()</span>
-<span id="cb4-5"><a href="#cb4-5"></a>)</span>
-<span id="cb4-6"><a href="#cb4-6"></a></span>
-<span id="cb4-7"><a href="#cb4-7"></a><span class="kw">def</span> compute_metrics(eval_pred):</span>
-<span id="cb4-8"><a href="#cb4-8"></a>    logits, labels <span class="op">=</span> eval_pred</span>
-<span id="cb4-9"><a href="#cb4-9"></a>    preds <span class="op">=</span> np.argmax(logits, axis<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb4-10"><a href="#cb4-10"></a>    <span class="cf">return</span> {</span>
-<span id="cb4-11"><a href="#cb4-11"></a>        <span class="st">"accuracy"</span>:    <span class="bu">round</span>(accuracy_score(labels, preds), <span class="dv">4</span>),</span>
-<span id="cb4-12"><a href="#cb4-12"></a>        <span class="st">"f1_macro"</span>:    <span class="bu">round</span>(f1_score(labels, preds, average<span class="op">=</span><span class="st">"macro"</span>,    zero_division<span class="op">=</span><span class="dv">0</span>), <span class="dv">4</span>), <span class="co"># &lt;2&gt;</span></span>
-<span id="cb4-13"><a href="#cb4-13"></a>        <span class="st">"f1_weighted"</span>: <span class="bu">round</span>(f1_score(labels, preds, average<span class="op">=</span><span class="st">"weighted"</span>, zero_division<span class="op">=</span><span class="dv">0</span>), <span class="dv">4</span>),</span>
-<span id="cb4-14"><a href="#cb4-14"></a>    }</span>
-<span id="cb4-15"><a href="#cb4-15"></a></span>
-<span id="cb4-16"><a href="#cb4-16"></a>trainer <span class="op">=</span> Trainer(</span>
-<span id="cb4-17"><a href="#cb4-17"></a>    model<span class="op">=</span>model,</span>
-<span id="cb4-18"><a href="#cb4-18"></a>    args<span class="op">=</span>TrainingArguments(</span>
-<span id="cb4-19"><a href="#cb4-19"></a>        output_dir<span class="op">=</span><span class="st">"./modelo_ciuo08"</span>,</span>
-<span id="cb4-20"><a href="#cb4-20"></a>        num_train_epochs<span class="op">=</span><span class="dv">3</span>,</span>
-<span id="cb4-21"><a href="#cb4-21"></a>        per_device_train_batch_size<span class="op">=</span><span class="dv">32</span>,</span>
-<span id="cb4-22"><a href="#cb4-22"></a>        learning_rate<span class="op">=</span><span class="fl">2e-5</span>,             <span class="co"># &lt;3&gt;</span></span>
-<span id="cb4-23"><a href="#cb4-23"></a>        eval_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
-<span id="cb4-24"><a href="#cb4-24"></a>        logging_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
-<span id="cb4-25"><a href="#cb4-25"></a>        report_to<span class="op">=</span><span class="st">"none"</span>,               <span class="co"># &lt;4&gt;</span></span>
-<span id="cb4-26"><a href="#cb4-26"></a>        save_strategy<span class="op">=</span><span class="st">"no"</span>,</span>
-<span id="cb4-27"><a href="#cb4-27"></a>    ),</span>
-<span id="cb4-28"><a href="#cb4-28"></a>    train_dataset<span class="op">=</span>ds_train,</span>
-<span id="cb4-29"><a href="#cb4-29"></a>    eval_dataset<span class="op">=</span>ds_test,</span>
-<span id="cb4-30"><a href="#cb4-30"></a>    compute_metrics<span class="op">=</span>compute_metrics,</span>
-<span id="cb4-31"><a href="#cb4-31"></a>)</span>
-<span id="cb4-32"><a href="#cb4-32"></a>trainer.train()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-5"><a href="#cb4-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<ol type="1">
-<li>Al cargar el modelo verán avisos sobre pesos no utilizados (los de MLM) y pesos faltantes (la cabeza de clasificación). Ambos son normales.</li>
-<li>F1 macro pondera cada clase por igual, independiente de su tamaño. Es más informativo que la accuracy cuando las clases están desbalanceadas.</li>
-<li>Learning rate entre 2e-5 y 5e-5 es estándar para fine-tuning de BERT.</li>
-</ol>
+<p><img data-src="imagenes/salida_modelo.png" width="800" height="500"></p>
 </section>
-<section id="paso-5-evaluación-detallada" class="slide level2">
-<h2>Paso 5: evaluación detallada</h2>
+<section id="paso-4b-entrenar-modelo" class="slide level2">
+<h2>Paso 4b: entrenar modelo</h2>
 <div class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report</span>
-<span id="cb5-2"><a href="#cb5-2"></a></span>
-<span id="cb5-3"><a href="#cb5-3"></a>salida <span class="op">=</span> trainer.predict(ds_test)</span>
-<span id="cb5-4"><a href="#cb5-4"></a>preds  <span class="op">=</span> np.argmax(salida.predictions, axis<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb5-5"><a href="#cb5-5"></a>etiquetas_reales <span class="op">=</span> np.array(ds_test[<span class="st">"label"</span>])</span>
-<span id="cb5-6"><a href="#cb5-6"></a></span>
-<span id="cb5-7"><a href="#cb5-7"></a>nombres_clases <span class="op">=</span> [<span class="ss">f"GG </span><span class="sc">{</span>c<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> c <span class="kw">in</span> le.classes_]  <span class="co"># &lt;1&gt;</span></span>
-<span id="cb5-8"><a href="#cb5-8"></a></span>
-<span id="cb5-9"><a href="#cb5-9"></a>reporte <span class="op">=</span> classification_report(</span>
-<span id="cb5-10"><a href="#cb5-10"></a>    etiquetas_reales, preds,</span>
-<span id="cb5-11"><a href="#cb5-11"></a>    target_names<span class="op">=</span>nombres_clases,</span>
-<span id="cb5-12"><a href="#cb5-12"></a>    zero_division<span class="op">=</span><span class="dv">0</span></span>
-<span id="cb5-13"><a href="#cb5-13"></a>)</span>
-<span id="cb5-14"><a href="#cb5-14"></a><span class="bu">print</span>(reporte)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a>trainer <span class="op">=</span> Trainer(</span>
+<span id="cb5-2"><a href="#cb5-2"></a>    model<span class="op">=</span>model,</span>
+<span id="cb5-3"><a href="#cb5-3"></a>    args<span class="op">=</span>TrainingArguments(</span>
+<span id="cb5-4"><a href="#cb5-4"></a>        output_dir<span class="op">=</span><span class="st">"./modelo_ciuo08"</span>,</span>
+<span id="cb5-5"><a href="#cb5-5"></a>        num_train_epochs<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb5-6"><a href="#cb5-6"></a>        per_device_train_batch_size<span class="op">=</span><span class="dv">32</span>,</span>
+<span id="cb5-7"><a href="#cb5-7"></a>        learning_rate<span class="op">=</span><span class="fl">2e-5</span>,             </span>
+<span id="cb5-8"><a href="#cb5-8"></a>        eval_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9"></a>        logging_strategy<span class="op">=</span><span class="st">"epoch"</span>,</span>
+<span id="cb5-10"><a href="#cb5-10"></a>        report_to<span class="op">=</span><span class="st">"none"</span>,              </span>
+<span id="cb5-11"><a href="#cb5-11"></a>        save_strategy<span class="op">=</span><span class="st">"no"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12"></a>    ),</span>
+<span id="cb5-13"><a href="#cb5-13"></a>    train_dataset<span class="op">=</span>ds_train,</span>
+<span id="cb5-14"><a href="#cb5-14"></a>    eval_dataset<span class="op">=</span>ds_test,</span>
+<span id="cb5-15"><a href="#cb5-15"></a>    compute_metrics<span class="op">=</span>compute_metrics,</span>
+<span id="cb5-16"><a href="#cb5-16"></a>)</span>
+<span id="cb5-17"><a href="#cb5-17"></a>trainer.train()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<table>
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parámetro</th>
+<th>Valor</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>num_train_epochs</code></td>
+<td>3</td>
+<td>Pasadas completas sobre los datos de entrenamiento</td>
+</tr>
+<tr class="even">
+<td><code>per_device_train_batch_size</code></td>
+<td>32</td>
+<td>Ejemplos por paso de actualización</td>
+</tr>
+<tr class="odd">
+<td><code>learning_rate</code></td>
+<td>2e-5</td>
+<td>Tasa de aprendizaje (estándar para fine-tuning BERT)</td>
+</tr>
+<tr class="even">
+<td><code>eval_strategy</code></td>
+<td><code>"epoch"</code></td>
+<td>Evaluar al final de cada época</td>
+</tr>
+<tr class="odd">
+<td><code>logging_strategy</code></td>
+<td><code>"epoch"</code></td>
+<td>Reportar métricas al final de cada época</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="paso-4c-guardar-modelo" class="slide level2">
+<h2>Paso 4c: guardar modelo</h2>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a>trainer.save_model(DIRECTORIO_FINAL)</span>
+<span id="cb6-2"><a href="#cb6-2"></a>tokenizer.save_pretrained(DIRECTORIO_FINAL)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="paso-5-evaluación" class="slide level2">
+<h2>Paso 5: evaluación</h2>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report</span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a>salida <span class="op">=</span> trainer.predict(ds_test)</span>
+<span id="cb7-4"><a href="#cb7-4"></a>preds  <span class="op">=</span> np.argmax(salida.predictions, axis<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb7-5"><a href="#cb7-5"></a>etiquetas_reales <span class="op">=</span> np.array(ds_test[<span class="st">"label"</span>])</span>
+<span id="cb7-6"><a href="#cb7-6"></a></span>
+<span id="cb7-7"><a href="#cb7-7"></a>nombres_clases <span class="op">=</span> [<span class="ss">f"GG </span><span class="sc">{</span>c<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> c <span class="kw">in</span> le.classes_]  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a></span>
+<span id="cb7-9"><a href="#cb7-9"></a>reporte <span class="op">=</span> classification_report(</span>
+<span id="cb7-10"><a href="#cb7-10"></a>    etiquetas_reales, preds,</span>
+<span id="cb7-11"><a href="#cb7-11"></a>    target_names<span class="op">=</span>nombres_clases,</span>
+<span id="cb7-12"><a href="#cb7-12"></a>    zero_division<span class="op">=</span><span class="dv">0</span></span>
+<span id="cb7-13"><a href="#cb7-13"></a>)</span>
+<span id="cb7-14"><a href="#cb7-14"></a><span class="bu">print</span>(reporte)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol type="1">
 <li><code>le.classes_</code> contiene los códigos CIUO originales en el orden en que <code>LabelEncoder</code> los asignó. Así cada fila del reporte muestra el gran grupo CIUO real, no un índice interno.</li>
 </ol>
-<div class="callout callout-note callout-captioned callout-style-default">
-<div class="callout-body">
-<div class="callout-caption">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p>El reporte muestra precisión, recall y F1 <strong>por cada gran grupo CIUO</strong>. Es la métrica más útil para detectar qué grupos son difíciles de clasificar (p/e Grupo 5 Servicios vs.&nbsp;Grupo 9 Ocupaciones elementales suelen confundirse).</p>
-</div>
-</div>
-</div>
 </section>
 <section id="paso-6-inferencia-con-decodificación-real" class="slide level2">
 <h2>Paso 6: inferencia con decodificación real</h2>
-<div class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
-<span id="cb6-2"><a href="#cb6-2"></a></span>
-<span id="cb6-3"><a href="#cb6-3"></a>DIRECTORIO_FINAL <span class="op">=</span> <span class="st">"./modelo_ciuo08/final"</span></span>
-<span id="cb6-4"><a href="#cb6-4"></a>trainer.save_model(DIRECTORIO_FINAL)</span>
-<span id="cb6-5"><a href="#cb6-5"></a>tokenizer.save_pretrained(DIRECTORIO_FINAL)</span>
-<span id="cb6-6"><a href="#cb6-6"></a></span>
-<span id="cb6-7"><a href="#cb6-7"></a>clasificador <span class="op">=</span> pipeline(<span class="st">"text-classification"</span>, model<span class="op">=</span>DIRECTORIO_FINAL,</span>
-<span id="cb6-8"><a href="#cb6-8"></a>                        tokenizer<span class="op">=</span>DIRECTORIO_FINAL, device<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb6-9"><a href="#cb6-9"></a></span>
-<span id="cb6-10"><a href="#cb6-10"></a><span class="kw">def</span> predecir_ciuo(texto):</span>
-<span id="cb6-11"><a href="#cb6-11"></a>    resultado <span class="op">=</span> clasificador(texto, truncation<span class="op">=</span><span class="va">True</span>, max_length<span class="op">=</span><span class="dv">64</span>)[<span class="dv">0</span>]</span>
-<span id="cb6-12"><a href="#cb6-12"></a>    idx     <span class="op">=</span> <span class="bu">int</span>(resultado[<span class="st">"label"</span>].split(<span class="st">"_"</span>)[<span class="dv">1</span>])  <span class="co"># &lt;1&gt;</span></span>
-<span id="cb6-13"><a href="#cb6-13"></a>    codigo  <span class="op">=</span> le.classes_[idx]</span>
-<span id="cb6-14"><a href="#cb6-14"></a>    <span class="cf">return</span> {<span class="st">"codigo_ciuo_1d"</span>: <span class="bu">int</span>(codigo), <span class="st">"confianza"</span>: <span class="bu">round</span>(resultado[<span class="st">"score"</span>], <span class="dv">4</span>)}</span>
-<span id="cb6-15"><a href="#cb6-15"></a></span>
-<span id="cb6-16"><a href="#cb6-16"></a>glosas <span class="op">=</span> [</span>
-<span id="cb6-17"><a href="#cb6-17"></a>    <span class="st">"OCUPACIÓN: ENFERMERA; TAREA: ADMINISTRAR MEDICAMENTOS Y CONTROLAR SIGNOS VITALES"</span>,</span>
-<span id="cb6-18"><a href="#cb6-18"></a>    <span class="st">"OCUPACIÓN: CONDUCTOR DE CAMIÓN; TAREA: TRANSPORTAR CARGA ENTRE REGIONES"</span>,</span>
-<span id="cb6-19"><a href="#cb6-19"></a>    <span class="st">"OCUPACIÓN: TEMPORERO AGRÍCOLA; TAREA: COSECHAR UVA EN TEMPORADA"</span>,</span>
-<span id="cb6-20"><a href="#cb6-20"></a>]</span>
-<span id="cb6-21"><a href="#cb6-21"></a><span class="cf">for</span> glosa <span class="kw">in</span> glosas:</span>
-<span id="cb6-22"><a href="#cb6-22"></a>    r <span class="op">=</span> predecir_ciuo(glosa)</span>
-<span id="cb6-23"><a href="#cb6-23"></a>    <span class="bu">print</span>(<span class="ss">f"GG </span><span class="sc">{</span>r[<span class="st">'codigo_ciuo_1d'</span>]<span class="sc">}</span><span class="ss">  (</span><span class="sc">{</span>r[<span class="st">'confianza'</span>]<span class="sc">:.1%}</span><span class="ss">)  →  </span><span class="sc">{</span>glosa[:<span class="dv">65</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
+<span id="cb8-2"><a href="#cb8-2"></a></span>
+<span id="cb8-3"><a href="#cb8-3"></a>DIRECTORIO_FINAL <span class="op">=</span> <span class="st">"./modelo_ciuo08/final"</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a></span>
+<span id="cb8-5"><a href="#cb8-5"></a>clasificador <span class="op">=</span> pipeline(<span class="st">"text-classification"</span>, model<span class="op">=</span>DIRECTORIO_FINAL,</span>
+<span id="cb8-6"><a href="#cb8-6"></a>                        tokenizer<span class="op">=</span>DIRECTORIO_FINAL, device<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb8-7"><a href="#cb8-7"></a></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="kw">def</span> predecir_ciuo(texto):</span>
+<span id="cb8-9"><a href="#cb8-9"></a>    resultado <span class="op">=</span> clasificador(texto, truncation<span class="op">=</span><span class="va">True</span>, max_length<span class="op">=</span><span class="dv">64</span>)[<span class="dv">0</span>]</span>
+<span id="cb8-10"><a href="#cb8-10"></a>    idx     <span class="op">=</span> <span class="bu">int</span>(resultado[<span class="st">"label"</span>].split(<span class="st">"_"</span>)[<span class="dv">1</span>])  <span class="co"># &lt;1&gt;</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a>    codigo  <span class="op">=</span> le.classes_[idx]</span>
+<span id="cb8-12"><a href="#cb8-12"></a>    <span class="cf">return</span> {<span class="st">"codigo_ciuo_1d"</span>: <span class="bu">int</span>(codigo), <span class="st">"confianza"</span>: <span class="bu">round</span>(resultado[<span class="st">"score"</span>], <span class="dv">4</span>)}</span>
+<span id="cb8-13"><a href="#cb8-13"></a></span>
+<span id="cb8-14"><a href="#cb8-14"></a>glosas <span class="op">=</span> [</span>
+<span id="cb8-15"><a href="#cb8-15"></a>    <span class="st">"OCUPACIÓN: ENFERMERA; TAREA: ADMINISTRAR MEDICAMENTOS Y CONTROLAR SIGNOS VITALES"</span>,</span>
+<span id="cb8-16"><a href="#cb8-16"></a>    <span class="st">"OCUPACIÓN: CONDUCTOR DE CAMIÓN; TAREA: TRANSPORTAR CARGA ENTRE REGIONES"</span>,</span>
+<span id="cb8-17"><a href="#cb8-17"></a>    <span class="st">"OCUPACIÓN: TEMPORERO AGRÍCOLA; TAREA: COSECHAR UVA EN TEMPORADA"</span>,</span>
+<span id="cb8-18"><a href="#cb8-18"></a>]</span>
+<span id="cb8-19"><a href="#cb8-19"></a><span class="cf">for</span> glosa <span class="kw">in</span> glosas:</span>
+<span id="cb8-20"><a href="#cb8-20"></a>    r <span class="op">=</span> predecir_ciuo(glosa)</span>
+<span id="cb8-21"><a href="#cb8-21"></a>    <span class="bu">print</span>(<span class="ss">f"GG </span><span class="sc">{</span>r[<span class="st">'codigo_ciuo_1d'</span>]<span class="sc">}</span><span class="ss">  (</span><span class="sc">{</span>r[<span class="st">'confianza'</span>]<span class="sc">:.1%}</span><span class="ss">)  →  </span><span class="sc">{</span>glosa[:<span class="dv">65</span>]<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol type="1">
 <li><code>pipeline</code> devuelve <code>"LABEL_0"</code>, <code>"LABEL_1"</code>, etc. — índices internos, no códigos CIUO. <code>le.classes_[idx]</code> recupera el código CIUO original a partir de ese índice.</li>
@@ -1035,7 +1051,7 @@
 <div class="medium-par">
 <p>Con el dataset de auditorías de Nomenclaturas (~10.000 glosas):</p>
 </div>
-<p><img data-src="imagenes/resultado_modelo.png" width="350" height="500"></p>
+<p><img data-src="imagenes/resultado_modelo.png" width="400" height="500"></p>
 </section></section>
 <section>
 <section id="cierre" class="title-slide slide level1 center">
