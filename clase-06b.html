@@ -471,8 +471,8 @@
 </section>
 <section id="intuición" class="slide level2">
 <h2>Intuición</h2>
-<p>Para representar la palabra <strong>banco</strong>, el modelo mira las demás palabras y le pone atención a las que son más “relevantes”. En función de eso, actualiza su valor (y así con todas los tokens del texto).</p>
 <p><img data-src="imagenes/ejemplo_atencion.png" width="800"></p>
+<p>Para representar la palabra <strong>banco</strong>, el modelo mira las demás palabras y le pone atención a las que son más “relevantes”. En función de eso, actualiza su valor (y así con todas los tokens del texto).</p>
 </section>
 <section id="intuición-1" class="slide level2">
 <h2>Intuición</h2>
@@ -495,26 +495,14 @@
 <section id="queries-keys-y-values" class="slide level2">
 <h2>Queries, Keys y Values</h2>
 <div class="medium-par">
-<p>La atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:</p>
+<p>La atención se implementa con tres matrices aprendibles.</p>
 </div>
 <div class="medium-par">
+<p>Para cada token se definen 3 vectores:</p>
 <ul>
-<li class="fragment"><strong>Query (Q)</strong>: <em>“¿Qué información necesito?”</em> — lo que estoy buscando.</li>
-<li class="fragment"><strong>Key (K)</strong>: <em>“¿Qué información tengo yo?”</em> — lo que cada token ofrece.</li>
-<li class="fragment"><strong>Value (V)</strong>: <em>“¿Qué información entrego si me eligen?”</em> — el contenido que se pasa.</li>
-</ul>
-</div>
-</section>
-<section id="queries-keys-y-values-1" class="slide level2">
-<h2>Queries, Keys y Values</h2>
-<div class="medium-par">
-<p>La atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:</p>
-</div>
-<div class="medium-par">
-<ul>
-<li><strong>Query (Q)</strong>: <em>“¿Qué información me haría cambiar la forma en que entiendo un token?”</em></li>
-<li><strong>Key (K)</strong>: <em>“¿Qué información es relevante para el significado de otros tokens?”</em></li>
-<li><strong>Value (V)</strong>: <em>“¿Qué información traspaso a otros tokens, si es que me”eligen”?“</em></li>
+<li class="fragment"><strong>Query (Q)</strong>: <em>“¿Qué información necesito para entender el token?”</em> - lo que estoy buscando.</li>
+<li class="fragment"><strong>Key (K)</strong>: <em>“¿Qué información tiene el token que puede ayudar a entender otros tokens?”</em> - lo que cada token ofrece.</li>
+<li class="fragment"><strong>Value (V)</strong>: <em>“¿Qué información entrego si lo eligen eligen?”</em> - el contenido que se pasa.</li>
 </ul>
 </div>
 <div class="fragment medium-par">
@@ -524,6 +512,10 @@
 <div class="fragment small-par">
 <p>El factor <span class="math inline">\(\sqrt{d_k}\)</span> escala los productos para evitar que el softmax sature con valores muy grandes.</p>
 </div>
+</section>
+<section id="queries-keys-y-values-1" class="slide level2">
+<h2>Queries, Keys y Values</h2>
+<p><img data-src="imagenes/esquema_QKV.png" width="800" height="575"></p>
 </section></section>
 <section>
 <section id="arquitectura-transformer" class="title-slide slide level1 center">
@@ -656,7 +648,7 @@
 <li class="fragment">Usamos un learning rate muy pequeño para no “olvidar” lo pre-entrenado.</li>
 </ol>
 </div>
-<div class="concepto-box">
+<div class="fragment concepto-box">
 <p>El token <code>[CLS]</code> es un token especial que BERT agrega al inicio de cada texto. Su representación final captura el significado global de la oración y se usa como input para la capa de clasificación.</p>
 </div>
 </section></section>
@@ -813,24 +805,14 @@
 </tbody>
 </table>
 </div>
-<div class="callout callout-note callout-captioned callout-style-default">
-<div class="callout-body">
-<div class="callout-caption">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<p><strong>Note</strong></p>
-</div>
-<div class="callout-content">
-<p>Ejericio práctico con 1 dígito (10 clases) como primer paso. El modelo puede refinarse luego para 2, 3 y 4 dígitos, donde el problema se vuelve más difícil.</p>
-</div>
-</div>
-</div>
 </section>
 <section id="pipeline-completo-con-huggingface" class="slide level2">
 <h2>Pipeline completo con HuggingFace</h2>
 <div class="medium-par">
-<p>HuggingFace <code>transformers</code> permite hacer fine-tuning de BETO en pocas líneas. El pipeline completo tiene cinco etapas:</p>
+<ul>
+<li class="fragment"><p>HuggingFace <code>transformers</code> es una biblioteca de código abierto que proporciona herramientas para crear, entrenar y desplegar modelos de inteligencia artificial de última generación.</p></li>
+<li class="fragment"><p>Permite hacer fine-tuning de BETO en pocas líneas. El pipeline completo tiene cinco etapas:</p></li>
+</ul>
 </div>
 <div class="medium-par">
 <ol type="1">
@@ -889,25 +871,24 @@
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoTokenizer</span>
 <span id="cb3-2"><a href="#cb3-2"></a><span class="im">from</span> datasets <span class="im">import</span> Dataset</span>
 <span id="cb3-3"><a href="#cb3-3"></a></span>
-<span id="cb3-4"><a href="#cb3-4"></a>MODEL <span class="op">=</span> <span class="st">"dccuchile/bert-base-spanish-wwm-cased"</span></span>
-<span id="cb3-5"><a href="#cb3-5"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(MODEL)</span>
-<span id="cb3-6"><a href="#cb3-6"></a></span>
-<span id="cb3-7"><a href="#cb3-7"></a><span class="kw">def</span> tokenize(batch):</span>
-<span id="cb3-8"><a href="#cb3-8"></a>    <span class="cf">return</span> tokenizer(</span>
-<span id="cb3-9"><a href="#cb3-9"></a>        batch[<span class="st">"texto"</span>],</span>
-<span id="cb3-10"><a href="#cb3-10"></a>        truncation<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb3-11"><a href="#cb3-11"></a>        padding<span class="op">=</span><span class="st">"max_length"</span>,</span>
-<span id="cb3-12"><a href="#cb3-12"></a>        max_length<span class="op">=</span><span class="dv">64</span>           <span class="co"># &lt;1&gt;</span></span>
-<span id="cb3-13"><a href="#cb3-13"></a>    )</span>
-<span id="cb3-14"><a href="#cb3-14"></a></span>
-<span id="cb3-15"><a href="#cb3-15"></a>ds_train <span class="op">=</span> Dataset.from_pandas(train_df[[<span class="st">"texto"</span>, <span class="st">"label"</span>]].reset_index(drop<span class="op">=</span><span class="va">True</span>))</span>
-<span id="cb3-16"><a href="#cb3-16"></a>ds_test  <span class="op">=</span> Dataset.from_pandas(test_df[[<span class="st">"texto"</span>, <span class="st">"label"</span>]].reset_index(drop<span class="op">=</span><span class="va">True</span>))</span>
-<span id="cb3-17"><a href="#cb3-17"></a></span>
-<span id="cb3-18"><a href="#cb3-18"></a>ds_train <span class="op">=</span> ds_train.<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb3-19"><a href="#cb3-19"></a>ds_test  <span class="op">=</span> ds_test.<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb3-20"><a href="#cb3-20"></a></span>
-<span id="cb3-21"><a href="#cb3-21"></a>ds_train.set_format(<span class="bu">type</span><span class="op">=</span><span class="st">"torch"</span>, columns<span class="op">=</span>[<span class="st">"input_ids"</span>, <span class="st">"attention_mask"</span>, <span class="st">"label"</span>]) <span class="co"># &lt;2&gt;</span></span>
-<span id="cb3-22"><a href="#cb3-22"></a>ds_test.set_format(<span class="bu">type</span><span class="op">=</span><span class="st">"torch"</span>,  columns<span class="op">=</span>[<span class="st">"input_ids"</span>, <span class="st">"attention_mask"</span>, <span class="st">"label"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-4"><a href="#cb3-4"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(MODEL)</span>
+<span id="cb3-5"><a href="#cb3-5"></a></span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="kw">def</span> tokenize(batch):</span>
+<span id="cb3-7"><a href="#cb3-7"></a>    <span class="cf">return</span> tokenizer(</span>
+<span id="cb3-8"><a href="#cb3-8"></a>        batch[<span class="st">"texto"</span>],</span>
+<span id="cb3-9"><a href="#cb3-9"></a>        truncation<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb3-10"><a href="#cb3-10"></a>        padding<span class="op">=</span><span class="st">"max_length"</span>,</span>
+<span id="cb3-11"><a href="#cb3-11"></a>        max_length<span class="op">=</span><span class="dv">64</span>           <span class="co"># &lt;1&gt;</span></span>
+<span id="cb3-12"><a href="#cb3-12"></a>    )</span>
+<span id="cb3-13"><a href="#cb3-13"></a></span>
+<span id="cb3-14"><a href="#cb3-14"></a>ds_train <span class="op">=</span> Dataset.from_pandas(train_df[[<span class="st">"texto"</span>, <span class="st">"label"</span>]].reset_index(drop<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb3-15"><a href="#cb3-15"></a>ds_test  <span class="op">=</span> Dataset.from_pandas(test_df[[<span class="st">"texto"</span>, <span class="st">"label"</span>]].reset_index(drop<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb3-16"><a href="#cb3-16"></a></span>
+<span id="cb3-17"><a href="#cb3-17"></a>ds_train <span class="op">=</span> ds_train.<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-18"><a href="#cb3-18"></a>ds_test  <span class="op">=</span> ds_test.<span class="bu">map</span>(tokenize, batched<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-19"><a href="#cb3-19"></a></span>
+<span id="cb3-20"><a href="#cb3-20"></a>ds_train.set_format(<span class="bu">type</span><span class="op">=</span><span class="st">"torch"</span>, columns<span class="op">=</span>[<span class="st">"input_ids"</span>, <span class="st">"attention_mask"</span>, <span class="st">"label"</span>]) <span class="co"># &lt;2&gt;</span></span>
+<span id="cb3-21"><a href="#cb3-21"></a>ds_test.set_format(<span class="bu">type</span><span class="op">=</span><span class="st">"torch"</span>,  columns<span class="op">=</span>[<span class="st">"input_ids"</span>, <span class="st">"attention_mask"</span>, <span class="st">"label"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol type="1">
 <li>64 tokens es suficiente para glosas cortas de ocupación y ahorra memoria en GPU.</li>
@@ -919,11 +900,11 @@
 <div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForSequenceClassification, Trainer, TrainingArguments</span>
 <span id="cb4-2"><a href="#cb4-2"></a></span>
-<span id="cb4-3"><a href="#cb4-3"></a>model <span class="op">=</span> AutoModelForSequenceClassification.from_pretrained(</span>
-<span id="cb4-4"><a href="#cb4-4"></a>    MODEL, num_labels<span class="op">=</span>df[<span class="st">"label"</span>].nunique()</span>
-<span id="cb4-5"><a href="#cb4-5"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-3"><a href="#cb4-3"></a>MODEL <span class="op">=</span> <span class="st">"dccuchile/bert-base-spanish-wwm-cased"</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a>model <span class="op">=</span> AutoModelForSequenceClassification.from_pretrained(</span>
+<span id="cb4-5"><a href="#cb4-5"></a>    MODEL, num_labels<span class="op">=</span>df[<span class="st">"label"</span>].nunique()</span>
+<span id="cb4-6"><a href="#cb4-6"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p><img data-src="imagenes/salida_modelo.png" width="800" height="500"></p>
 </section>
 <section id="paso-4b-entrenar-modelo" class="slide level2">
 <h2>Paso 4b: entrenar modelo</h2>
@@ -976,8 +957,8 @@
 <li><code>le.classes_</code> contiene los códigos CIUO originales en el orden en que <code>LabelEncoder</code> los asignó. Así cada fila del reporte muestra el gran grupo CIUO real, no un índice interno.</li>
 </ol>
 </section>
-<section id="paso-6-inferencia-con-decodificación-real" class="slide level2">
-<h2>Paso 6: inferencia con decodificación real</h2>
+<section id="paso-6-predección" class="slide level2">
+<h2>Paso 6: predección</h2>
 <div class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
 <span id="cb8-2"><a href="#cb8-2"></a></span>
@@ -1005,14 +986,13 @@
 <li><code>pipeline</code> devuelve <code>"LABEL_0"</code>, <code>"LABEL_1"</code>, etc. — índices internos, no códigos CIUO. <code>le.classes_[idx]</code> recupera el código CIUO original a partir de ese índice.</li>
 </ol>
 </section>
+<section id="resultados-del-entrenamiento" class="slide level2">
+<h2>Resultados del entrenamiento</h2>
+<p>Con el dataset de auditorías de Nomenclaturas (~10.000 glosas):</p>
+<p><img data-src="imagenes/entrenamiento_modelo.png" width="700" height="400"></p>
+</section>
 <section id="resultados" class="slide level2">
 <h2>Resultados</h2>
-<p>Con el dataset de auditorías de Nomenclaturas (~10.000 glosas):</p>
-<p><img data-src="imagenes/entrenamiento_modelo.png" width="600" height="500"></p>
-</section>
-<section id="resultados-1" class="slide level2">
-<h2>Resultados</h2>
-<p>Con el dataset de auditorías de Nomenclaturas (~10.000 glosas):</p>
 <p><img data-src="imagenes/resultado_modelo.png" width="450" height="500"></p>
 </section></section>
 <section>
@@ -1027,10 +1007,10 @@
 <li class="fragment"><strong>El problema de las RNN</strong>: pérdida de memoria en secuencias largas, dificultad para paralelizar.</li>
 <li class="fragment"><strong>Mecanismo de atención</strong>: Q, K, V — cada token puede mirar directamente cualquier otro.</li>
 <li class="fragment"><strong>Arquitectura Transformer</strong>: bloques de Multi-Head Attention + Feed-Forward + residuales.</li>
-<li class="fragment"><strong>Encoder vs.&nbsp;Decoder</strong>: para clasificación censal, usamos encoders (BERT/BETO).</li>
+<li class="fragment"><strong>Encoder vs.&nbsp;Decoder</strong>: para clasificación, usamos encoders (BERT/BETO).</li>
 <li class="fragment"><strong>Pre-entrenamiento + fine-tuning</strong>: aprovechamos conocimiento general para adaptarlo a CIUO/CAENES.</li>
 <li class="fragment"><strong>BETO y el ecosistema HuggingFace</strong>: pipeline completo en Python.</li>
-<li class="fragment"><strong>Aplicaciones en CPV2024</strong>: codificación automática de ocupaciones (CIUO-08) y rama de actividad (CAENES).</li>
+<li class="fragment"><strong>Aplicaciones</strong>: codificación automática de ocupaciones (CIUO-08).</li>
 </ol>
 </div>
 </section></section>

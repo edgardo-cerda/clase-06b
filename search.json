@@ -32,7 +32,7 @@
     "href": "clase-06b.html#intuición",
     "title": "",
     "section": "Intuición",
-    "text": "Intuición\nPara representar la palabra banco, el modelo mira las demás palabras y le pone atención a las que son más “relevantes”. En función de eso, actualiza su valor (y así con todas los tokens del texto)."
+    "text": "Intuición\n\nPara representar la palabra banco, el modelo mira las demás palabras y le pone atención a las que son más “relevantes”. En función de eso, actualiza su valor (y así con todas los tokens del texto)."
   },
   {
     "objectID": "clase-06b.html#intuición-1",
@@ -46,14 +46,14 @@
     "href": "clase-06b.html#queries-keys-y-values",
     "title": "",
     "section": "Queries, Keys y Values",
-    "text": "Queries, Keys y Values\n\nLa atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:\n\n\n\nQuery (Q): “¿Qué información necesito?” — lo que estoy buscando.\nKey (K): “¿Qué información tengo yo?” — lo que cada token ofrece.\nValue (V): “¿Qué información entrego si me eligen?” — el contenido que se pasa."
+    "text": "Queries, Keys y Values\n\nLa atención se implementa con tres matrices aprendibles.\n\n\nPara cada token se definen 3 vectores:\n\nQuery (Q): “¿Qué información necesito para entender el token?” - lo que estoy buscando.\nKey (K): “¿Qué información tiene el token que puede ayudar a entender otros tokens?” - lo que cada token ofrece.\nValue (V): “¿Qué información entrego si lo eligen eligen?” - el contenido que se pasa.\n\n\n\nLa atención entre Q y K produce un peso para cada par de tokens. Esos pesos se aplican sobre V:\n\\[\\text{Attention}(Q, K, V) = \\text{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right) V\\]\n\n\nEl factor \\(\\sqrt{d_k}\\) escala los productos para evitar que el softmax sature con valores muy grandes."
   },
   {
     "objectID": "clase-06b.html#queries-keys-y-values-1",
     "href": "clase-06b.html#queries-keys-y-values-1",
     "title": "",
     "section": "Queries, Keys y Values",
-    "text": "Queries, Keys y Values\n\nLa atención se implementa con tres matrices aprendibles. Para cada token en la secuencia:\n\n\n\nQuery (Q): “¿Qué información me haría cambiar la forma en que entiendo un token?”\nKey (K): “¿Qué información es relevante para el significado de otros tokens?”\nValue (V): “¿Qué información traspaso a otros tokens, si es que me”eligen”?“\n\n\n\nLa atención entre Q y K produce un peso para cada par de tokens. Esos pesos se aplican sobre V:\n\\[\\text{Attention}(Q, K, V) = \\text{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right) V\\]\n\n\nEl factor \\(\\sqrt{d_k}\\) escala los productos para evitar que el softmax sature con valores muy grandes."
+    "text": "Queries, Keys y Values"
   },
   {
     "objectID": "clase-06b.html#atención-multi-cabeza-multi-head-attention",
@@ -151,14 +151,14 @@
     "href": "clase-06b.html#codificación-de-ocupaciones-ciuo-08",
     "title": "",
     "section": "Codificación de ocupaciones (CIUO-08)",
-    "text": "Codificación de ocupaciones (CIUO-08)\n\nEntrada: texto libre de la glosa de ocupación, y de tareas y deberes.\nSalida: código CIUO-08 a 1 dígito (10 grandes grupos).\n\n\n\n\n\nCódigo\nGrupo\n\n\n\n\n1\nDirectores y gerentes\n\n\n2\nProfesionales científicos e intelectuales\n\n\n3\nTécnicos y profesionales de nivel medio\n\n\n4\nPersonal de apoyo administrativo\n\n\n…\n…\n\n\n9\nOcupaciones elementales\n\n\n\n\n\n\n\n\n\n\nNote\n\n\nEjericio práctico con 1 dígito (10 clases) como primer paso. El modelo puede refinarse luego para 2, 3 y 4 dígitos, donde el problema se vuelve más difícil."
+    "text": "Codificación de ocupaciones (CIUO-08)\n\nEntrada: texto libre de la glosa de ocupación, y de tareas y deberes.\nSalida: código CIUO-08 a 1 dígito (10 grandes grupos).\n\n\n\n\n\nCódigo\nGrupo\n\n\n\n\n1\nDirectores y gerentes\n\n\n2\nProfesionales científicos e intelectuales\n\n\n3\nTécnicos y profesionales de nivel medio\n\n\n4\nPersonal de apoyo administrativo\n\n\n…\n…\n\n\n9\nOcupaciones elementales"
   },
   {
     "objectID": "clase-06b.html#pipeline-completo-con-huggingface",
     "href": "clase-06b.html#pipeline-completo-con-huggingface",
     "title": "",
     "section": "Pipeline completo con HuggingFace",
-    "text": "Pipeline completo con HuggingFace\n\nHuggingFace transformers permite hacer fine-tuning de BETO en pocas líneas. El pipeline completo tiene cinco etapas:\n\n\n\nCarga y preparación de datos\nCodificación de etiquetas y split train/test\nTokenización\nConfigurar el Trainer y entrenar\nEvaluación e inferencia\n\n\n\nUsaremos un dataset de glosas auditadas por el equipo de Nomenclaturas, proveniente de distintas encuestas o Censos realizados por el INE, con etiquetas CIUO-08 a 1 dígito."
+    "text": "Pipeline completo con HuggingFace\n\n\nHuggingFace transformers es una biblioteca de código abierto que proporciona herramientas para crear, entrenar y desplegar modelos de inteligencia artificial de última generación.\nPermite hacer fine-tuning de BETO en pocas líneas. El pipeline completo tiene cinco etapas:\n\n\n\n\nCarga y preparación de datos\nCodificación de etiquetas y split train/test\nTokenización\nConfigurar el Trainer y entrenar\nEvaluación e inferencia\n\n\n\nUsaremos un dataset de glosas auditadas por el equipo de Nomenclaturas, proveniente de distintas encuestas o Censos realizados por el INE, con etiquetas CIUO-08 a 1 dígito."
   },
   {
     "objectID": "clase-06b.html#paso-1-carga-de-datos",
@@ -179,14 +179,14 @@
     "href": "clase-06b.html#paso-3-tokenización",
     "title": "",
     "section": "Paso 3: tokenización",
-    "text": "Paso 3: tokenización\n\nfrom transformers import AutoTokenizer\nfrom datasets import Dataset\n\nMODEL = \"dccuchile/bert-base-spanish-wwm-cased\"\ntokenizer = AutoTokenizer.from_pretrained(MODEL)\n\ndef tokenize(batch):\n    return tokenizer(\n        batch[\"texto\"],\n        truncation=True,\n        padding=\"max_length\",\n        max_length=64           # <1>\n    )\n\nds_train = Dataset.from_pandas(train_df[[\"texto\", \"label\"]].reset_index(drop=True))\nds_test  = Dataset.from_pandas(test_df[[\"texto\", \"label\"]].reset_index(drop=True))\n\nds_train = ds_train.map(tokenize, batched=True)\nds_test  = ds_test.map(tokenize, batched=True)\n\nds_train.set_format(type=\"torch\", columns=[\"input_ids\", \"attention_mask\", \"label\"]) # <2>\nds_test.set_format(type=\"torch\",  columns=[\"input_ids\", \"attention_mask\", \"label\"])\n\n\n64 tokens es suficiente para glosas cortas de ocupación y ahorra memoria en GPU.\nSin set_format, el Trainer puede fallar al intentar armar los batches: los tensores de PyTorch deben ser explícitamente del tipo correcto."
+    "text": "Paso 3: tokenización\n\nfrom transformers import AutoTokenizer\nfrom datasets import Dataset\n\ntokenizer = AutoTokenizer.from_pretrained(MODEL)\n\ndef tokenize(batch):\n    return tokenizer(\n        batch[\"texto\"],\n        truncation=True,\n        padding=\"max_length\",\n        max_length=64           # <1>\n    )\n\nds_train = Dataset.from_pandas(train_df[[\"texto\", \"label\"]].reset_index(drop=True))\nds_test  = Dataset.from_pandas(test_df[[\"texto\", \"label\"]].reset_index(drop=True))\n\nds_train = ds_train.map(tokenize, batched=True)\nds_test  = ds_test.map(tokenize, batched=True)\n\nds_train.set_format(type=\"torch\", columns=[\"input_ids\", \"attention_mask\", \"label\"]) # <2>\nds_test.set_format(type=\"torch\",  columns=[\"input_ids\", \"attention_mask\", \"label\"])\n\n\n64 tokens es suficiente para glosas cortas de ocupación y ahorra memoria en GPU.\nSin set_format, el Trainer puede fallar al intentar armar los batches: los tensores de PyTorch deben ser explícitamente del tipo correcto."
   },
   {
     "objectID": "clase-06b.html#paso-4a-modelo",
     "href": "clase-06b.html#paso-4a-modelo",
     "title": "",
     "section": "Paso 4a: modelo",
-    "text": "Paso 4a: modelo\n\nfrom transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments\n\nmodel = AutoModelForSequenceClassification.from_pretrained(\n    MODEL, num_labels=df[\"label\"].nunique()\n)"
+    "text": "Paso 4a: modelo\n\nfrom transformers import AutoModelForSequenceClassification, Trainer, TrainingArguments\n\nMODEL = \"dccuchile/bert-base-spanish-wwm-cased\"\nmodel = AutoModelForSequenceClassification.from_pretrained(\n    MODEL, num_labels=df[\"label\"].nunique()\n)"
   },
   {
     "objectID": "clase-06b.html#paso-4b-entrenar-modelo",
@@ -210,32 +210,32 @@
     "text": "Paso 5: evaluación\n\nfrom sklearn.metrics import classification_report\n\nsalida = trainer.predict(ds_test)\npreds  = np.argmax(salida.predictions, axis=-1)\netiquetas_reales = np.array(ds_test[\"label\"])\n\nnombres_clases = [f\"GG {c}\" for c in le.classes_]  # <1>\n\nreporte = classification_report(\n    etiquetas_reales, preds,\n    target_names=nombres_clases,\n    zero_division=0\n)\nprint(reporte)\n\n\nle.classes_ contiene los códigos CIUO originales en el orden en que LabelEncoder los asignó. Así cada fila del reporte muestra el gran grupo CIUO real, no un índice interno."
   },
   {
-    "objectID": "clase-06b.html#paso-6-inferencia-con-decodificación-real",
-    "href": "clase-06b.html#paso-6-inferencia-con-decodificación-real",
+    "objectID": "clase-06b.html#paso-6-predección",
+    "href": "clase-06b.html#paso-6-predección",
     "title": "",
-    "section": "Paso 6: inferencia con decodificación real",
-    "text": "Paso 6: inferencia con decodificación real\n\nfrom transformers import pipeline\n\nDIRECTORIO_FINAL = \"./modelo_ciuo08/final\"\n\nclasificador = pipeline(\"text-classification\", model=DIRECTORIO_FINAL,\n                        tokenizer=DIRECTORIO_FINAL, device=-1)\n\ndef predecir_ciuo(texto):\n    resultado = clasificador(texto, truncation=True, max_length=64)[0]\n    idx     = int(resultado[\"label\"].split(\"_\")[1])  # <1>\n    codigo  = le.classes_[idx]\n    return {\"codigo_ciuo_1d\": int(codigo), \"confianza\": round(resultado[\"score\"], 4)}\n\nglosas = [\n    \"OCUPACIÓN: ENFERMERA; TAREA: ADMINISTRAR MEDICAMENTOS Y CONTROLAR SIGNOS VITALES\",\n    \"OCUPACIÓN: CONDUCTOR DE CAMIÓN; TAREA: TRANSPORTAR CARGA ENTRE REGIONES\",\n    \"OCUPACIÓN: TEMPORERO AGRÍCOLA; TAREA: COSECHAR UVA EN TEMPORADA\",\n]\nfor glosa in glosas:\n    r = predecir_ciuo(glosa)\n    print(f\"GG {r['codigo_ciuo_1d']}  ({r['confianza']:.1%})  →  {glosa[:65]}\")\n\n\npipeline devuelve \"LABEL_0\", \"LABEL_1\", etc. — índices internos, no códigos CIUO. le.classes_[idx] recupera el código CIUO original a partir de ese índice."
+    "section": "Paso 6: predección",
+    "text": "Paso 6: predección\n\nfrom transformers import pipeline\n\nDIRECTORIO_FINAL = \"./modelo_ciuo08/final\"\n\nclasificador = pipeline(\"text-classification\", model=DIRECTORIO_FINAL,\n                        tokenizer=DIRECTORIO_FINAL, device=-1)\n\ndef predecir_ciuo(texto):\n    resultado = clasificador(texto, truncation=True, max_length=64)[0]\n    idx     = int(resultado[\"label\"].split(\"_\")[1])  # <1>\n    codigo  = le.classes_[idx]\n    return {\"codigo_ciuo_1d\": int(codigo), \"confianza\": round(resultado[\"score\"], 4)}\n\nglosas = [\n    \"OCUPACIÓN: ENFERMERA; TAREA: ADMINISTRAR MEDICAMENTOS Y CONTROLAR SIGNOS VITALES\",\n    \"OCUPACIÓN: CONDUCTOR DE CAMIÓN; TAREA: TRANSPORTAR CARGA ENTRE REGIONES\",\n    \"OCUPACIÓN: TEMPORERO AGRÍCOLA; TAREA: COSECHAR UVA EN TEMPORADA\",\n]\nfor glosa in glosas:\n    r = predecir_ciuo(glosa)\n    print(f\"GG {r['codigo_ciuo_1d']}  ({r['confianza']:.1%})  →  {glosa[:65]}\")\n\n\npipeline devuelve \"LABEL_0\", \"LABEL_1\", etc. — índices internos, no códigos CIUO. le.classes_[idx] recupera el código CIUO original a partir de ese índice."
+  },
+  {
+    "objectID": "clase-06b.html#resultados-del-entrenamiento",
+    "href": "clase-06b.html#resultados-del-entrenamiento",
+    "title": "",
+    "section": "Resultados del entrenamiento",
+    "text": "Resultados del entrenamiento\nCon el dataset de auditorías de Nomenclaturas (~10.000 glosas):"
   },
   {
     "objectID": "clase-06b.html#resultados",
     "href": "clase-06b.html#resultados",
     "title": "",
     "section": "Resultados",
-    "text": "Resultados\nCon el dataset de auditorías de Nomenclaturas (~10.000 glosas):"
-  },
-  {
-    "objectID": "clase-06b.html#resultados-1",
-    "href": "clase-06b.html#resultados-1",
-    "title": "",
-    "section": "Resultados",
-    "text": "Resultados\nCon el dataset de auditorías de Nomenclaturas (~10.000 glosas):"
+    "text": "Resultados"
   },
   {
     "objectID": "clase-06b.html#qué-vimos-hoy",
     "href": "clase-06b.html#qué-vimos-hoy",
     "title": "",
     "section": "Qué vimos hoy",
-    "text": "Qué vimos hoy\n\n\nEl problema de las RNN: pérdida de memoria en secuencias largas, dificultad para paralelizar.\nMecanismo de atención: Q, K, V — cada token puede mirar directamente cualquier otro.\nArquitectura Transformer: bloques de Multi-Head Attention + Feed-Forward + residuales.\nEncoder vs. Decoder: para clasificación censal, usamos encoders (BERT/BETO).\nPre-entrenamiento + fine-tuning: aprovechamos conocimiento general para adaptarlo a CIUO/CAENES.\nBETO y el ecosistema HuggingFace: pipeline completo en Python.\nAplicaciones en CPV2024: codificación automática de ocupaciones (CIUO-08) y rama de actividad (CAENES)."
+    "text": "Qué vimos hoy\n\n\nEl problema de las RNN: pérdida de memoria en secuencias largas, dificultad para paralelizar.\nMecanismo de atención: Q, K, V — cada token puede mirar directamente cualquier otro.\nArquitectura Transformer: bloques de Multi-Head Attention + Feed-Forward + residuales.\nEncoder vs. Decoder: para clasificación, usamos encoders (BERT/BETO).\nPre-entrenamiento + fine-tuning: aprovechamos conocimiento general para adaptarlo a CIUO/CAENES.\nBETO y el ecosistema HuggingFace: pipeline completo en Python.\nAplicaciones: codificación automática de ocupaciones (CIUO-08)."
   },
   {
     "objectID": "ejemplo_fine_tuning_beto_ciuo08.html",
