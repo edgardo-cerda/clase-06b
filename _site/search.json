@@ -84,25 +84,18 @@
     "text": "Estructura Encoder-Decoder\n\n\nEl Transformer original (2017) se diseñó para traducción automática, por lo que tenía dos mitades: Encoder y Decoder. La lógica era que el Encoder “codificaba” la información de un idioma en un vector numérico, y el Decoder tomaba esto y lo “decodificaba” en otro idioma.\n\nPero cada mitad resultó ser más útil por separado, y para propósitos diferentes."
   },
   {
-    "objectID": "clase-06b.html#estructura-encoder-decoder-1",
-    "href": "clase-06b.html#estructura-encoder-decoder-1",
+    "objectID": "clase-06b.html#encoder",
+    "href": "clase-06b.html#encoder",
     "title": "",
-    "section": "Estructura Encoder-Decoder",
-    "text": "Estructura Encoder-Decoder\n\nEncoder - leer y representar\n\nToma una secuencia de tokens y produce una representación para cada uno\nAtención bidireccional: cada token ve todos los demás (izquierda y derecha)\nNo genera predicciones de texto: su salida son vectores, no palabras\nÚtil cuando la tarea requiere entender el texto de entrada\n\n\n\nDecoder - generar secuencias\n\nToma una secuencia de tokens y produce una predicción del siguiente token\nAtención causal: cada token solo ve los anteriores, nunca los siguientes\nEsta restricción es necesaria para que la generación sea coherente: no puede “hacer trampa” mirando el futuro\nÚtil cuando la tarea requiere producir texto nuevo"
+    "section": "Encoder",
+    "text": "Encoder\n\nEncoder - leer y representar\n\nToma una secuencia de tokens y produce una representación para cada uno\nAtención bidireccional: cada token ve todos los demás (izquierda y derecha)\nNo genera predicciones de texto: su salida son vectores, no palabras\nÚtil cuando la tarea requiere entender el texto de entrada\n\n\n\nBERT (Bidirectional Encoder Representations from Transformers, Google 2018) fue el modelo que democratizó el uso de Transformers en NLP.\n\n\nCon BERT, por primera vez fue posible tomar un modelo ya entrenado y adaptarlo a tareas específicas con muy pocos datos propios: el fine-tuning."
   },
   {
-    "objectID": "clase-06b.html#modelos-actuales-claude-gpt-4-etc.",
-    "href": "clase-06b.html#modelos-actuales-claude-gpt-4-etc.",
+    "objectID": "clase-06b.html#decoders",
+    "href": "clase-06b.html#decoders",
     "title": "",
-    "section": "Modelos actuales (Claude, GPT-4, etc.)",
-    "text": "Modelos actuales (Claude, GPT-4, etc.)\nClaude, GPT-4, Gemini y todos los grandes modelos de lenguaje actuales son, en su núcleo, transformers decoder-only.\nEntrenados con predicción de siguiente token sobre cantidades enormes de texto, seguido de refinamiento con retroalimentación humana (RLHF o variantes)."
-  },
-  {
-    "objectID": "clase-06b.html#bert-el-encoder-por-excelencia",
-    "href": "clase-06b.html#bert-el-encoder-por-excelencia",
-    "title": "",
-    "section": "BERT: el encoder por excelencia",
-    "text": "BERT: el encoder por excelencia\n\nBERT (Bidirectional Encoder Representations from Transformers, Google 2018) fue el modelo que democratizó el uso de Transformers en NLP:\n\n12 capas Transformer, 110M de parámetros (versión base).\nPre-entrenado en Wikipedia + BooksCorpus en inglés.\nBidireccional: cada token ve todo el contexto (izquierda y derecha).\nTarea de pre-entrenamiento: Masked Language Modeling (MLM) y Next Sentence Prediction.\n\n\n\nCon BERT, por primera vez fue posible tomar un modelo ya entrenado y adaptarlo a tareas específicas con muy pocos datos propios: el fine-tuning."
+    "section": "Decoders",
+    "text": "Decoders\n\nDecoder - generar secuencias\n\nToma una secuencia de tokens y produce una predicción del siguiente token\nAtención causal: cada token solo ve los anteriores, nunca los siguientes\nEsta restricción es necesaria para que la generación sea coherente: no puede “hacer trampa” mirando el futuro\nÚtil cuando la tarea requiere producir texto nuevo\n\n\n\nClaude, GPT-4, Gemini y todos los grandes modelos de lenguaje actuales son, en su núcleo, transformers decoder-only.\nEntrenados con predicción de siguiente token sobre cantidades enormes de texto, seguido de refinamiento con retroalimentación humana (RLHF o variantes)."
   },
   {
     "objectID": "clase-06b.html#fine-tuning",
