@@ -11,14 +11,7 @@
     "href": "clase-06b.html#límites-de-las-rnn-y-lstm",
     "title": "",
     "section": "Límites de las RNN y LSTM",
-    "text": "Límites de las RNN y LSTM\nLas primeras redes neuronales que vimos las clases anteriores trataban cada entrada como independiente: no tienen noción de orden ni de contexto previo.\n\nEso es un problema: el significado de una palabra depende de su contexto.\n\n\nEjemplo de respuesta en actividad económica:\n\n“Trabajo en una empresa que realiza minería de …”\n\nEn qué sector económico trabaja? La respuesta depende del contexto.\n\n\nMinería de datos -> Actividades profesionales, científicas y técnicas\n\n\nMinería de cobre -> Explotación de minas y canteras"
-  },
-  {
-    "objectID": "clase-06b.html#rnn-y-lstm",
-    "href": "clase-06b.html#rnn-y-lstm",
-    "title": "",
-    "section": "RNN y LSTM",
-    "text": "RNN y LSTM\nPara solucionar este problema surgieron las Redes Neuronales Recurrentes (RNN), Long Short-Term Memory (LSTM), Gated Recurent Units (GRU), entre otras, que permiten aprender del contexto.\n\nPero tienen otros problemas:\n\nLa información se diluye a medida que la secuencia crece (Las LSTM mitigan el problema, pero no lo eliminan)\nRecurrencia hace difícil la paralelización, por lo que el costo computacional escala mal."
+    "text": "Límites de las RNN y LSTM\n\nProblema: el significado de una palabra depende de su contexto.\n\n\nEjemplo de respuesta en actividad económica:\n\n“Trabajo en una empresa que realiza minería de …”\n\nEn qué sector económico trabaja? La respuesta depende del contexto.\n\n\nMinería de datos -> Actividades profesionales, científicas y técnicas\n\n\nMinería de cobre -> Explotación de minas y canteras\n\nHasta 2017, el estado del arte para solucionar este problema eran las Redes Neuronales Recurrentes (RNN), Long Short-Term Memory (LSTM), Gated Recurent Units (GRU), entre otras.\n\nPero tienen otros problemas:\n\nLa información se diluye a medida que la secuencia crece (Las LSTM mitigan el problema, pero no lo eliminan)\nRecurrencia hace difícil la paralelización, por lo que el costo computacional escala mal."
   },
   {
     "objectID": "clase-06b.html#la-solución-transformers-y-la-autoatención",
