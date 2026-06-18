@@ -425,13 +425,13 @@
 <blockquote>
 <p>“Trabajo en una empresa que realiza <strong>minería</strong> de …”</p>
 </blockquote>
+</div>
+<div class="fragment">
 <p>En qué sector económico trabaja? La respuesta depende del contexto.</p>
-</div>
-<div class="fragment">
-<p>Minería de datos -&gt; Actividades profesionales, científicas y técnicas</p>
-</div>
-<div class="fragment">
-<p>Minería de cobre -&gt; Explotación de minas y canteras</p>
+<ul>
+<li>Minería de datos -&gt; Actividades profesionales, científicas y técnicas</li>
+<li>Minería de cobre -&gt; Explotación de minas y canteras</li>
+</ul>
 </div>
 <p>Hasta 2017, el estado del arte para solucionar este problema eran las <strong>Redes Neuronales Recurrentes (RNN)</strong>, <strong>Long Short-Term Memory (LSTM)</strong>, <strong>Gated Recurent Units (GRU)</strong>, entre otras.</p>
 <div class="fragment medium-par">
@@ -454,16 +454,13 @@
 <section id="por-qué-son-tan-bacanes-los-transformers" class="slide level2">
 <h2>¿Por qué son tan bacanes los Transformers?</h2>
 <div class="fragment">
-<p>Capturan dependencias de <strong>largo alcance</strong> sin pérdida de información (eliminan el problema del Desvanecimiento o Explosión de pesos)</p>
-</div>
-<div class="fragment">
 <p><strong>Paralelización masiva</strong>: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Es lo que hizo posible entrenar modelos con billones de parámetros.</p>
 </div>
 <div class="fragment">
 <p><strong>Preentrenamiento:</strong> Se pueden preentrenar en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.</p>
 </div>
 <div class="fragment">
-<p><strong>Capacidades emergentes:</strong> Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes.</p>
+<p><strong>Capacidades emergentes:</strong> Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes, como el razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto.</p>
 </div>
 </section></section>
 <section>
@@ -473,6 +470,8 @@
 </section>
 <section id="intuición" class="slide level2">
 <h2>Intuición</h2>
+<p>:::: columns</p>
+<p>::: {.column width=55%}</p>
 <div class="fragment medium-par">
 <p>La atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).</p>
 </div>
@@ -482,6 +481,11 @@
 <div class="fragment medium-par">
 <p>Esto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto.</p>
 </div>
+<p>::: {.column width=45%}</p>
+<p><img data-src="imagenes/transformers.webp"></p>
+</section>
+<section id="intuición-1" class="slide level2">
+<h2>Intuición</h2>
 <div class="fragment">
 <p>En el texto:</p>
 <blockquote>
@@ -489,7 +493,7 @@
 </blockquote>
 <p>Para representar la palabra <strong>banco</strong>, el modelo mira las demás palabras y le pone atención a las que son más “relevantes”. En función de eso, actualiza su valor (y así con todas los tokens del texto).</p>
 </div>
-<p>FALTA UN DIAGRAMA</p>
+<p><img data-src="imagenes/ejemplo_atencion.png"></p>
 </section>
 <section id="queries-keys-y-values" class="slide level2">
 <h2>Queries, Keys y Values</h2>

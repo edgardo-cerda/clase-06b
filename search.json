@@ -11,7 +11,7 @@
     "href": "clase-06b.html#límites-de-las-rnn-y-lstm",
     "title": "",
     "section": "Límites de las RNN y LSTM",
-    "text": "Límites de las RNN y LSTM\n\nProblema: el significado de una palabra depende de su contexto.\n\n\nEjemplo de respuesta en actividad económica:\n\n“Trabajo en una empresa que realiza minería de …”\n\nEn qué sector económico trabaja? La respuesta depende del contexto.\n\n\nMinería de datos -> Actividades profesionales, científicas y técnicas\n\n\nMinería de cobre -> Explotación de minas y canteras\n\nHasta 2017, el estado del arte para solucionar este problema eran las Redes Neuronales Recurrentes (RNN), Long Short-Term Memory (LSTM), Gated Recurent Units (GRU), entre otras.\n\nPero tienen otros problemas:\n\nLa información se diluye a medida que la secuencia crece (Las LSTM mitigan el problema, pero no lo eliminan)\nRecurrencia hace difícil la paralelización, por lo que el costo computacional escala mal."
+    "text": "Límites de las RNN y LSTM\n\nProblema: el significado de una palabra depende de su contexto.\n\n\nEjemplo de respuesta en actividad económica:\n\n“Trabajo en una empresa que realiza minería de …”\n\n\n\nEn qué sector económico trabaja? La respuesta depende del contexto.\n\nMinería de datos -> Actividades profesionales, científicas y técnicas\nMinería de cobre -> Explotación de minas y canteras\n\n\nHasta 2017, el estado del arte para solucionar este problema eran las Redes Neuronales Recurrentes (RNN), Long Short-Term Memory (LSTM), Gated Recurent Units (GRU), entre otras.\n\nPero tienen otros problemas:\n\nLa información se diluye a medida que la secuencia crece (Las LSTM mitigan el problema, pero no lo eliminan)\nRecurrencia hace difícil la paralelización, por lo que el costo computacional escala mal."
   },
   {
     "objectID": "clase-06b.html#la-solución-transformers-y-la-autoatención",
@@ -25,14 +25,21 @@
     "href": "clase-06b.html#por-qué-son-tan-bacanes-los-transformers",
     "title": "",
     "section": "¿Por qué son tan bacanes los Transformers?",
-    "text": "¿Por qué son tan bacanes los Transformers?\n\nCapturan dependencias de largo alcance sin pérdida de información (eliminan el problema del Desvanecimiento o Explosión de pesos)\n\n\nParalelización masiva: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Es lo que hizo posible entrenar modelos con billones de parámetros.\n\n\nPreentrenamiento: Se pueden preentrenar en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.\n\n\nCapacidades emergentes: Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes."
+    "text": "¿Por qué son tan bacanes los Transformers?\n\nParalelización masiva: Los transformers procesan todos los tokens simultáneamente, lo que significa que puedes aprovechar las GPUs al máximo. Es lo que hizo posible entrenar modelos con billones de parámetros.\n\n\nPreentrenamiento: Se pueden preentrenar en texto no supervisado (predicción de siguiente token) y luego afinar para tareas específicas. Esta idea de “preentrenar una vez, usar muchas veces” escaló de manera predecible: cuantos más datos y parámetros, mejor el modelo.\n\n\nCapacidades emergentes: Arquitectura suficientemente flexible que permite la aparición de capacidades emergentes, como el razonar en múltiples pasos, hacer aritmética simple o aprender de pocos ejemplos en el contexto."
   },
   {
     "objectID": "clase-06b.html#intuición",
     "href": "clase-06b.html#intuición",
     "title": "",
     "section": "Intuición",
-    "text": "Intuición\n\nLa atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).\n\n\nLos transformers aprenden a qué y cómo poner atención para “entender” los tokens de un texto.\n\n\nEsto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto.\n\n\nEn el texto:\n\n“Fui al banco que está junto a la plaza a retirar dinero”\n\nPara representar la palabra banco, el modelo mira las demás palabras y le pone atención a las que son más “relevantes”. En función de eso, actualiza su valor (y así con todas los tokens del texto).\n\nFALTA UN DIAGRAMA"
+    "text": "Intuición\n:::: columns\n::: {.column width=55%}\n\nLa atención es una parte de los Transformers. Es un mecanismo de búsqueda aprendible (entrenable).\n\n\nLos transformers aprenden a qué y cómo poner atención para “entender” los tokens de un texto.\n\n\nEsto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto.\n\n::: {.column width=45%}"
+  },
+  {
+    "objectID": "clase-06b.html#intuición-1",
+    "href": "clase-06b.html#intuición-1",
+    "title": "",
+    "section": "Intuición",
+    "text": "Intuición\n\nEn el texto:\n\n“Fui al banco que está junto a la plaza a retirar dinero”\n\nPara representar la palabra banco, el modelo mira las demás palabras y le pone atención a las que son más “relevantes”. En función de eso, actualiza su valor (y así con todas los tokens del texto)."
   },
   {
     "objectID": "clase-06b.html#queries-keys-y-values",
