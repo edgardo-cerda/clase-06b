@@ -287,7 +287,7 @@ diferentes.
 :::
 :::
 
-## Estructura Encoder-Decoder
+## Encoder
 
 ::: fragment
 **Encoder** - leer y representar
@@ -302,6 +302,20 @@ diferentes.
 
 -   Útil cuando la tarea requiere entender el texto de entrada
 :::
+
+::: {.fragment .medium-par}
+**BERT** (*Bidirectional Encoder Representations from Transformers*,
+Google 2018) fue el modelo que democratizó el uso de Transformers en
+NLP.
+:::
+
+::: {.fragment .nota-box}
+Con BERT, por primera vez fue posible tomar un modelo ya entrenado y
+adaptarlo a tareas específicas con muy pocos datos propios: el
+**fine-tuning**.
+:::
+
+## Decoders
 
 ::: fragment
 **Decoder** - generar secuencias
@@ -318,34 +332,13 @@ diferentes.
 -   Útil cuando la tarea requiere producir texto nuevo
 :::
 
-## Modelos actuales (Claude, GPT-4, etc.)
-
+::: {.fragment .medium-par}
 Claude, GPT-4, Gemini y todos los grandes modelos de lenguaje actuales
 son, en su núcleo, transformers decoder-only.
 
 Entrenados con predicción de siguiente token sobre cantidades enormes de
 texto, seguido de refinamiento con retroalimentación humana (RLHF o
 variantes).
-
-## BERT: el encoder por excelencia
-
-::: {.incremental .medium-par}
-**BERT** (*Bidirectional Encoder Representations from Transformers*,
-Google 2018) fue el modelo que democratizó el uso de Transformers en
-NLP:
-
--   12 capas Transformer, 110M de parámetros (versión base).
--   Pre-entrenado en Wikipedia + BooksCorpus en inglés.
--   Bidireccional: cada token ve **todo el contexto** (izquierda y
-    derecha).
--   Tarea de pre-entrenamiento: **Masked Language Modeling** (MLM) y
-    Next Sentence Prediction.
-:::
-
-::: {.fragment .nota-box}
-Con BERT, por primera vez fue posible tomar un modelo ya entrenado y
-adaptarlo a tareas específicas con muy pocos datos propios: el
-**fine-tuning**.
 :::
 
 # Pre-entrenamiento y fine-tuning
