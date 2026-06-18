@@ -168,6 +168,8 @@ función de cuánta atención se le pone a las diferentes partes del mismo
 texto.
 :::
 
+:::
+
 ::: {.column width="50%"}
 ![](imagenes/transformers.webp){width="350" height="500"}
 :::
@@ -233,8 +235,6 @@ paralelo. Cada cabeza aprende a atender a **aspectos distintos** de la
 secuencia:
 :::
 
-::: columns
-::: {.column width="55%"}
 ::: {.incremental .medium-par}
 -   Una cabeza puede capturar **relaciones sintácticas** (sujeto →
     verbo).
@@ -248,12 +248,6 @@ Las salidas de todas las cabezas se concatenan y proyectan:
 
 $$\text{MultiHead}(Q,K,V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\,W^O$$
 :::
-:::
-
-::: {.column width="45%"}
-<!-- ![](imagenes/multi_head_attention.png) -->
-:::
-:::
 
 ## El bloque Transformer
 
@@ -263,8 +257,6 @@ feed-forward, rodeados de **normalización de capa** y **conexiones
 residuales**:
 :::
 
-::: columns
-::: {.column width="50%"}
 ::: {.incremental .medium-par}
 1.  **Multi-Head Attention**: cada token atiende a todos los demás.
 2.  **Add & Norm**: conexión residual + LayerNorm (estabiliza el
@@ -276,12 +268,6 @@ residuales**:
 ::: {.fragment .small-par}
 Un Transformer completo = apilar $N$ de estos bloques (BERT usa 12 ó
 24).
-:::
-:::
-
-::: {.column width="50%"}
-<!-- ![](imagenes/transformer_block.png) -->
-:::
 :::
 
 ## Visualizando un Transformer:
@@ -298,17 +284,27 @@ Un Transformer completo = apilar $N$ de estos bloques (BERT usa 12 ó
 
 ## Estructura Encoder-Decoder
 
-::: fragment
+:::: columns
+
+::: {.column width=50%}
+
 El Transformer original (2017) se diseñó para traducción automática, por
 lo que tenía dos mitades: Encoder y Decoder. La lógica era que el
 Encoder "codificaba" la información de un idioma en un vector numérico,
 y el Decoder tomaba esto y lo "decodificaba" en otro idioma.
-:::
 
 ::: fragment
 Con el tiempo se encontró que cada mitad es útil por separado, y para
 propósitos diferentes.
 :::
+
+:::
+
+::: {.column width=50%}
+![](imagenes/transformers.webp){width="350" height="500"}
+:::
+
+::::
 
 ## Estructura Encoder-Decoder
 
@@ -321,7 +317,7 @@ propósitos diferentes.
 -   Atención bidireccional: cada token ve todos los demás (izquierda y
     derecha)
 
--   No genera nada: su salida son vectores, no palabras
+-   No genera predicciones de texto: su salida son vectores, no palabras
 
 -   Útil cuando la tarea requiere entender el texto de entrada
 :::
