@@ -633,6 +633,8 @@ model = AutoModelForSequenceClassification.from_pretrained(
 ## Paso 4b: entrenar modelo
 
 ```{python}
+#| echo: true
+#| eval: false
 trainer = Trainer(
     model=model,
     args=TrainingArguments(
