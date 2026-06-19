@@ -488,7 +488,7 @@
 <p>Esto permite actualizar la representación de cada token de un texto en función de cuánta atención se le pone a las diferentes partes del mismo texto.</p>
 </div>
 </div><div class="column" style="width:50%;">
-<p><img data-src="imagenes/transformers.webp" width="350" height="500"></p>
+<p><img data-src="imagenes/visualizacion_atencion.png" width="350" height="500"></p>
 </div>
 </div>
 </section>
@@ -515,7 +515,7 @@
 </section>
 <section id="queries-keys-y-values-1" class="slide level2">
 <h2>Queries, Keys y Values</h2>
-<p><img data-src="imagenes/esquema_QKV.png" width="800" height="575"></p>
+<p><img data-src="imagenes/esquema_QKV.png" width="800" height="600"></p>
 </section></section>
 <section>
 <section id="arquitectura-transformer" class="title-slide slide level1 center">
@@ -525,7 +525,7 @@
 <section id="atención-multi-cabeza-multi-head-attention" class="slide level2">
 <h2>Atención multi-cabeza (Multi-Head Attention)</h2>
 <div class="medium-par">
-<p>El mecanismo de atención corresponde a una “cabeza de atención” (junto a otros componentes)</p>
+<p>El mecanismo de atención corresponde a una “cabeza de atención”</p>
 </div>
 <div class="medium-par">
 <p>En la práctica, no se usa una sola cabeza de atención sino varias en paralelo. Cada cabeza aprende a atender a <strong>aspectos distintos</strong> de la secuencia:</p>
@@ -547,14 +547,7 @@
 <div class="medium-par">
 <p>Un bloque Transformer combina Multi-Head Attention con una red feed-forward, rodeados de <strong>normalización de capa</strong> y <strong>conexiones residuales</strong>:</p>
 </div>
-<div class="medium-par">
-<ol type="1">
-<li class="fragment"><strong>Multi-Head Attention</strong>: cada token atiende a todos los demás.</li>
-<li class="fragment"><strong>Add &amp; Norm</strong>: conexión residual + LayerNorm (estabiliza el entrenamiento).</li>
-<li class="fragment"><strong>Feed-Forward</strong>: una red MLP pequeña aplicada posición a posición.</li>
-<li class="fragment"><strong>Add &amp; Norm</strong>: otra conexión residual.</li>
-</ol>
-</div>
+<p><img data-src="imagenes/arquitectura_simplificada.png" width="800" height="600"></p>
 <div class="fragment small-par">
 <p>Un Transformer completo = apilar <span class="math inline">\(N\)</span> de estos bloques (BERT usa 12 ó 24).</p>
 </div>
