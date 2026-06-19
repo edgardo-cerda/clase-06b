@@ -203,7 +203,15 @@ sature con valores muy grandes.
 
 ## Queries, Keys y Values
 
+$$\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V$$
+
 ![](imagenes/esquema_QKV.png){width="800" height="300"}
+
+## Queries, Keys y Values
+
+$$\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right) V$$
+
+![](imagenes/esquema_QKV2.png){width="850" height="300"}
 
 # Arquitectura Transformer
 
@@ -241,7 +249,7 @@ feed-forward, rodeados de **normalización de capa** y **conexiones
 residuales**:
 :::
 
-![](imagenes/arquitectura_simplificada.png){width="800" height="400"}
+![](imagenes/arquitectura_simplificada.png){width="800" height="400   "}
 
 ::: {.fragment .small-par}
 Un Transformer completo = apilar $N$ de estos bloques (BERT usa 12 ó
