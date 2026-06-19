@@ -168,7 +168,7 @@ texto.
 :::
 
 ::: {.column width="50%"}
-![](imagenes/transformers.webp){width="350" height="500"}
+![](imagenes/visualizacion_atencion.png){width="350" height="500"}
 :::
 :::
 
@@ -203,15 +203,14 @@ sature con valores muy grandes.
 
 ## Queries, Keys y Values
 
-![](imagenes/esquema_QKV.png){width="800" height="575"}
+![](imagenes/esquema_QKV.png){width="800" height="600"}
 
 # Arquitectura Transformer
 
 ## Atención multi-cabeza (Multi-Head Attention)
 
 ::: {.incremental .medium-par}
-El mecanismo de atención corresponde a una "cabeza de atención" (junto a
-otros componentes)
+El mecanismo de atención corresponde a una "cabeza de atención"
 :::
 
 ::: medium-par
@@ -242,13 +241,7 @@ feed-forward, rodeados de **normalización de capa** y **conexiones
 residuales**:
 :::
 
-::: {.incremental .medium-par}
-1.  **Multi-Head Attention**: cada token atiende a todos los demás.
-2.  **Add & Norm**: conexión residual + LayerNorm (estabiliza el
-    entrenamiento).
-3.  **Feed-Forward**: una red MLP pequeña aplicada posición a posición.
-4.  **Add & Norm**: otra conexión residual.
-:::
+![](imagenes/arquitectura_simplificada.png){width="800" height="600"}
 
 ::: {.fragment .small-par}
 Un Transformer completo = apilar $N$ de estos bloques (BERT usa 12 ó
