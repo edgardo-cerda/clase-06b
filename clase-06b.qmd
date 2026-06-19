@@ -203,7 +203,7 @@ sature con valores muy grandes.
 
 ## Queries, Keys y Values
 
-![](imagenes/esquema_QKV.png){width="800" height="600"}
+![](imagenes/esquema_QKV.png){width="800" height="300"}
 
 # Arquitectura Transformer
 
@@ -241,7 +241,7 @@ feed-forward, rodeados de **normalización de capa** y **conexiones
 residuales**:
 :::
 
-![](imagenes/arquitectura_simplificada.png){width="800" height="600"}
+![](imagenes/arquitectura_simplificada.png){width="800" height="400"}
 
 ::: {.fragment .small-par}
 Un Transformer completo = apilar $N$ de estos bloques (BERT usa 12 ó
