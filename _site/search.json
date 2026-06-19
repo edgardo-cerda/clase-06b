@@ -60,14 +60,14 @@
     "href": "clase-06b.html#atención-multi-cabeza-multi-head-attention",
     "title": "",
     "section": "Atención multi-cabeza (Multi-Head Attention)",
-    "text": "Atención multi-cabeza (Multi-Head Attention)\n\nEl mecanismo de atención corresponde a una “cabeza de atención” (junto a otros componentes)\n\n\nEn la práctica, no se usa una sola cabeza de atención sino varias en paralelo. Cada cabeza aprende a atender a aspectos distintos de la secuencia:\n\n\n\nUna cabeza puede capturar relaciones sintácticas (sujeto → verbo).\nOtra puede capturar relaciones semánticas (ocupación → rama de actividad).\nOtra puede rastrear correferencias (pronombres → sustantivos).\n\n\n\nLas salidas de todas las cabezas se concatenan y proyectan:\n\\[\\text{MultiHead}(Q,K,V) = \\text{Concat}(\\text{head}_1, \\ldots, \\text{head}_h)\\,W^O\\]"
+    "text": "Atención multi-cabeza (Multi-Head Attention)\n\nEl mecanismo de atención corresponde a una “cabeza de atención”\n\n\nEn la práctica, no se usa una sola cabeza de atención sino varias en paralelo. Cada cabeza aprende a atender a aspectos distintos de la secuencia:\n\n\n\nUna cabeza puede capturar relaciones sintácticas (sujeto → verbo).\nOtra puede capturar relaciones semánticas (ocupación → rama de actividad).\nOtra puede rastrear correferencias (pronombres → sustantivos).\n\n\n\nLas salidas de todas las cabezas se concatenan y proyectan:\n\\[\\text{MultiHead}(Q,K,V) = \\text{Concat}(\\text{head}_1, \\ldots, \\text{head}_h)\\,W^O\\]"
   },
   {
     "objectID": "clase-06b.html#el-bloque-transformer",
     "href": "clase-06b.html#el-bloque-transformer",
     "title": "",
     "section": "El bloque Transformer",
-    "text": "El bloque Transformer\n\nUn bloque Transformer combina Multi-Head Attention con una red feed-forward, rodeados de normalización de capa y conexiones residuales:\n\n\n\nMulti-Head Attention: cada token atiende a todos los demás.\nAdd & Norm: conexión residual + LayerNorm (estabiliza el entrenamiento).\nFeed-Forward: una red MLP pequeña aplicada posición a posición.\nAdd & Norm: otra conexión residual.\n\n\n\nUn Transformer completo = apilar \\(N\\) de estos bloques (BERT usa 12 ó 24)."
+    "text": "El bloque Transformer\n\nUn bloque Transformer combina Multi-Head Attention con una red feed-forward, rodeados de normalización de capa y conexiones residuales:\n\n\n\nUn Transformer completo = apilar \\(N\\) de estos bloques (BERT usa 12 ó 24)."
   },
   {
     "objectID": "clase-06b.html#visualizando-un-transformer",
