@@ -53,7 +53,14 @@
     "href": "clase-06b.html#queries-keys-y-values-1",
     "title": "",
     "section": "Queries, Keys y Values",
-    "text": "Queries, Keys y Values"
+    "text": "Queries, Keys y Values\n\\[\\text{Attention}(Q, K, V) = \\text{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right) V\\]"
+  },
+  {
+    "objectID": "clase-06b.html#queries-keys-y-values-2",
+    "href": "clase-06b.html#queries-keys-y-values-2",
+    "title": "",
+    "section": "Queries, Keys y Values",
+    "text": "Queries, Keys y Values\n\\[\\text{Attention}(Q, K, V) = \\text{softmax}\\!\\left(\\frac{QK^\\top}{\\sqrt{d_k}}\\right) V\\]"
   },
   {
     "objectID": "clase-06b.html#atención-multi-cabeza-multi-head-attention",
